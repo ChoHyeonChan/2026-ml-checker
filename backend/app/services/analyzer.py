@@ -1,13 +1,11 @@
-, code: str) -> dict[str, Any]:
-        code = (code or "").strip()
-        validation = self._validate_input(code)
-        if validation["errors"]:
-            return validation
+rn {
+                "classification": "의심",
+                "summary": {"확정위반": 0, "의심": 0, "이상없음": 0},
+                "results": [],
+                "message": "분석 가능한 코드를 추출하지 못했습니다.",
+                "warnings": [],
+                "errors": ["파일에서 분석 가능한 코드를 읽을 수 없습니다."],
+            }
         lines = code.splitlines()
         results, summary = self._judge(lines)
-        return self._build_response(lines, results, summary)
-
-    def analyze_file(self, file_bytes, file_name: str) -> dict[str, Any]:
-        code = self._extract_code(file_bytes, file_name)
-        if code is None:
-            retu
+        return self._buil
