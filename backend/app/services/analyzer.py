@@ -1,14 +1,13 @@
-from typing import Any
-from app.schemas import JudgmentResult
+, code: str) -> dict[str, Any]:
+        code = (code or "").strip()
+        validation = self._validate_input(code)
+        if validation["errors"]:
+            return validation
+        lines = code.splitlines()
+        results, summary = self._judge(lines)
+        return self._build_response(lines, results, summary)
 
-
-class AnalyzerService:
-    """예선 ml-data-leakage-checker 기반 + 서비스화 확장 로직.
-    MVP P0에서는 LLM 없이 패턴/규칙 기반 1차 판정을 먼저 구현하고,
-    실제 예선 스킬 호출/확장은 이후 연결한다. 규칙은 확실히 잡을 수 있는 누수부터 우선한다.
-    """
-
-    def __init__(self, settings: Any = None) -> None:
-        self.settings = settings
-
-    def analyze_code(self
+    def analyze_file(self, file_bytes, file_name: str) -> dict[str, Any]:
+        code = self._extract_code(file_bytes, file_name)
+        if code is None:
+            retu
