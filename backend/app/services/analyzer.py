@@ -1,99 +1,111 @@
-d_response(lines, results, summary)
 
-    def _validate_input(self, code: str) -> dict[str, Any]:
-        errors: list[str] = []
-        warnings: list[str] = []
-        if not code:
-            errors.append("분석할 코드가 비어 있습니다.")
-        if code and not self._looks_like_python(code):
-            errors.append("분석 대상 코드가 파이썬 코드로 보이지 않습니다.")
-        if code and not self._looks_like_ml_preprocessing(code):
-            warnings.append("ML 전처리 코드로 보기 어려운 부분이 있습니다. 분석 범위는 제한적일 수 있습니다.")
-        if errors:
-            return {
-                "classification": "이상없음",
-                "summary": {"확정위반": 0, "의심": 0, "이상없음": 0},
-                "results": [],
-                "message": "분석을 진행할 수 없습니다.",
-                "errors": errors,
-                "warnings": warnings,
-            }
-        return {"errors": [], "warnings": warnings, "code": code}
+            return False
+        if any(k in lowered for k in ["map(", "apply(", "replace(", "merge", "join"]):
+            return True
+        return any(t in lowered for t in target_vars)
 
-    def _judge(self, lines, start=1):
-            tag = self._classify_line(lines, idx, line)
-            if tag:
-                results.append(JudgmentResult(
-                    line=idx,
-                    type=tag["type"],
-                    fix_suggestion=tag["fix"],
-                    reason=tag["reason"],
-                ))
-        summary = {
-            "확정위반": sum(1 for r in results if r.type == "확정위반"),
-            "의심": sum(1 for r in results if r.type == "의심"),
-            "이상없음": max(0, len(lines) - len(results)),
-        }
-        return results, summary
-
-    def _classify_line(self, lines, start=1):
+    def _has_preprocess_fit_before_split(
+        self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
+    ) -> dict[str, str] | None:
         lowered = line.lower()
-        ctx_before = lines[max(0, idx - 2):idx]
-        ctx_after = lines[idx + 1:idx + 3]
-
-        # 1) 타겟 직접 사용 + 전처리 패턴 -> 확정위반 우선
-        if self._has_target_leakage_clear(lines, idx, line, ctx_before, ctx_after):
-            return {
-                "type": "확정위반",
-                "fix": "타겟 정보를 전처리 과정에서 직접 사용하지 않도록 분리하세요.",
-                "reason": "타겟 열이 전처리 과정에서 직접 참조된 것으로 보입니다.",
-            }
-
-        # 2) 전체 데이터 기준 fit/transform 후 분할 또는 분할 없음 -> 확정위반/의심
-        fit_tag = self._has_preprocess_fit_before_split(lines, idx, line, ctx_before, ctx_after)
-        if fit_tag:
-            if fit_tag["level"] == " 확정위반":
-                return {
-                    "type": "확정위반",
-                    "fix": "train/test 분할 후에만 fit/transform을 적용하도록 순서를 조정하세요.",
-                    "reason": "전체 데이터 기준으로 먼저 fit/transform을 적용한 것으로 보입니다.",
-                }
-            return {
-                "type": "의심",
-                "fix": "train/test 분할 후에만 fit/transform을 적용하도록 순서를 점검하세요.",
-                "reason": "전체 데이터 기준으로 먼저 fit/transform을 적용한 것으로 의심됩니다.",
-            }
-
-        # 3) 시계열/순서 관련 전처리 후 fit -> 의심
-        time_tag = self._has_time_order_leakage_hint(lines, idx, line, ctx_before, ctx_after)
-        if time_tag:
-            return {
-                "type": "의심",
-                "fix": "시간 순서가 중요한 데이터라면 분할/전처리 순서를 점검하세요.",
-                "reason": "시간 순서 관련 누수 가능성이 있는 패턴으로 보입니다.",
-            }
-
-        # 4) 파이프라인/객체 재할당/재사용 의심 -> 의심
-        pipe_tag = self._has_pipeline_reuse_leakage_hint(lines, idx, line, ctx_before, ctx_after)
-        if pipe_tag:
-            return {
-                "type": "의심",
-                "fix": "fit 정보가 여러 fold/데이터에 공유되지 않도록 파이프라인을 분리하세요.",
-                "reason": "전처리 객체가 여러 데이터/단계에 재사용된 것으로 의심됩니다.",
-            }
-
+        if not self._has_preprocess_keywords(lowered):
+            return None
+        has_fit = any(p in lowered for p in ["fit(", "fit_transform(", "transform("])
+        if not has_fit:
+            return None
+        window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
+        split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
+        has_split_context = any(k in " ".join(window).lower() for k in split_kw)
+        has_any_split_call = any(k in " ".join(lines).lower() for k in ["train_test_split", "split", "kfold", "cross_val", "partition"])
+        if not has_any_split_call:
+            return {"level": " 확정위반", "note": "분할 호출이 보이지 않음"}
+        if not has_split_context:
+            return {"level": " 의", "note": "근처에 분할 맥락 부족"}
         return None
 
-    # ---------- 패턴 판단 헬퍼 ----------
-
-    def _has_target_leakage_clear(
+    def _has_time_order_leakage_hint(
         self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
     ) -> bool:
         lowered = line.lower()
         if not self._has_preprocess_keywords(lowered):
             return False
-        target_vars = self._extract_tokens(ctx_before + [line] + ctx_after, ["y", "target", "label"])
-        if not target_vars:
+        if "fit(" not in lowered and "transform(" not in lowered and "fit_transform(" not in lowered:
             return False
-        leak_patterns = ["fit", "transform", "fit_transform", "encoder", "scaler", "normali", "standard", "map", "apply"]
-        if not any(p in lowered for p in leak_patterns):
+        time_kw = ["shift", "lag", "rolling", "sort_values", "sort", "date", "time", "timestamp", "before", "after"]
+        window = " ".join(lines[max(0, idx - 3):idx + 4]).lower()
+        return any(k in window for k in time_kw)
+
+    def _has_pipeline_reuse_leakage_hint(
+        self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
+    ) -> bool:
+        lowered = line.lower()
+        if not self._has_preprocess_keywords(lowered):
+            return False
+        reuse_hints = ["scaler", "encoder", "pipeline", "preprocessor", "imputer", "le", "std", "mean", "std"]
+        window = " ".join(lines[max(0, idx - 5):idx + 5]).lower()
+        if not any(k in lowered for k in reuse_hints):
+            return False
+        if lowered.count("fit(") + lowered.count("transform(") >= 2:
+            return True
+        return any(k in window for k in ["scaler", "encoder", "pipeline", "preprocessor"])
+
+    def _has_preprocess_keywords(self, lowered: str) -> bool:
+        keywords = [
+            "fit", "transform", "fit_transform", "encode", "scale",
+            "normali", "standard", "impute", "drop", "fillna", "replace",
+            "get_dummies", "onehot", "label", "encoder", "scaler",
+            "preprocess", "pipeline", "select", "feature",
+        ]
+        return any(k in lowered for k in keywords)
+
+    def _extract_tokens(self, texts: list[str], tokens: list[str]) -> list[str]:
+        found: list[str] = []
+        for t in texts:
+            low = t.lower()
+            for tok in tokens:
+                if tok in low:
+                    found.append(tok)
+        return list(dict.fromkeys(found))
+
+    def _looks_like_python(self, code: str) -> bool:
+        lowered = code.lower()
+        hints = ["def ", "import ", "from ", "=", "df", "fit", "transform", "train", "test", "split"]
+        return any(h in lowered for h in hints) or code.lstrip().startswith("#")
+
+    def _looks_like_ml_preprocessing(self, code: str) -> bool:
+        lowered = code.lower()
+        ml_hints = [
+            "fit", "transform", "fit_transform", "train_test_split",
+            "target", "le", "encoder", "scaler", "normali", "standard",
+            "onehot", "get_dummies", "label", "cross", "cvs", "pipeline",
+            "column", "select", "preprocess", "impute",
+        ]
+        return any(h in lowered for h in ml_hints)
+
+    def _extract_code(self, file_bytes: bytes, file_name: str) -> str | None:
+        for enc in ("utf-8", "latin-1"):
+            try:
+                return file_bytes.decode(enc).strip()
+            except Exception:
+                continue
+        return None
+
+    def _build_response(self, lines, summary: dict[str, int]) -> dict[str, Any]:
+        total = len(lines) or 1
+        if summary["확정위반"] > 0:
+            classification = "확정위반"
+            message = f"{summary['확정위반']}건의 확정위반 패턴이 확인되었습니다."
+        elif summary["의심"] > 0:
+            classification = "의심"
+            message = f"{summary['의심']}건의 의심 패턴이 확인되었습니다."
+        else:
+            classification = "이상없음"
+            message = "명확하게 의심되는 패턴이 보이지 않습니다."
+        return {
+            "classification": classification,
+            "summary": summary,
+            "results": results,
+            "message": message,
+            "warnings": [],
+            "errors": [],
+        }
