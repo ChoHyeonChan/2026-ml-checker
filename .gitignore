@@ -1,41 +1,33 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# 환경변수/키/토큰
+.env
+.env.local
+.env.*
+!.env.example
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
+# 비밀/인증 관련
 *.pem
+*.key
+*.p12
+*.pfx
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+# Python 실행 관련
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
 
-# env files (can opt-in for committing if needed)
-.env*
+# IDE/편집기
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# vercel
-.vercel
+# OS
+.DS_Store
+Thumbs.db
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# 로그/임시
+*.log
+/tmp/
