@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026-09-10 회의 자료 — 본선 MVP 방향 정리</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #1f2937; line-height: 1.6; max-width: 920px; margin: 24px auto; padding: 0 16px; }
+  h1 { font-size: 20px; border-bottom: 2px solid #111827; padding-bottom: 8px; }
+  h2 { font-size: 15px; margin-top: 22px; border-left: 4px solid #2563eb; padding-left: 8px; }
+  h3 { font-size: 13px; margin-top: 14px; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 13px; }
+  th, td { border: 1px solid #d1d5db; padding: 6px 8px; vertical-align: top; text-align: left; }
+  th { background: #f3f4f6; }
+  ul { margin: 6px 0 12px 0; padding-left: 20px; }
+  li { margin: 3px 0; }
+  .meta { color: #6b7280; font-size: 12px; margin-bottom: 18px; }
+  .box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 12px; margin: 10px 0; }
+  code { background: #f3f4f6; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+  .tag { display: inline-block; background: #dbeafe; color: #1e40af; border-radius: 4px; padding: 1px 6px; font-size: 11px; margin-right: 4px; }
+</style>
+</head>
+<body>
+<h1>2026-09-10 회의 자료 — 본선 MVP 방향 정리</h1>
+<div class="meta">예선 당선 스킬: <code>ml-data-leakage-checker</code> &nbsp;|&nbsp; 플랫폼: Timely(확정) &nbsp;|&nbsp; 목표: 수상 목표 / 연구자 대상 제대로 + 사용성·온보딩까지</div>
+
+<h2>1. 오늘 회의 목표</h2>
+<ul>
+  <li>MVP 범위(P0/P1) 확정</li>
+  <li>백엔드/프론트 작업 단위 정리</li>
+  <li>멘토에게 물어볼 기획 질문 정리</li>
+  <li>제출물/일정 역산 확인</li>
+</ul>
+
+<h2>2. 지금 정리된 전제 (먼저 확인)</h2>
+<div class="box">
+  <ul>
+    <li><span class="tag">타겟</span> 연구자 중심 — 전처리 코드 직접 작성·검토하는 사람(학부연구생/대학원생/주니어 연구원 등), 확장으로 교수/시니어 연구원</li>
+    <li><span class="tag">입력</span> 코드 문자열(붙여넣기) 우선, 파일 업로드/다중 파일 등은 P1 검토</li>
+    <li><span class="tag">출력</span> 확정위반/의심/이상없음 3분류 + 줄 번호 + 수정 방향, 예외/판정불가 처리</li>
+    <li><span class="tag">핵심</span> 예선 <code>ml-data-leakage-checker</code>를 서비스 중심에 두고, 그대로 호출 원칙 + 서비스화 수정·확장 허용</li>
+    <li><span class="tag">방향</span> 대충 구현 말고, researcher 대상 깊게 + 사용성/온보딩/제출물 품질까지 챙기기</li>
+  </ul>
+</div>
+
+<h2>3. MVP 5체크포인트 — 오늘 정할 것</h2>
+<table>
+  <tr><th style="width:18%">체크포인트</th><th style="width:42%">지금 생각</th><th style="width:40%">오늘 정할 것</th></tr>
+  <tr>
+    <td>Who (타겟)</td>
+    <td>전처리 코드 직접 만지는 연구자(1차), 교수/시니어는 확장</td>
+    <td>1차 타겟 문구 확정, 확장 타겟은 P1/발표에서 보여줄지</td>
+  </tr>
+  <tr>
+    <td>When (사용 시점)</td>
+    <td>모델 학습 전 전처리 코드 점검 + 팀 코드 리뷰 공유</td>
+    <td>메인 사용 맥락 1개로 좁힐지, 둘 다 강조할지</td>
+  </tr>
+  <tr>
+    <td>Input &amp; Output</td>
+    <td>코드 입력 → 3분류+줄번호+수정방향, 예외/판정불가 처리</td>
+    <td>입력 방식 P0 범위(문자열 먼저/파일도 초기?), 결과 화면/문구 톤</td>
+  </tr>
+  <tr>
+    <td>Setup (설정값)</td>
+    <td>백엔드 환경변수 관리, 민감정보 노출 금지, Vercel 환경변수/배포</td>
+    <td>예선 스킬 연동 방식, 수정·확장 범위, 보안 점검 포인트</td>
+  </tr>
+  <tr>
+    <td>Solve (가치)</td>
+    <td>전처리 코드 넣으면 누수 의심 지점 빠르게 확인, 체크리스트형 결과</td>
+    <td>Solve 한 문장 후보 중 메인 확정, 발표/데모에서 어디에 강조할지</td>
+  </tr>
+</table>
+
+<h2>4. P0 / P1 우선순위 — 오늘 정할 것</h2>
+<h3>P0 (필수 — 제출 직전까지 돌아가야 하는 것)</h3>
+<ul>
+  <li>코드 입력(문자열/붙여넣기) → 3분류+줄번호+수정방향</li>
+  <li>확정위반 시 이유 한 줄 포함</li>
+  <li>예외 처리: 빈 입력/비파이썬/ML 전처리 코드 아님/split 없음 → 판정 불가 또는 사유 안내</li>
+  <li>기본 결과 화면 + 첫 방문자 이해 가능한 안내</li>
+  <li>백엔드: 예선 스킬 중심 동작 + 안정적 호출/확장</li>
+  <li>배포/공개 URL, 시크릿 창 테스트, 심사 종료까지 유지</li>
+  <li>제출물: 발표자료 PDF(5장 이내·Noto Sans), 포스터(A1), 데모 영상(MP4 3분 이내), PRD(2쪽 내외)</li>
+</ul>
+<h3>P1 (시간 남으면 붙이기)</h3>
+<ul>
+  <li>파일 업로드/stdin/다중 파일 지원</li>
+  <li>결과 복사/공유/저장/이력 등 편의 기능</li>
+  <li>예시 코드/온보딩/가이드 강화</li>
+  <li>교수/시니어 코드 리뷰 공유 시나리오 확장</li>
+  <li>데모 영상 퀄리티, 발표 스토리라인 다듬기</li>
+</ul>
+<p><strong>오늘 결정할 것:</strong> P0/P1 경계를 어디까지 볼지 (특히 파일 지원, 복사/공유, 온보딩 강화 수준)</p>
+
+<h2>5. 백엔드 / 프론트 작업 단위 (이슈/PR 후보)</h2>
+<h3>백엔드(채현)</h3>
+<ul>
+  <li>예선 스킬 호출/확장 방식 정리 (그대로 호출 원칙 + 서비스화 수정·확장)</li>
+  <li>입력→출력 흐름: 코드 입력 → 분석/호출 → 3분류+줄번호+수정방향 반환</li>
+  <li>예외/판정불가 처리 로직</li>
+  <li>환경변수/.env 관리, 민감정보 제외 (.gitignore 유지)</li>
+  <li>배포본 식별 정보(커밋 해시 등) 확보, Public 레포 유지</li>
+  <li>배포/공개 URL, 시크릿 창 테스트</li>
+</ul>
+<h3>프론트(서연)</h3>
+<ul>
+  <li>코드 입력 화면(문자열/붙여넣기 기준 먼저)</li>
+  <li>결과 화면: 3분류+줄번호+수정방향, 확정위반 이유 한 줄</li>
+  <li>첫 방문자 안내/온보딩 기본(예시 코드/결과, 해석 안내, 예외 안내)</li>
+  <li>Solve 한 문장 가치 노출</li>
+  <li>데모 영상용 화면 흐름 정리</li>
+</ul>
+<h3>공통</h3>
+<ul>
+  <li>MVP P0/P1 확정</li>
+  <li>PRD 초안(2쪽 내외)</li>
+  <li>발표자료 PDF 초안(5장 이내, Noto Sans)</li>
+  <li>제출 전 체크리스트(<code>mabc-checklist.py</code>)로 최종 점검</li>
+</ul>
+
+<h2>6. 회의 때 물어볼 것 / 결정할 것 (질문 리스트)</h2>
+<h3>범위 관련</h3>
+<ul>
+  <li>1차 타겟을 뭐라고 문구로 잡을지? (예: “전처리 코드를 직접 작성·검토하는 연구자”)</li>
+  <li>확장 타겟(교수/시니어)은 P1로 뺄지, 발표/데모에서 언급만 할지?</li>
+  <li>사용 시점(학습 전 점검 vs 코드 리뷰 공유)은 하나로 좁힐지, 둘 다 살릴지?</li>
+</ul>
+<h3>입력/출력 관련</h3>
+<ul>
+  <li>P0 입력 방식: 코드 문자열/붙여넣기부터? 파일 업로드도 초기에 넣을지?</li>
+  <li>출력 결과 화면/문구 톤: 얼마나 친절하게 안내할지? 체크리스트형 결과 특징 어디까지 살릴지?</li>
+</ul>
+<h3>백엔드/보안 관련</h3>
+<ul>
+  <li>예선 스킬을 서비스로 넣을 때 “그대로 호출” 원칙 살리면서, 수정·확장 범위 어디가 안전한지?</li>
+  <li>환경변수/키 관리, 민감정보 제외는 어느 수준까지 점검할지?</li>
+  <li>배포/공개 URL, 시크릿 창 테스트, 심사 종료까지 유지 계획?</li>
+</ul>
+<h3>제출물 관련</h3>
+<ul>
+  <li>PRD(2쪽 내외) 초안 언제까지 잡을지?</li>
+  <li>발표자료 PDF(5장 이내, Noto Sans), 포스터(A1), 데모 영상(MP4 3분 이내) 중 뭐가 먼저 필요할지?</li>
+  <li>제출 구글폼(차주 초 공유 예정) 나오면 어떤 항목 기준으로 최종 점검할지?</li>
+</ul>
+<h3>일정/멘토 관련</h3>
+<ul>
+  <li>오늘 멘토링에서 물어볼 기획 질문 정리 (아래 멘토용 자료 참고)</li>
+  <li>9/12까지 기획/서비스 멘토링, 9/15까지 개발 멘토링 — 역산 일정</li>
+</ul>
+
+<h2>7. 멘토에게 전달할 핵심 요약 (회의 때 같이 확인)</h2>
+<div class="box">
+  <ul>
+    <li><strong>무엇을 만드나:</strong> ML 전처리 코드를 넣으면 데이터 누수 패턴을 자동 검사하는 서비스</li>
+    <li><strong>핵심 결과:</strong> 확정위반/의심/이상없음 3분류 + 줄 번호 + 수정 방향 (과정 설명 생략, 결과만 간결)</li>
+    <li><strong>왜 만드나:</strong> 전처리 코드 검토마다 사람이 직접 데이터 누수를 찾는 반복 작업, 누수가 숨어 늦게 발견되면 튜닝·모델 비교를 다시 해야 하는 문제</li>
+    <li><strong>누가 쓰나:</strong> ML 전처리/학습 파이프라인을 작성·수정하는 연구자(학부연구생/대학원생/주니어 연구원 등)</li>
+    <li><strong>예선 스킬:</strong> <code>ml-data-leakage-checker</code>를 서비스 핵심에 포함(그대로 호출 원칙 + 서비스화 수정·확장 허용)</li>
+    <li><strong>플랫폼:</strong> Timely</li>
+    <li><strong>목표:</strong> 연구자 대상 제대로 + 사용성/온보딩 + 제출물 품질 챙겨서 수상 목표</li>
+  </ul>
+</div>
+
+<h2>8. 회의 후 바로 정리할 것</h2>
+<ul>
+  <li>MVP P0/P1 확정</li>
+  <li>백엔드/프론트 작업 단위 이슈화</li>
+  <li>멘토 질문 정리 → 멘토링 때 사용</li>
+  <li>PRD 초안, 제출물 제작 일정 역산</li>
+</ul>
+
+<p style="color:#6b7280; font-size:11px; margin-top:20px;">작성 기준: OT 발표자료 + OT 요약본 + 노션 세부 가이드 + ml-data-leakage-checker 팀 공유 문서</p>
+</body>
+</html>
