@@ -237,3 +237,31 @@
   font-size: 12px;
   text-decoration: underline;
 }
+
+.reference {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: #f5f7fb;
+  border: 1px solid #d7dee8;
+  border-radius: 10px;
+}
+
+.referenceLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.referenceBlock {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  background: #fff;
+  border: 1px solid #e2e6ee;
+  border-radius: 6px;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  color: #111;
+}
+
