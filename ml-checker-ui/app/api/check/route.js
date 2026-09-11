@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8004";
+
 function extractPyFromIpynb(source) {
   try {
     const nb = JSON.parse(source);
@@ -20,10 +22,37 @@ function isPyLike(src) {
   return /^\s*(def|class|import|from|if|elif|else|for|while|return|print|with|try|except|raise|lambda|yield|assert|#)/m.test(src);
 }
 
+async function callBackend(path, options) {
+  const url = `${BACKEND_BASE}${path}`;
+  try {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      return { type: "error", note: `백엔드 오류 (${res.status})` };
+    }
+    return await res.json();
+  } catch (e) {
+    return { type: "error", note: "백엔드에 연결할 수 없습니다. 서버가 실행 중인지 확인하세요." };
+  }
+}
+
+function mapBackendToFrontend(backendResp) {
+  if (!backendResp || typeof backendResp !== "object") {
+    return { type: "error", note: "잘못된 백엔드 응답" };
+  }
+  const { type, badge, items, note, classification, summary } = backendResp;
+  return {
+    type: type || "error",
+    badge: badge || "결과 없음",
+    items: Array.isArray(items) ? items : [],
+    note: note || "",
+    classification: classification || "이상없음",
+    summary: summary || { 확정위반: 0, 의심: 0, 이상없음: 0 },
+  };
+}
+
 export async function POST(req) {
   const contentType = req.headers.get("content-type") || "";
 
-  // 파일 업로드인 경우
   if (contentType.startsWith("multipart/")) {
     const formData = await req.formData();
     const file = formData.get("file");
@@ -60,22 +89,15 @@ export async function POST(req) {
       return NextResponse.json({ type: "not-python" });
     }
 
-    // 이후 실제 검사 연동 시 여기서 code를 검사기에 전달
-    return NextResponse.json({
-      badge: "결과 준비 중",
-      items: [
-        {
-          line: "[12]",
-          verdict: "의심",
-          desc: "split 경계 대비 fit 호출 위치가 불명확합니다.",
-          fix: "fit은 train만 기준으로, test/val은 transform/predict만 사용하세요.",
-        },
-      ],
-      note: "업로드된 파일로 검사 요청을 받았습니다. 실제 검사 연동 시 결과가 여기에 표시됩니다.",
+    const backendForm = new FormData();
+    backendForm.append("file", new Blob([raw]), file.name);
+    const backendResp = await callBackend("/api/v1/analyze/file", {
+      method: "POST",
+      body: backendForm,
     });
+    return NextResponse.json(mapBackendToFrontend(backendResp));
   }
 
-  // 코드 직접 입력인 경우
   let body;
   try {
     body = await req.json();
@@ -92,16 +114,10 @@ export async function POST(req) {
     return NextResponse.json({ type: "not-python" });
   }
 
-  return NextResponse.json({
-    badge: "결과 준비 중",
-    items: [
-      {
-        line: "[12]",
-        verdict: "의심",
-        desc: "split 경계 대비 fit 호출 위치가 불명확합니다.",
-        fix: "fit은 train만 기준으로, test/val은 transform/predict만 사용하세요.",
-      },
-    ],
-    note: "이 응답은 예시 구조입니다. 실제 검사 결과가 연동되면 여기에 분류/줄 번호/수정 방향이 표시됩니다.",
+  const backendResp = await callBackend("/api/v1/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code }),
   });
+  return NextResponse.json(mapBackendToFrontend(backendResp));
 }
