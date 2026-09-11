@@ -3,6 +3,11 @@
 import { useState } from "react";
 import styles from "./page.module.css";
 
+const referenceBlock = `::tly
+{"c":[["file","DESIGN-stripe.md"]]}
+[참조] 파일 DESIGN-stripe.md
+:::`;
+
 export default function Home() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState(null);
@@ -158,6 +163,11 @@ export default function Home() {
             {result.note && (
               <div className={styles.note}>{result.note}</div>
             )}
+
+            <div className={styles.reference}>
+              <div className={styles.referenceLabel}>레퍼런스 / 출처</div>
+              <pre className={styles.referenceBlock}>{referenceBlock}</pre>
+            </div>
           </div>
         )}
       </main>
