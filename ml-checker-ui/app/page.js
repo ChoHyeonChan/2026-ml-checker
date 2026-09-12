@@ -148,13 +148,23 @@ export default function Home() {
               </p>
             )}
 
-            {result.type === "error" && (
-              <p className={styles.message} style={{ color: "var(--color-ruby)" }}>
-                {result.message}
+            {result.type === "ok" && (
+              <p className={styles.message}>
+                명확하게 의심되는 패턴이 보이지 않습니다.
               </p>
             )}
 
-            {result.type === "judgment" && (
+            {result.type === "error" && (
+              <div className={styles.items}>
+                {result.note && (
+                  <div className={styles.item}>
+                    <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{result.note}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {result.type === "judgment" && result.items.length > 0 && (
               <div className={styles.items}>
                 {result.items.map((item, i) => (
                   <div key={i} className={styles.item} style={{ borderColor: "var(--color-hairline)" }}>
@@ -171,7 +181,7 @@ export default function Home() {
               </div>
             )}
 
-            {result.note && (
+            {result.note && result.type !== "error" && (
               <div className={styles.note} style={{ borderLeftColor: "var(--color-primary)" }}>{result.note}</div>
             )}
           </div>
