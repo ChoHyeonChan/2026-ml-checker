@@ -10,9 +10,10 @@ export default function Home() {
   const [result, setResult] = useState(null);
 
   const runCheck = async () => {
+    setStatus("loading");
+    setResult(null);
+
     if (file) {
-      setStatus("loading");
-      setResult(null);
       const formData = new FormData();
       formData.append("file", file);
       try {
@@ -32,10 +33,10 @@ export default function Home() {
 
     if (!code.trim()) {
       setResult({ type: "empty" });
+      setStatus("idle");
       return;
     }
-    setStatus("loading");
-    setResult(null);
+
     try {
       const res = await fetch("/api/check", {
         method: "POST",
@@ -144,6 +145,12 @@ export default function Home() {
             {result.type === "not-preprocessing" && (
               <p className={styles.message} style={{ color: "var(--color-ink-mute)" }}>
                 ML 전처리/학습 패턴이 충분히 보이지 않습니다. 전처리 코드인지 확인해 주세요.
+              </p>
+            )}
+
+            {result.type === "error" && (
+              <p className={styles.message} style={{ color: "var(--color-ruby)" }}>
+                {result.message}
               </p>
             )}
 
