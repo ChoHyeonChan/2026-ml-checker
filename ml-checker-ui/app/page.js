@@ -1,13 +1,8 @@
-"use client";
+"use client"
 
 import { useState } from "react";
 import styles from "./page.module.css";
 import Onboarding from "./components/Onboarding";
-
-const referenceBlock = `::tly
-{"c":[["file","DESIGN-stripe.md"]]}
-[참조] 파일 DESIGN-stripe.md
-:::;`;
 
 export default function Home() {
   const [code, setCode] = useState("");
@@ -22,9 +17,10 @@ export default function Home() {
   };
 
   const runCheck = async () => {
+    setStatus("loading");
+    setResult(null);
+
     if (file) {
-      setStatus("loading");
-      setResult(null);
       const formData = new FormData();
       formData.append("file", file);
       try {
@@ -35,7 +31,7 @@ export default function Home() {
         const data = await res.json();
         setResult(data);
       } catch (e) {
-        setResult({ type: "error", message: "검사 실행 중 문제가 생겼습니다." });
+        setResult({ type: "error", note: "검사 실행 중 문제가 생겼습니다." });
       } finally {
         setStatus("idle");
       }
@@ -44,10 +40,10 @@ export default function Home() {
 
     if (!code.trim()) {
       setResult({ type: "empty" });
+      setStatus("idle");
       return;
     }
-    setStatus("loading");
-    setResult(null);
+
     try {
       const res = await fetch("/api/check", {
         method: "POST",
@@ -57,7 +53,7 @@ export default function Home() {
       const data = await res.json();
       setResult(data);
     } catch (e) {
-      setResult({ type: "error", message: "검사 실행 중 문제가 생겼습니다." });
+      setResult({ type: "error", note: "검사 실행 중 문제가 생겼습니다." });
     } finally {
       setStatus("idle");
     }
@@ -74,20 +70,27 @@ export default function Home() {
     setResult(null);
   };
 
+  const clearContent = () => {
+    setCode("");
+    setResult(null);
+  };
+
   return (
     <div className={styles.page}>
       <Onboarding onDismiss={handleOnboardingDismiss} />
       <main className={styles.main}>
         <div className={styles.header}>
-          <h1 className={styles.title}>ML Data Leakage Checker</h1>
-          <p className={styles.subtitle}>
+          <h1 className={styles.title} style={{ color: "var(--color-ink)" }}>
+            ML Data Leakage Checker
+          </h1>
+          <p className={styles.subtitle} style={{ color: "var(--color-ink-secondary)" }}>
             전처리 코드를 붙여넣거나 .py/.ipynb 파일을 올리면 데이터 누수 의심 패턴을 줄 번호와 수정 방향만 짧게 보여줍니다.
           </p>
         </div>
 
-        <div className={styles.card}>
+        <div className={styles.card} style={{ borderColor: "var(--color-hairline)", backgroundColor: "var(--color-canvas)" }}>
           <div className={styles.cardHeader}>
-            <span className={styles.cardLabel}>전처리 코드 입력</span>
+            <span className={styles.cardLabel} style={{ color: "var(--color-ink)" }}>전처리 코드 입력</span>
             <label className={styles.fileLabel}>
               <input
                 type="file"
@@ -95,15 +98,15 @@ export default function Home() {
                 onChange={handleFileChange}
                 className={styles.fileInput}
               />
-              <span className={styles.fileButton}>파일 선택</span>
+              <span className={styles.fileButton} style={{ color: "var(--color-primary)" }}>파일 선택</span>
             </label>
           </div>
 
           <div className={styles.fileInfo}>
             {file && (
-              <span className={styles.fileName}>
+              <span className={styles.fileName} style={{ color: "var(--color-ink-secondary)" }}>
                 선택한 파일: {file.name}
-                <button className={styles.fileClear} onClick={clearFile}>지우기</button>
+                <button className={styles.fileClear} onClick={clearFile} style={{ color: "var(--color-ink-mute)" }}>지우기</button>
               </span>
             )}
           </div>
@@ -118,54 +121,44 @@ export default function Home() {
 
         <div className={styles.actions}>
           <button
-            className={styles.runButton}
+            className="btn-primary-pill"
             onClick={runCheck}
             disabled={status === "loading"}
           >
             {status === "loading" ? "검사 중..." : "누수 검사하기"}
           </button>
+          <button
+            className="btn-secondary"
+            onClick={clearContent}
+            disabled={status === "loading"}
+          >
+            내용 지우기
+          </button>
         </div>
 
         {result && (
-          <div className={styles.result}>
+          <div className={styles.result} style={{ borderColor: "var(--color-hairline)", backgroundColor: "var(--color-canvas)" }}>
             <div className={styles.resultHeader}>
-              <span className={styles.resultLabel}>검사 결과</span>
+              <span className={styles.resultLabel} style={{ color: "var(--color-ink)" }}>검사 결과</span>
               <span className={styles.resultBadge}>{result.badge}</span>
             </div>
 
             {result.type === "empty" && (
-              <p className={styles.message}>
+              <p className={styles.message} style={{ color: "var(--color-ink-mute)" }}>
                 빈 입력이라 검사할 수 없습니다. 전처리 코드를 붙여넣거나 파일을 선택해 주세요.
               </p>
             )}
 
             {result.type === "not-python" && (
-              <p className={styles.message}>
+              <p className={styles.message} style={{ color: "var(--color-ink-mute)" }}>
                 파이썬 코드로 보기 어렵습니다. 파이썬 전처리/학습 코드를 붙여넣거나 .py/.ipynb 파일을 선택해 주세요.
               </p>
             )}
 
             {result.type === "not-preprocessing" && (
-              <p className={styles.message}>
+              <p className={styles.message} style={{ color: "var(--color-ink-mute)" }}>
                 ML 전처리/학습 패턴이 충분히 보이지 않습니다. 전처리 코드인지 확인해 주세요.
               </p>
-            )}
-
-            {result.type === "judgment" && result.items.length > 0 && (
-              <div className={styles.items}>
-                {result.items.map((item, i) => (
-                  <div key={i} className={styles.item}>
-                    <div className={styles.itemHead}>
-                      <span className={styles.itemLine}>{item.line}</span>
-                      <span className={styles.itemVerdict}>{item.verdict}</span>
-                    </div>
-                    <p className={styles.itemDesc}>{item.desc}</p>
-                    {item.fix && (
-                      <p className={styles.itemFix}>{item.fix}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
             )}
 
             {result.type === "ok" && (
@@ -178,20 +171,32 @@ export default function Home() {
               <div className={styles.items}>
                 {result.note && (
                   <div className={styles.item}>
-                    <p className={styles.itemDesc}>{result.note}</p>
+                    <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{result.note}</p>
                   </div>
                 )}
               </div>
             )}
 
-            {result.note && result.type !== "error" && (
-              <div className={styles.note}>{result.note}</div>
+            {result.type === "judgment" && result.items.length > 0 && (
+              <div className={styles.items}>
+                {result.items.map((item, i) => (
+                  <div key={i} className={styles.item} style={{ borderColor: "var(--color-hairline)" }}>
+                    <div className={styles.itemHead}>
+                      <span className={styles.itemLine} style={{ color: "var(--color-ink-mute)" }}>{item.line}</span>
+                      <span className={styles.itemVerdict}>{item.verdict}</span>
+                    </div>
+                    <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
+                    {item.fix && (
+                      <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
 
-            <div className={styles.reference}>
-              <div className={styles.referenceLabel}>레퍼런스 / 출처</div>
-              <pre className={styles.referenceBlock}>{referenceBlock}</pre>
-            </div>
+            {result.note && result.type !== "error" && (
+              <div className={styles.note} style={{ borderLeftColor: "var(--color-primary)" }}>{result.note}</div>
+            )}
           </div>
         )}
       </main>

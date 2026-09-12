@@ -3,10 +3,46 @@
   --foreground: #171717;
 }
 
+/* Minimal Stripi color tokens for page.js */
+:root {
+  --color-primary: #533afd;
+  --color-primary-deep: #4434d4;
+  --color-primary-press: #2e2b8c;
+  --color-primary-soft: #665efd;
+  --color-primary-bg-subdued-hover: #b9b9f9;
+  --color-brand-dark-900: #1c1e54;
+  --color-ruby: #ea2261;
+  --color-magenta: #f96bee;
+  --color-lemon: #9b6829;
+
+  --color-canvas: #ffffff;
+  --color-canvas-soft: #f6f9fc;
+  --color-canvas-cream: #f5e9d4;
+  --color-hairline: #e3e8ee;
+  --color-hairline-input: #a8c3de;
+
+  --color-ink: #0d253d;
+  --color-ink-secondary: #273951;
+  --color-ink-mute: #64748d;
+  --color-ink-mute-2: #61718a;
+  --color-on-primary: #ffffff;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    --color-canvas: #1c1e54;
+    --color-canvas-soft: #14173a;
+    --color-canvas-cream: #2a2545;
+    --color-hairline: #2a2d55;
+    --color-hairline-input: #3a3d6a;
+
+    --color-ink: #f0f2ff;
+    --color-ink-secondary: #dce0f5;
+    --color-ink-mute: #9aa3c7;
+    --color-ink-mute-2: #8b95bd;
   }
 }
 
@@ -46,4 +82,61 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+/* Stripi button classes used by page.js */
+
+.btn-primary-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.0;
+  letter-spacing: 0;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  min-height: 40px;
+}
+
+.btn-primary-pill:hover {
+  background: var(--color-primary-deep);
+}
+
+.btn-primary-pill:active {
+  background: var(--color-primary-press);
+}
+
+.btn-primary-pill:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-canvas);
+  color: var(--color-primary);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.0;
+  letter-spacing: 0;
+  padding: 8px 16px;
+  border: 1px solid var(--color-primary);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  min-height: 40px;
+}
+
+.btn-secondary:hover {
+  background: var(--color-canvas-soft);
 }
