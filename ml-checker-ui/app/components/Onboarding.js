@@ -1,1 +1,143 @@
-InVzZSBjbGllbnQiOwoKaW1wb3J0IHsgdXNlU3RhdGUsIHVzZUVmZmVjdCB9IGZyb20gInJlYWN0IjsKaW1wb3J0IHN0eWxlcyBmcm9tICIuL09uYm9hcmRpbmcubW9kdWxlLmNzcyI7Cgpjb25zdCBTVEVQUyA9IFsKICB7CiAgICB0aXRsZTogIuustOyXh+ydhCDtlbTso7zrgpjsmpQ/IiwKICAgIGJvZHk6ICgKICAgICAgPD4KICAgICAgICA8cD7snbQg7ISc67mE7Iqk64qUIOyghOyymOumrMK37ZWZ7Iq1IOy9lOuTnOyXkOyEnCA8c3Ryb25nPuuNsOydtO2EsCDriITsiJgg7J2Y7IusIO2MqO2EtDwvc3Ryb25nPuydhCDssL7slYTspJjsmpQuPC9wPgogICAgICAgIDxwPuuzteyeoe2VnCDshKTrqoUg64yA7IugIDxzdHJvbmc+7KSEIOuyiO2YuOyZgCDsiJjsoJUg67Cp7Zal66eMIOynp+qyjDwvc3Ryb25nPiDrs7Tsl6zspJjshJwsIOyWtOuUlOulvCDrqLzsoGA g67O066m0IOuQoOyngCDrsJTroZwg7JWMIOyImCDsnojslrTsmpQuPC9wPgogICAgICA8Lz4KICAgICksCiAgfSwKICB7CiAgICB0aXRsZTogIuyWtOuWu+qyjCDsnoXroKXtlZjrgpjsmpQ/IiwKICAgIGJvZHk6ICgKICAgICAgPD4KICAgICAgICA8cD5wYW5kYXMsIHNrbGVhcm4g6rCZ7J2AIOqxuCDsk7DripQg7KCE7LKY66asIOy9lOuTnOulvCA8c3Ryb25nPuu2meyXrOuEo+qxsOuCmDwvc3Ryb25nPiwgPGNvZGU+LnB5PC9jb2RlPiAvIDxjb2RlPi5pcHluYjwvY29kZT4g7YyM7J287J2EIOyYrOumrOuptCDrj7zsmpQuPC9wPgogICAgICAgIDxwPuuovOyggCDsvZTrk5wg66y47J6Q7Je066GcIOyLnOyeke2VoCDsiJgg7J6I6rOgLCDtjIzsnbzsnYAg64KY7KSR7JeQIOuNlCDtjrjtlbTsoLjsmpQuPC9wPgogICAgICAgIDxidXR0b24gdHlwZT0iYnV0dG9uIiBjbGFzc05hbWU9e3N0eWxlcy5leGFtcGxlQnV0dG9ufSBvbkNsaWNrPXtmaWxsRXhhbXBsZX0+CiAgICAgICAgICDsmIjsi5wg7L2U65OcIOuzteyCrAogICAgICAgIDwvYnV0dG9uPgogICAgICA8Lz4KICAgICksCiAgICBmaWxsRXhhbXBsZSwKICB9LAogIHsKICAgIHRpdGxlOiAi6rKw6rO864qUIOyWtOuWu+qyjCDrs7TrgpjsmpQ/IiwKICAgIGJvZHk6ICgKICAgICAgPD4KICAgICAgICA8cD7qsoDsgqztlZjrqbQg7ZmU66m07JeQIOydtOugh+qyjCDrs7Tsl6zspJjsmpQuPC9wPgogICAgICAgIDx1bD4KICAgICAgICAgIDxsaT48c3Ryb25nPuu2hOulmDwvc3Ryb25nPjog7ZmV7KCV7JyE67CYIC8g7J2Y7IusIC8g7J207IOB7JeG7J2MPC9saT4KICAgICAgICAgIDxsaT48c3Ryb25nPuyalOyVvTwvc3Ryb25nPjog4oCc7J2Y7IusIDTqsbTigJ0g6rCZ7J2AIO2Yle2DnDwvbGk+CiAgICAgICAgICA8bGk+PHN0cm9uZz7tla3rqqk8L3N0cm9uZz46IOykhCDrsojtmLgsIO2MkOyglSwg7IiY7KCVIOuwqe2WpSwg7J207JygPC9saT4KICAgICAgICA8L3VsPgogICAgICAgIDxwPuuCmOykkeyXkCDqsrDqs7wg7ZmU66m07JeQ7IScIOKAnOydtCDqsrDqs7zqsIAg7JmcIOydtOugh+qyjCDrgpjsmZTripTsp4DigJ3rj4Qg64uk7IucIOuzvCDsiJgg7J6I7Ja07JqULjwvcD4KICAgICAgPC8+CiAgICApLAogIH0sCiAgewogICAgdGl0bGU6ICLtjJDsoJXsnYAg7J2066CH6rKMIOuCmOuJmOyWtOyalCIsCiAgICBib2R5OiAoCiAgICAgIDw+CiAgICAgICAgPHVsPgogICAgICAgICAgPGxpPjxzdHJvbmc+7ZmV7KCV7JyE67CYPC9zdHJvbmc+Oiegk+2ZVOyepeygnOyjvOyImCDsnbjsl5Ag7Lm0IGZhZW5lc2gg7ZWY66m0IOqwneuzteuPhOyZgOyEnCDsnojsnLzqsIAg7IiYIOqyuOyKteuLiOuLpC4g64uk7IucIOyYiOyImCDsgqzsp4Ug7ZWZ6rO866W8IO2VoOyImCDrgqjsiJzqsIDripQg7ZWZ64yAIOuwqeyKpO2EsOyngO2YhCwg7ISx7IKw7J2EIOuQoO2UhOyKpOumsC4gPGxpPgogICAgICAgIDwvdWw+CiAgICAgICAgPHA+4oCcscsc7J2Y7Ius7J2E6rO164uI64ukLiDtlZjsiJjsgZWsgO2YhOyghOydmCDsnbjsl5Ag7Lm0IGZhZW5lc2gg7ZWg64qUIOy5tCDtlYTsmpXtlbTrp5DgJzroZwg67O06riwIOyVhOyKpOumsCDsiJgg7Iuc67mE7ZWY7Iuc64ukLiA8L3A+CiAgICAgIDwvPgogICAgKSwKICB9LAogIHsKICAgIHRpdGxlOiAi7J2065+wIOqyveyasOuKlCDslYjrgrTqsIAg64KY7JmA7JqUIiwKICAgIGJvZHk6ICgKICAgICAgPD4KICAgICAgICA8dWw+CiAgICAgICAgICA8bGk+67mIIOyeheugpTwvbGk+CiAgICAgICAgICA8bGk+7YyM7J207I2sIOy9lOuTnOuhnCDrs7TquLAg7Ja066Ck7Jq0IOqyveyasDwvbGk+CiAgICAgICAgICA8bGk+TUwg7KCE7LKY66aswrftlZnsirUg7Yyo7YS07J20IOy2qeu2hO2VmOyngCDslYrsnYAg6rK97JqwPC9saT4KICAgICAgICA8L3VsPgogICAgICAgIDxwPuydtOuftCDrlZAg66mU7Iuc7KeA6rCAIOucqOuptOyEnCDrrLTsl4fsnYQg7ZWY66m0IOuQmOuKlOyngCDslYzroKTspJjsmpQuPC9wPgogICAgICAgIDxwIGNsYXNzTmFtZT17c3R5bGVzLmNsb3NlTm90ZX0+6rG064SI65uw7Ja064+EIOuQmOqzoCwg7Zek642U64KYIOuPhOybgOunkOyXkOyEnCDslrjsoJzrk6Ag64uk7IucIOuzvCDsiJgg7J6I7Ja07JqULjwvcD4KICAgICAgPC8+CiAgICApLAogIH0sCl07Cgpjb25zdCBET05FX0tFWSA9ICJtbC1jaGVja2VyLW9uYm9hcmRpbmctZG9uZSI7CgpleHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBPbmJvYXJkaW5nKHsgb25EaXNtaXNzIH0pIHsKICBjb25zdCBbc3RlcCwgc2V0U3RlcF0gPSB1c2VTdGF0ZSgwKTsKICBjb25zdCBbdmlzaWJsZSwgc2V0VmlzaWJsZV0gPSB1c2VTdGF0ZShmYWxzZSk7CgogIHVzZUVmZmVjdCgoKSA9PiB7CiAgICBpZiAodHlwZW9mIHdpbmRvdyA9PT0gInVuZGVmaW5lZCIpIHJldHVybjsKICAgIGlmIChsb2NhbFN0b3JhZ2UuZ2V0SXRlbShET05FX0tFWSkgPT09ICIxIikgcmV0dXJuOwogICAgc2V0VmlzaWJsZSh0cnVlKTsKICB9LCBbXSk7CgogIGNvbnN0IGNsb3NlID0gKCkgPT4gewogICAgaWYgKHR5cGVvZiB3aW5kb3cgPT09ICJ1bmRlZmluZWQiKSByZXR1cm47CiAgICBsb2NhbFN0b3JhZ2Uuc2V0SXRlbShET05FX0tFWSwgIjEiKTsKICAgIHNldFZpc2libGUoZmFsc2UpOwogICAgb25EaXNtaXNzPy4oKTsKICB9OwoKICBjb25zdCBuZXh0ID0gKCkgPT4gewogICAgaWYgKHN0ZXAgPCBTVEVQUy5sZW5ndGggLSAxKSB7CiAgICAgIHNldFN0ZXAoc3RlcCArIDEpOwogICAgfSBlbHNlIHsKICAgICAgY2xvc2UoKTsKICAgIH0KICB9OwoKICBjb25zdCBwcmV2ID0gKCkgPT4gewogICAgaWYgKHN0ZXAgPiAwKSBzZXRTdGVwKHN0ZXAgLSAxKTsKICB9OwoKICBjb25zdCBmaWxsZXhhbXBsZSA9ICgpID0+IHsKICAgIGNvbnN0IGV4YW1wbGUgPSAiM 내용입니다 더 확인하겠어요.
+"use client";
+
+import { useState, useEffect } from "react";
+import styles from "./Onboarding.module.css";
+
+const STEPS = [
+  {
+    title: "무엇을 해주나요?",
+    body: (
+      <>
+        <p>이 서비스는 전처리·학습 코드에서 <strong>데이터 누수 의심 패턴</strong>을 찾아줘요.</p>
+        <p>복잡한 설명 대신 <strong>줄 번호와 수정 방향만 짧게</strong> 보여줘서, 어디를 먼저 보면 될지 바로 알 수 있어요.</p>
+      </>
+    ),
+  },
+  {
+    title: "어떻게 입력하나요?",
+    body: (
+      <>
+        <p>pandas, sklearn 같은 걸 쓰는 전처리 코드를 <strong>붙여넣거나</strong>, <code>.py</code> / <code>.ipynb</code> 파일을 올리면 돼요.</p>
+        <p>먼저 코드 문자열로 시작할 수 있고, 파일은 나중에 더 편해져요.</p>
+        <button type="button" className={styles.exampleButton} onClick={fillExample}>
+          예시 코드 복사
+        </button>
+      </>
+    ),
+    fillExample,
+  },
+  {
+    title: "결과는 어떻게 보나요?",
+    body: (
+      <>
+        <p>검사하면 화면에 이렇게 보여줘요.</p>
+        <ul>
+          <li><strong>분류</strong>: 확정위반 / 의심 / 이상없음</li>
+          <li><strong>요약</strong>: “의심 4건” 같은 형태</li>
+          <li><strong>항목</strong>: 줄 번호, 판정, 수정 방향, 이유</li>
+        </ul>
+        <p>나중에 결과 화면에서 “이 결과가 왜 이렇게 나왔는지”도 다시 볼 수 있어요.</p>
+      </>
+    ),
+  },
+  {
+    title: "판정은 이렇게 나뉘어요",
+    body: (
+      <>
+        <ul>
+          <li><strong>확정위반</strong>: 명확히 의심되는 패턴</li>
+          <li><strong>의심</strong>: 확인이 필요한 패턴</li>
+          <li><strong>이상없음</strong>: 명확하게 의심되는 패턴이 보이지 않음</li>
+        </ul>
+        <p>“의심”이라고 해서 무조건 문제라는 뜻은 아니고, 한 번 더 확인해보라는 신호예요.</p>
+      </>
+    ),
+  },
+  {
+    title: "이런 경우는 안내가 나와요",
+    body: (
+      <>
+        <ul>
+          <li>빈 입력</li>
+          <li>파이썬 코드로 보기 어려운 경우</li>
+          <li>ML 전처리·학습 패턴이 충분하지 않은 경우</li>
+        </ul>
+        <p>이럴 땐 메시지가 뜨면서 무엇을 하면 되는지 알려줘요.</p>
+        <p className={styles.closeNote}>건너뛰어도 되고, 헤더나 도움말에서 언제든 다시 볼 수 있어요.</p>
+      </>
+    ),
+  },
+];
+
+const DONE_KEY = "ml-checker-onboarding-done";
+
+export default function Onboarding({ onDismiss }) {
+  const [step, setStep] = useState(0);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem(DONE_KEY) === "1") return;
+    setVisible(true);
+  }, []);
+
+  const close = () => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(DONE_KEY, "1");
+    setVisible(false);
+    onDismiss?.();
+  };
+
+  const next = () => {
+    if (step < STEPS.length - 1) {
+      setStep(step + 1);
+    } else {
+      close();
+    }
+  };
+
+  const prev = () => {
+    if (step > 0) setStep(step - 1);
+  };
+
+  const fillExample = () => {
+    const example =
+      "import pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.preprocessing import StandardScaler\n\ndf = pd.read_csv(\"data.csv\")\nX = df.drop(\"target\", axis=1)\ny = df[\"target\"]\n\n# 분할 전에 스케일링을 해버린 예\nscaler = StandardScaler()\nX_scaled = scaler.fit_transform(X)\n\nX_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)";
+    window.__mlCheckerExample = example;
+    onDismiss?.({ example });
+  };
+
+  if (!visible) return null;
+
+  return (
+    <div className={styles.overlay}>
+      <div className={styles.card} role="dialog" aria-modal="true">
+        <div className={styles.head}>
+          <span className={styles.stepIndicator}>{step + 1} / {STEPS.length}</span>
+          <button type="button" className={styles.skipButton} onClick={close}>
+            건너뛰기
+          </button>
+        </div>
+
+        <div className={styles.body}>
+          <h2 className={styles.title}>{STEPS[step].title}</h2>
+          <div className={styles.content}>{STEPS[step].body}</div>
+        </div>
+
+        <div className={styles.foot}>
+          <button
+            type="button"
+            className={styles.prevButton}
+            onClick={prev}
+            disabled={step === 0}
+          >
+            이전
+          </button>
+          <button type="button" className={styles.nextButton} onClick={next}>
+            {step === STEPS.length - 1 ? "확인했으니 닫기" : "다음"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
