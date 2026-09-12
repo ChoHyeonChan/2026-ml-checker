@@ -1,4 +1,13 @@
-import { NextResponse } from "next/server";
+// route.js — NextResponse 조건부 import (테스트 환경 대응)
+if (typeof globalThis !== "undefined" && globalThis.__TEST__) {
+  // 테스트 환경에서는 전역 모킹 NextResponse를 사용
+} else {
+  import("next/server").then(({ NextResponse }) => {
+    globalThis.NextResponse = NextResponse;
+  });
+}
+
+const NextResponse = globalThis && globalThis.NextResponse;
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
@@ -48,7 +57,7 @@ function classifyFromBackend(resp) {
       type: "error",
       badge,
       items: [],
-      note: (resp.errors || []).join(" \n ") + (resp.message ? " \n " + resp.message : ""),
+      note: (resp.errors || []).join("\n ") + (resp.message ? "\n " + resp.message : ""),
     };
   }
 
@@ -74,7 +83,7 @@ function classifyFromBackend(resp) {
     type: classification === "이상없음" ? "ok" : "judgment",
     badge,
     items,
-    note: note.join(" \n ") || null,
+    note: note.join("\n ") || null,
     summary,
   };
 }
@@ -148,6 +157,9 @@ export async function POST(req) {
     }
 
     const name = (file.name || "").toLowerCase();
+    if (!name) {
+      return NextResponse.json({ type: "empty" });
+    }
     let raw;
     try {
       raw = await file.text();
@@ -192,7 +204,7 @@ export async function POST(req) {
           return NextResponse.json({
             type: "error",
             message: data.message || data.detail || "백엔드 검사 중 오류가 발생했습니다.",
-            note: data.errors ? data.errors.join(" \n ") : null,
+            note: data.errors ? data.errors.join("\n ") : null,
           });
         }
         return NextResponse.json(classifyFromBackend(data));
@@ -245,7 +257,7 @@ export async function POST(req) {
         return NextResponse.json({
           type: "error",
           message: data.message || data.detail || "백엔드 검사 중 오류가 발생했습니다.",
-          note: data.errors ? data.errors.join(" \n ") : null,
+          note: data.errors ? data.errors.join("\n ") : null,
         });
       }
       return NextResponse.json(classifyFromBackend(data));

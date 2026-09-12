@@ -2,14 +2,19 @@
   "name": "ml-checker-ui",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "node --experimental-vm-modules test/router-route.test.mjs && node --experimental-vm-modules test/front-exception.test.js"
   },
   "dependencies": {
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
   }
 }
