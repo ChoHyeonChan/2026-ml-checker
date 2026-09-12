@@ -3,6 +3,14 @@
 import { useState, useEffect } from "react";
 import styles from "./Onboarding.module.css";
 
+function ExampleButton({ onClick }) {
+  return (
+    <button type="button" className={styles.exampleButton} onClick={onClick}>
+      예시 코드 복사
+    </button>
+  );
+}
+
 const STEPS = [
   {
     title: "무엇을 해주나요?",
@@ -19,12 +27,9 @@ const STEPS = [
       <>
         <p>pandas, sklearn 같은 걸 쓰는 전처리 코드를 <strong>붙여넣거나</strong>, <code>.py</code> / <code>.ipynb</code> 파일을 올리면 돼요.</p>
         <p>먼저 코드 문자열로 시작할 수 있고, 파일은 나중에 더 편해져요.</p>
-        <button type="button" className={styles.exampleButton} onClick={fillExample}>
-          예시 코드 복사
-        </button>
       </>
     ),
-    fillExample,
+    showExampleButton: true,
   },
   {
     title: "결과는 어떻게 보나요?",
@@ -109,6 +114,8 @@ export default function Onboarding({ onDismiss }) {
 
   if (!visible) return null;
 
+  const currentStep = STEPS[step];
+
   return (
     <div className={styles.overlay}>
       <div className={styles.card} role="dialog" aria-modal="true">
@@ -120,8 +127,13 @@ export default function Onboarding({ onDismiss }) {
         </div>
 
         <div className={styles.body}>
-          <h2 className={styles.title}>{STEPS[step].title}</h2>
-          <div className={styles.content}>{STEPS[step].body}</div>
+          <h2 className={styles.title}>{currentStep.title}</h2>
+          <div className={styles.content}>
+            {currentStep.body}
+            {currentStep.showExampleButton && (
+              <ExampleButton onClick={fillExample} />
+            )}
+          </div>
         </div>
 
         <div className={styles.foot}>
