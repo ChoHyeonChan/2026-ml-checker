@@ -143,7 +143,7 @@ export default function Home() {
               </p>
             )}
 
-            {result.type === "judgment" && (
+            {result.type === "judgment" && result.items.length > 0 && (
               <div className={styles.items}>
                 {result.items.map((item, i) => (
                   <div key={i} className={styles.item}>
@@ -160,7 +160,23 @@ export default function Home() {
               </div>
             )}
 
-            {result.note && (
+            {result.type === "ok" && (
+              <p className={styles.message}>
+                명확하게 의심되는 패턴이 보이지 않습니다.
+              </p>
+            )}
+
+            {result.type === "error" && (
+              <div className={styles.items}>
+                {result.note && (
+                  <div className={styles.item}>
+                    <p className={styles.itemDesc}>{result.note}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {result.note && result.type !== "error" && (
               <div className={styles.note}>{result.note}</div>
             )}
 

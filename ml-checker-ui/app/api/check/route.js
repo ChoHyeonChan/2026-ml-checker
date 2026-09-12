@@ -36,10 +36,21 @@ function looksLikeMlPreprocessing(src) {
 function classifyFromBackend(resp) {
   const classification = resp.classification || "이상없음";
   const summary = resp.summary || { 확정위반: 0, 의심: 0, 이상없음: 0 };
-  let type;
-  if (classification === "확정위반") type = "judgment";
-  else if (classification === "의심") type = "judgment";
-  else type = "judgment";
+
+  if (resp.errors && resp.errors.length > 0) {
+    const badge =
+      summary.확정위반 > 0
+        ? `확정위반 ${summary.확정위반}건`
+        : summary.의심 > 0
+        ? `의심 ${summary.의심}건`
+        : "이상없음";
+    return {
+      type: "error",
+      badge,
+      items: [],
+      note: resp.errors.join(" \n ") + (resp.message ? " \n " + resp.message : ""),
+    };
+  }
 
   const badge =
     summary.확정위반 > 0
@@ -58,10 +69,9 @@ function classifyFromBackend(resp) {
   const note = [];
   if (resp.message) note.push(resp.message);
   if (resp.warnings) note.push(...resp.warnings);
-  if (resp.errors) note.push(...resp.errors);
 
   return {
-    type,
+    type: classification === "이상없음" ? "ok" : "judgment",
     badge,
     items,
     note: note.join(" \n ") || null,
