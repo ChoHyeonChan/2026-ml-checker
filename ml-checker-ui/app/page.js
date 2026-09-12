@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { useState } from "react";
 import styles from "./page.module.css";
@@ -24,7 +24,7 @@ export default function Home() {
         const data = await res.json();
         setResult(data);
       } catch (e) {
-        setResult({ type: "error", message: "검사 실행 중 문제가 생겼습니다." });
+        setResult({ type: "error", note: "검사 실행 중 문제가 생겼습니다." });
       } finally {
         setStatus("idle");
       }
@@ -46,7 +46,7 @@ export default function Home() {
       const data = await res.json();
       setResult(data);
     } catch (e) {
-      setResult({ type: "error", message: "검사 실행 중 문제가 생겼습니다." });
+      setResult({ type: "error", note: "검사 실행 중 문제가 생겼습니다." });
     } finally {
       setStatus("idle");
     }
@@ -60,6 +60,11 @@ export default function Home() {
 
   const clearFile = () => {
     setFile(null);
+    setResult(null);
+  };
+
+  const clearContent = () => {
+    setCode("");
     setResult(null);
   };
 
@@ -116,7 +121,7 @@ export default function Home() {
           </button>
           <button
             className="btn-secondary"
-            onClick={() => { setCode(""); setResult(null); }}
+            onClick={clearContent}
             disabled={status === "loading"}
           >
             내용 지우기
