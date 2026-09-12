@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "ml-checker-ui/.next",
+  "framework": "nextjs",
+  "regions": ["icn1"],
+  "routes": [
+    { "src": "^(/.*)", "dest": "$1" }
+  ]
+}

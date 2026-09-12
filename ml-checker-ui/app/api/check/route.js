@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+
 function extractPyFromIpynb(source) {
   try {
     const nb = JSON.parse(source);
@@ -18,6 +20,52 @@ function extractPyFromIpynb(source) {
 
 function isPyLike(src) {
   return /^\s*(def|class|import|from|if|elif|else|for|while|return|print|with|try|except|raise|lambda|yield|assert|#)/m.test(src);
+}
+
+function looksLikeMlPreprocessing(src) {
+  const low = src.toLowerCase();
+  const hints = [
+    "fit", "transform", "fit_transform", "train_test_split",
+    "target", "le", "encoder", "scaler", "normali", "standard",
+    "onehot", "get_dummies", "label", "cross", "cvs", "pipeline",
+    "column", "select", "preprocess", "impute",
+  ];
+  return hints.some((h) => low.includes(h));
+}
+
+function classifyFromBackend(resp) {
+  const classification = resp.classification || "이상없음";
+  const summary = resp.summary || { 확정위반: 0, 의심: 0, 이상없음: 0 };
+  let type;
+  if (classification === "확정위반") type = "judgment";
+  else if (classification === "의심") type = "judgment";
+  else type = "judgment";
+
+  const badge =
+    summary.확정위반 > 0
+      ? `확정위반 ${summary.확정위반}건`
+      : summary.의심 > 0
+      ? `의심 ${summary.의심}건`
+      : "이상없음";
+
+  const items = (resp.results || []).map((it) => ({
+    line: it.line ?? "",
+    verdict: it.type || "의심",
+    desc: it.reason || "",
+    fix: it.fix_suggestion || "",
+  }));
+
+  const note = [];
+  if (resp.message) note.push(resp.message);
+  if (resp.warnings) note.push(...resp.warnings);
+  if (resp.errors) note.push(...resp.errors);
+
+  return {
+    type,
+    badge,
+    items,
+    note: note.join(" \n ") || null,
+  };
 }
 
 export async function POST(req) {
@@ -60,18 +108,48 @@ export async function POST(req) {
       return NextResponse.json({ type: "not-python" });
     }
 
-    // 이후 실제 검사 연동 시 여기서 code를 검사기에 전달
+    if (!looksLikeMlPreprocessing(code)) {
+      return NextResponse.json({ type: "not-preprocessing" });
+    }
+
+    // 백엔드 연동 가능하면 백엔드로 전달
+    if (BACKEND_URL) {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/v1/analyze/file`, {
+          method: "POST",
+          headers: { "Content-Type": "multipart/form-data" },
+          body: await makeFormData(file),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          return NextResponse.json({
+            type: "error",
+            message: data.message || data.detail || "백엔드 검사 중 오류가 발생했습니다.",
+            note: data.errors ? data.errors.join(" \n ") : null,
+          });
+        }
+        return NextResponse.json(classifyFromBackend(data));
+      } catch {
+        return NextResponse.json({
+          type: "error",
+          message: "백엔드 연결 중 오류가 발생했습니다.",
+        });
+      }
+    }
+
+    // 백엔드가 없으면 프론트 기본 판정만 반환
     return NextResponse.json({
+      type: "judgment",
       badge: "결과 준비 중",
       items: [
         {
-          line: "[12]",
+          line: "",
           verdict: "의심",
-          desc: "split 경계 대비 fit 호출 위치가 불명확합니다.",
-          fix: "fit은 train만 기준으로, test/val은 transform/predict만 사용하세요.",
+          desc: "백엔드 연동 없이 프론트 기본 판정만 표시했습니다.",
+          fix: "Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL을 설정하면 실제 검사 결과가 표시됩니다.",
         },
       ],
-      note: "업로드된 파일로 검사 요청을 받았습니다. 실제 검사 연동 시 결과가 여기에 표시됩니다.",
+      note: "백엔드 URL이 설정되지 않아 기본 응답만 반환합니다.",
     });
   }
 
@@ -92,16 +170,52 @@ export async function POST(req) {
     return NextResponse.json({ type: "not-python" });
   }
 
+  if (!looksLikeMlPreprocessing(code)) {
+    return NextResponse.json({ type: "not-preprocessing" });
+  }
+
+  // 백엔드 연동
+  if (BACKEND_URL) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/v1/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return NextResponse.json({
+          type: "error",
+          message: data.message || data.detail || "백엔드 검사 중 오류가 발생했습니다.",
+          note: data.errors ? data.errors.join(" \n ") : null,
+        });
+      }
+      return NextResponse.json(classifyFromBackend(data));
+    } catch {
+      return NextResponse.json({
+        type: "error",
+        message: "백엔드 연결 중 오류가 발생했습니다.",
+      });
+    }
+  }
+
   return NextResponse.json({
+    type: "judgment",
     badge: "결과 준비 중",
     items: [
       {
-        line: "[12]",
+        line: "",
         verdict: "의심",
-        desc: "split 경계 대비 fit 호출 위치가 불명확합니다.",
-        fix: "fit은 train만 기준으로, test/val은 transform/predict만 사용하세요.",
+        desc: "백엔드 연동 없이 프론트 기본 판정만 표시했습니다.",
+        fix: "Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL을 설정하면 실제 검사 결과가 표시됩니다.",
       },
     ],
-    note: "이 응답은 예시 구조입니다. 실제 검사 결과가 연동되면 여기에 분류/줄 번호/수정 방향이 표시됩니다.",
+    note: "백엔드 URL이 설정되지 않아 기본 응답만 반환합니다.",
   });
+}
+
+function makeFormData(file) {
+  const form = new FormData();
+  form.append("file", file);
+  return form;
 }
