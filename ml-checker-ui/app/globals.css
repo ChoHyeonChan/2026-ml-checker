@@ -3,12 +3,143 @@
   --foreground: #171717;
 }
 
+/* =========================================
+   Stripi Design System — Design Tokens
+   ========================================= */
+
+:root {
+  /* --- Colors: Brand & Accent --- */
+  --color-primary: #533afd;
+  --color-primary-deep: #4434d4;
+  --color-primary-press: #2e2b8c;
+  --color-primary-soft: #665efd;
+  --color-primary-bg-subdued-hover: #b9b9f9;
+  --color-brand-dark-900: #1c1e54;
+  --color-ruby: #ea2261;
+  --color-magenta: #f96bee;
+  --color-lemon: #9b6829;
+
+  /* --- Colors: Surface --- */
+  --color-canvas: #ffffff;
+  --color-canvas-soft: #f6f9fc;
+  --color-canvas-cream: #f5e9d4;
+  --color-hairline: #e3e8ee;
+  --color-hairline-input: #a8c3de;
+
+  /* --- Colors: Text --- */
+  --color-ink: #0d253d;
+  --color-ink-secondary: #273951;
+  --color-ink-mute: #64748d;
+  --color-ink-mute-2: #61718a;
+  --color-on-primary: #ffffff;
+
+  /* --- Colors: Shadow --- */
+  --color-shadow-blue: #003770;
+
+  /* --- Typography --- */
+  --font-display: "Sohne Var", "SF Pro Display", system-ui, -apple-system, sans-serif;
+  --font-body: "Sohne Var", "SF Pro Display", system-ui, -apple-system, sans-serif;
+
+  /* Display tier (weight 300, negative tracking) */
+  --text-display-xxl: 56px;
+  --text-display-xl: 48px;
+  --text-display-lg: 32px;
+  --text-display-md: 26px;
+  --text-heading-lg: 22px;
+  --text-heading-md: 20px;
+  --text-heading-sm: 18px;
+
+  /* Body tier */
+  --text-body-lg: 16px;
+  --text-body-md: 15px;
+  --text-body-tabular: 14px;
+
+  /* Compact tier */
+  --text-button-md: 16px;
+  --text-button-sm: 14px;
+  --text-caption: 13px;
+  --text-micro: 11px;
+  --text-micro-cap: 10px;
+
+  /* --- Letter-spacing (display negative tracking) --- */
+  --tracking-display-xxl: -1.4px;
+  --tracking-display-xl: -0.96px;
+  --tracking-display-lg: -0.64px;
+  --tracking-display-md: -0.26px;
+  --tracking-heading-lg: -0.22px;
+  --tracking-heading-md: -0.2px;
+  --tracking-caption: -0.39px;
+  --tracking-micro-cap: 0.1px;
+
+  /* --- Typography weights --- */
+  --weight-thin: 300;
+  --weight-regular: 400;
+
+  /* --- Line heights --- */
+  --leading-display-xxl: 1.03;
+  --leading-display-xl: 1.15;
+  --leading-display-lg: 1.1;
+  --leading-display-md: 1.12;
+  --leading-heading-lg: 1.1;
+  --leading-heading-md: 1.4;
+  --leading-heading-sm: 1.4;
+  --leading-body-lg: 1.4;
+  --leading-body-md: 1.4;
+  --leading-body-tabular: 1.4;
+  --leading-button: 1.0;
+  --leading-caption: 1.4;
+  --leading-micro: 1.4;
+  --leading-micro-cap: 1.15;
+
+  /* --- Spacing (base unit 8px) --- */
+  --space-xxs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-xxl: 32px;
+  --space-huge: 64px;
+
+  /* --- Border radius --- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 9999px;
+
+  /* --- Shadows --- */
+  --shadow-level-1: 0 1px 3px rgba(0, 55, 112, 0.08);
+  --shadow-level-2: 0 8px 24px rgba(0, 55, 112, 0.08), 0 2px 6px rgba(0, 55, 112, 0.04);
+
+  /* --- Shadows (dark mode) --- */
+  --shadow-dark-level-1: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-dark-level-2: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode overrides */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-canvas: #1c1e54;
+    --color-canvas-soft: #14173a;
+    --color-canvas-cream: #2a2545;
+    --color-hairline: #2a2d55;
+    --color-hairline-input: #3a3d6a;
+
+    --color-ink: #f0f2ff;
+    --color-ink-secondary: #dce0f5;
+    --color-ink-mute: #9aa3c7;
+    --color-ink-mute-2: #8b95bd;
+
+    --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-level-2: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
   }
 }
+
+/* =========================================
+   Base Styles
+   ========================================= */
 
 html {
   height: 100%;
@@ -24,11 +155,17 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  font-family: var(--font-body);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-body-md);
+  line-height: var(--leading-body-md);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Global ss01 stylistic set */
+  font-feature-settings: "ss01";
 }
 
 * {
@@ -38,12 +175,416 @@ body {
 }
 
 a {
-  color: inherit;
+  color: var(--color-primary);
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+a:hover {
+  text-decoration: underline;
+}
+
+/* Tabular figures for numeric / money cells */
+.tabular-figures {
+  font-feature-settings: "tnum";
+  letter-spacing: var(--tracking-caption);
+}
+
+/* =========================================
+   Stripi Component Classes
+   ========================================= */
+
+/* --- Buttons --- */
+
+.btn-primary-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-button-md);
+  line-height: var(--leading-button);
+  letter-spacing: 0;
+  padding: var(--space-sm) var(--space-lg);
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  min-height: 40px;
+}
+
+.btn-primary-pill:hover {
+  background: var(--color-primary-deep);
+}
+
+.btn-primary-pill:active {
+  background: var(--color-primary-press);
+}
+
+.btn-primary-pill:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-canvas);
+  color: var(--color-primary);
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-button-md);
+  line-height: var(--leading-button);
+  letter-spacing: 0;
+  padding: var(--space-sm) var(--space-lg);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  min-height: 40px;
+}
+
+.btn-secondary:hover {
+  background: var(--color-canvas-soft);
+}
+
+.btn-on-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-brand-dark-900);
+  color: var(--color-on-primary);
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-button-md);
+  line-height: var(--leading-button);
+  letter-spacing: 0;
+  padding: var(--space-sm) var(--space-lg);
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  min-height: 40px;
+}
+
+.btn-on-dark:hover {
+  opacity: 0.9;
+}
+
+/* --- Cards --- */
+
+.card-feature-light {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xxl);
+  box-shadow: var(--shadow-level-1);
+}
+
+.card-pricing {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xxl);
+  box-shadow: var(--shadow-level-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.card-pricing-featured {
+  background: var(--color-brand-dark-900);
+  color: var(--color-on-primary);
+  border: 1px solid var(--color-brand-dark-900);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xxl);
+  box-shadow: var(--shadow-level-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.card-cream-band {
+  background: var(--color-canvas-cream);
+  color: var(--color-ink);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--space-xxl);
+}
+
+.card-dashboard-mockup {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-level-2);
+}
+
+/* --- Inputs --- */
+
+.input-text {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-body-md);
+  line-height: var(--leading-body-md);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-hairline-input);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.15s ease;
+  min-height: 40px;
+}
+
+.input-text:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.1);
+}
+
+/* --- Pills / Tags --- */
+
+.pill-tag-soft {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-primary-bg-subdued-hover);
+  color: var(--color-primary-deep);
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-micro-cap);
+  line-height: var(--leading-micro-cap);
+  letter-spacing: var(--tracking-micro-cap);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+}
+
+/* --- Navigation --- */
+
+.nav-bar {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  padding: var(--space-lg) var(--space-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+/* --- Footer --- */
+
+.footer-light {
+  background: var(--color-canvas);
+  color: var(--color-ink-mute);
+  font-family: var(--font-body);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-caption);
+  padding: var(--space-huge) var(--space-xl);
+  border-top: 1px solid var(--color-hairline);
+}
+
+/* --- Links --- */
+
+.link-on-light {
+  color: var(--color-primary);
+  font-family: var(--font-body);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-body-md);
+  line-height: var(--leading-body-md);
+  letter-spacing: 0;
+  text-decoration: none;
+}
+
+.link-on-light:hover {
+  text-decoration: underline;
+}
+
+/* --- Gradient Mesh Backdrop --- */
+
+.gradient-mesh {
+  position: relative;
+  overflow: hidden;
+}
+
+.gradient-mesh::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--color-canvas-cream) 0%,
+    var(--color-lemon) 15%,
+    #b8a9d4 30%,
+    var(--color-primary-soft) 45%,
+    var(--color-primary) 60%,
+    var(--color-ruby) 75%,
+    var(--color-magenta) 90%
+  );
+  opacity: 0.85;
+  z-index: 0;
+}
+
+/* Gradient mesh content overlay */
+.gradient-mesh > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Display Typography Utilities --- */
+
+.display-xxl {
+  font-family: var(--font-display);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-display-xxl);
+  line-height: var(--leading-display-xxl);
+  letter-spacing: var(--tracking-display-xxl);
+}
+
+.display-xl {
+  font-family: var(--font-display);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-display-xl);
+  line-height: var(--leading-display-xl);
+  letter-spacing: var(--tracking-display-xl);
+}
+
+.display-lg {
+  font-family: var(--font-display);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-display-lg);
+  line-height: var(--leading-display-lg);
+  letter-spacing: var(--tracking-display-lg);
+}
+
+.display-md {
+  font-family: var(--font-display);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-display-md);
+  line-height: var(--leading-display-md);
+  letter-spacing: var(--tracking-display-md);
+}
+
+.heading-lg {
+  font-family: var(--font-display);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-heading-lg);
+  line-height: var(--leading-heading-lg);
+  letter-spacing: var(--tracking-heading-lg);
+}
+
+.heading-md {
+  font-family: var(--font-display);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-heading-md);
+  line-height: var(--leading-heading-md);
+  letter-spacing: var(--tracking-heading-md);
+}
+
+.heading-sm {
+  font-family: var(--font-display);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-heading-sm);
+  line-height: var(--leading-heading-sm);
+  letter-spacing: 0;
+}
+
+.body-lg {
+  font-family: var(--font-body);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-body-lg);
+  letter-spacing: 0;
+}
+
+.body-md {
+  font-family: var(--font-body);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-body-md);
+  line-height: var(--leading-body-md);
+  letter-spacing: 0;
+}
+
+.caption {
+  font-family: var(--font-body);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-caption);
+}
+
+.micro {
+  font-family: var(--font-body);
+  font-weight: var(--weight-thin);
+  font-size: var(--text-micro);
+  line-height: var(--leading-micro);
+  letter-spacing: 0;
+}
+
+.micro-cap {
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-micro-cap);
+  line-height: var(--leading-micro-cap);
+  letter-spacing: var(--tracking-micro-cap);
+}
+
+/* --- Section spacing --- */
+
+.section-hero {
+  padding: var(--space-huge) 0;
+}
+
+.section-content {
+  padding: var(--space-xxl) 0;
+}
+
+.section-dashboard {
+  padding: var(--space-xl) 0;
+}
+
+/* --- Responsive helpers --- */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--space-md);
   }
+
+  .display-xxl {
+    font-size: 36px;
+  }
+}
+
+/* =========================================
+   Section spacing on marketing vs dashboard
+   ========================================= */
+
+.marketing-page {
+  background: var(--color-canvas);
+}
+
+.marketing-page .section-hero {
+  padding: 96px 0;
+}
+
+.dashboard-shell {
+  background: var(--color-brand-dark-900);
+  color: var(--color-on-primary);
+}
+
+.dashboard-shell .card-dashboard-mockup {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
