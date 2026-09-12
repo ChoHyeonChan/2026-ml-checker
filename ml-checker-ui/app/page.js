@@ -2,17 +2,24 @@
 
 import { useState } from "react";
 import styles from "./page.module.css";
+import Onboarding from "./components/Onboarding";
 
 const referenceBlock = `::tly
 {"c":[["file","DESIGN-stripe.md"]]}
 [참조] 파일 DESIGN-stripe.md
-:::`;
+:::;`;
 
 export default function Home() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState("idle");
   const [result, setResult] = useState(null);
+
+  const handleOnboardingDismiss = (payload) => {
+    if (payload && payload.example) {
+      setCode(payload.example);
+    }
+  };
 
   const runCheck = async () => {
     if (file) {
@@ -69,6 +76,7 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
+      <Onboarding onDismiss={handleOnboardingDismiss} />
       <main className={styles.main}>
         <div className={styles.header}>
           <h1 className={styles.title}>ML Data Leakage Checker</h1>
