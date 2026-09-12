@@ -48,7 +48,7 @@ function classifyFromBackend(resp) {
       type: "error",
       badge,
       items: [],
-      note: resp.errors.join(" \n ") + (resp.message ? " \n " + resp.message : ""),
+      note: (resp.errors || []).join(" \n ") + (resp.message ? " \n " + resp.message : ""),
     };
   }
 
@@ -75,13 +75,71 @@ function classifyFromBackend(resp) {
     badge,
     items,
     note: note.join(" \n ") || null,
+    summary,
+  };
+}
+
+function makeFrontBasicResult(code) {
+  const items = [];
+  const lines = code.split("\n");
+
+  let fitLine = -1;
+  let targetLine = -1;
+  let scalerLine = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    const line = raw.trim();
+
+    if (fitLine === -1 && /\.fit\s*\(/.test(line)) {
+      fitLine = i + 1;
+    }
+    if (targetLine === -1 && /target/i.test(line) && !/def |class |#/.test(line)) {
+      targetLine = i + 1;
+    }
+    if (scalerLine === -1 && /StandardScaler|MinMaxScaler|RobustScaler|scale/.test(line)) {
+      scalerLine = i + 1;
+    }
+  }
+
+  if (fitLine > 0 && scalerLine > 0 && fitLine > scalerLine) {
+    items.push({
+      line: String(scalerLine),
+      verdict: "확정위반",
+      desc: "스케일링 fit이 전체 데이터 기준으로 먼저 호출될 수 있습니다.",
+      fix: "학습 데이터 기준으로 fit한 뒤 검증/테스트 데이터에는 transform만 적용하세요.",
+    });
+  }
+
+  if (targetLine > 0) {
+    items.push({
+      line: String(targetLine),
+      verdict: "의심",
+      desc: "코드에서 타겟 정보를 직접 참조하는 표현이 보입니다.",
+      fix: "전처리 단계에서 타겟을 직접 변환하지 말고, 피처만 처리하세요.",
+    });
+  }
+
+  const summary = {
+    확정위반: items.filter((it) => it.verdict === "확정위반").length,
+    의심: items.filter((it) => it.verdict === "의심").length,
+    이상없음: items.filter((it) => it.verdict === "이상없음").length,
+  };
+
+  return {
+    type: items.length > 0 ? "judgment" : "ok",
+    badge: items.length > 0
+      ? `의심 ${summary.의심}건`
+      : "이상없음",
+    items,
+    note: "백엔드 미연결 상태라 프론트 기본 패턴 점검 결과만 표시합니다.",
+    summary,
   };
 }
 
 export async function POST(req) {
   const contentType = req.headers.get("content-type") || "";
 
-  // 파일 업로드인 경우
   if (contentType.startsWith("multipart/")) {
     const formData = await req.formData();
     const file = formData.get("file");
@@ -122,7 +180,6 @@ export async function POST(req) {
       return NextResponse.json({ type: "not-preprocessing" });
     }
 
-    // 백엔드 연동 가능하면 백엔드로 전달
     if (BACKEND_URL) {
       try {
         const res = await fetch(`${BACKEND_URL}/api/v1/analyze/file`, {
@@ -147,23 +204,15 @@ export async function POST(req) {
       }
     }
 
-    // 백엔드가 없으면 프론트 기본 판정만 반환
+    const basic = makeFrontBasicResult(code);
     return NextResponse.json({
+      ...basic,
       type: "judgment",
-      badge: "결과 준비 중",
-      items: [
-        {
-          line: "",
-          verdict: "의심",
-          desc: "백엔드 연동 없이 프론트 기본 판정만 표시했습니다.",
-          fix: "Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL을 설정하면 실제 검사 결과가 표시됩니다.",
-        },
-      ],
-      note: "백엔드 URL이 설정되지 않아 기본 응답만 반환합니다.",
+      badge: basic.badge,
+      note: "백엔드 URL이 설정되지 않아 프론트 기본 패턴 점검 결과만 표시합니다.",
     });
   }
 
-  // 코드 직접 입력인 경우
   let body;
   try {
     body = await req.json();
@@ -184,7 +233,6 @@ export async function POST(req) {
     return NextResponse.json({ type: "not-preprocessing" });
   }
 
-  // 백엔드 연동
   if (BACKEND_URL) {
     try {
       const res = await fetch(`${BACKEND_URL}/api/v1/analyze`, {
@@ -209,18 +257,12 @@ export async function POST(req) {
     }
   }
 
+  const basic = makeFrontBasicResult(code);
   return NextResponse.json({
+    ...basic,
     type: "judgment",
-    badge: "결과 준비 중",
-    items: [
-      {
-        line: "",
-        verdict: "의심",
-        desc: "백엔드 연동 없이 프론트 기본 판정만 표시했습니다.",
-        fix: "Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL을 설정하면 실제 검사 결과가 표시됩니다.",
-      },
-    ],
-    note: "백엔드 URL이 설정되지 않아 기본 응답만 반환합니다.",
+    badge: basic.badge,
+    note: "백엔드 URL이 설정되지 않아 프론트 기본 패턴 점검 결과만 표시합니다.",
   });
 }
 
