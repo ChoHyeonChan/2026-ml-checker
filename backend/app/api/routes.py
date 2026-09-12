@@ -53,6 +53,7 @@ def _build_ui_response(resp: AnalyzeResponse | AnalyzeFileResponse) -> dict:
         "summary": summary,
         "items": items,
         "note": " ".join(note) if note else None,
+        "not_preprocessing": bool(resp.not_preprocessing),
     }
 
 
@@ -77,6 +78,7 @@ async def analyze_file(file: UploadFile = File(...)) -> AnalyzeFileResponse:
                 "message": "지원하지 않는 파일 형식입니다.",
                 "warnings": [],
                 "errors": [f"지원 형식: {', '.join(sorted(allowed))}."],
+                "not_preprocessing": False,
             },
         )
 
@@ -91,4 +93,5 @@ async def analyze_file(file: UploadFile = File(...)) -> AnalyzeFileResponse:
         errors=result.get("errors", []),
         file_name=name,
         total_lines=result.get("total_lines"),
+        not_preprocessing=result.get("not_preprocessing", False),
     )
