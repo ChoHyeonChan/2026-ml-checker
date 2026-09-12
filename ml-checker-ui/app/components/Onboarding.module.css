@@ -1,1 +1,131 @@
-Lm92ZXJsYXkgewogIHBvc2l0aW9uOiBmaXhlZDsKICBpbnNldDogMDsKICBiYWNrZ3JvdW5kOiByZ2JhKDAsIDAsIDAsIDAuNDUpOwogIGRpc3BsYXk6IGZsZXg7CiAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjsKICB6LWluZGV4OiA5OTk5OwogIHBhZGRpbmc6IDI0cHg7Cn0KCi5jYXJkIHsKICBiYWNrZ3JvdW5kOiB2YXIoLS1iYWNrZ3JvdW5kLCAjZmZmZmZmKTsKICBjb2xvcjogdmFyKC0tZm9yZWdyb3VuZCwgIzE3MTcxNyk7CiAgbWF4LXdpZHRoOiA1MjBweDsKICB3aWR0aDogMTAwJTsKICBib3JkZXItcmFkaXVzOiAxNHB4OwogIGJveC1zaGFkb3c6IDAgMjBweCA2MHB4IHJnYmEoMCwgMCwgMCwgMC4yKTsKICBvdmVyZmxvdzogaGlkZGVuOwp9CgouaGVhZCB7CiAgZGlzcGxheTogZmxleDsKICBqdXN0aWZ5LWNvbnRlbnQ6IHNwYWNlLWJldHdlZW47CiAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICBwYWRkaW5nOiAxNnB4IDIwcHg7CiAgYm9yZGVyLWJvdHRvbTogMXB4IHNvbGlkICNlNWU1ZTU7Cn0KCi5zdGVwSW5kaWNhdG9yIHsKICBmb250LXNpemU6IDE0cHg7CiAgY29sb3I6ICM2NjY7Cn0KCi5za2lwQnV0dG9uIHsKICBiYWNrZ3JvdW5kOiBub25lOwogIGJvcmRlcjogbm9uZTsKICBjb2xvcjogIzY2NjsKICBmb250LXNpemU6IDE0cHg7CiAgY3Vyc29yOiBwb2ludGVyOwp9CgouYm9keSB7CiAgcGFkZGluZzogMjBweDsKfQoKLnRpdGxlIHsKICBmb250LXNpemU6IDE4cHg7CiAgbWFyZ2luLWJvdHRvbTogMTJweDsKfQoKLmNvbnRlbnQgewogIGZvbnQtc2l6ZTogMTVweDsKICBsaW5lLWhlaWdodDogMS42Owp9CgouY29udGVudCB1bCB7CiAgbWFyZ2luOiA4cHggMCA4cHggMjBweDsKfQoKLmNvbnRlbnQgbGkgewogIG1hcmdpbjogNHB4IDA7Cn0KCi5jb250ZW50IGNvZGUgewogIGJhY2tncm91bmQ6ICNmMWYxZjE7CiAgcGFkZGluZzogMnB4IDZweDsKICBib3JkZXItcmFkaXVzOiA0cHg7CiAgZm9udC1zaXplOiAxM3B4Owp9CgouZXhhbXBsZUJ1dHRvbiB7CiAgbWFyZ2luLXRvcDogMTJweDsKICBwYWRkaW5nOiA4cHggMTRweDsKICBib3JkZXI6IDFweCBzb2xpZCAjZDBkMGQwOwogIGJvcmRlci1yYWRpdXM6IDhweDsKICBiYWNrZ3JvdW5kOiAjZmFmYWZhOwogIGNvbG9yOiAjMTcxNzE3OwogIGN1cnNvcjogcG9pbnRlcjsKICBmb250LXNpemU6IDE0cHg7Cn0KCi5leGFtcGxlQnV0dG9uOmhvdmVyIHsKICBiYWNrZ3JvdW5kOiAjZjBmMGYwOwp9CgouY2xvc2VOb3RlIHsKICBtYXJnaW4tdG9wOiAxMnB4OwogIGNvbG9yOiAjNjY2OwogIGZvbnQtc2l6ZTogMTRweDsKfQoKLmZvb3QgewogIGRpc3BsYXk6IGZsZXg7CiAganVzdGlmeS1jb250ZW50OiBzcGFjZS1iZXR3ZWVuOwogIHBhZGRpbmc6IDE0cHggMjBweDsKICBib3JkZXItdG9wOiAxcHggc29saWQgI2U1ZTVlNTsKfQoKLnByZXZCdXR0b24sCi5uZXh0QnV0dG9uIHsKICBib3JkZXI6IG5vbmU7CiAgcGFkZGluZzogOHB4IDE4cHg7CiAgYm9yZGVyLXJhZGl1czogOHB4OwogIGZvbnQtc2l6ZTogMTVweDsKICBjdXJzb3I6IHBvaW50ZXI7Cn0KCi5wcmV2QnV0dG9uIHsKICBiYWNrZ3JvdW5kOiB0cmFuc3BhcmVudDsKICBjb2xvcjogIzY2NjsKfQoKLnByZXZCdXR0b246ZGlzYWJsZWQgewogIG9wYWNpdHk6IDAuNDsKICBjdXJzb3I6IG5vdC1hbGxvd2VkOwp9CgoubmV4dEJ1dHRvbiB7CiAgYmFja2dyb3VuZDogIzE3MTcxNzsKICBjb2xvcjogI2ZmZjsKfQoKLm5leHRCdXR0b246aG92ZXIgewogIG9wYWNpdHk6IDAuOTsKfQo=
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 24px;
+}
+
+.card {
+  background: var(--brand-dark-900, #171717);
+  color: var(--foreground, #171717);
+  max-width: 520px;
+  width: 100%;
+  border-radius: 14px;
+  border: 0;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.stepIndicator {
+  font-size: 14px;
+  color: #666;
+}
+
+.skipButton {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.body {
+  padding: 20px;
+}
+
+.title {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.content {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.content ul {
+  margin: 8px 0 8px 20px;
+}
+
+.content li {
+  margin: 4px 0;
+}
+
+.content code {
+  background: #f1f1f1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.exampleButton {
+  margin-top: 12px;
+  padding: 8px 18px;
+  border: 1px solid #d0d0d0;
+  background: #fff;
+  color: #171717;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 6px;
+}
+
+.exampleButton:hover {
+  background: #f5f5f5;
+}
+
+.closeNote {
+  margin-top: 12px;
+  color: #666;
+  font-size: 14px;
+}
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.prevButton,
+.nextButton {
+  border: none;
+  padding: 8px 18px;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.prevButton {
+  background: transparent;
+  color: #666;
+}
+
+.prevButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.nextButton {
+  background: #171717;
+  color: #fff;
+}
+
+.nextButton:hover {
+  background: #222;
+}
+
+.nextButton:hover {
+  opacity: 0.8;
+}
