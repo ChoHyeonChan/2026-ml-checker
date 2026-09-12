@@ -70,8 +70,10 @@ function classifyFromBackend(resp) {
   if (resp.message) note.push(resp.message);
   if (resp.warnings) note.push(...resp.warnings);
 
+  const backendNotPreprocessing = Boolean(resp.not_preprocessing);
+
   return {
-    type: classification === "이상없음" ? "ok" : "judgment",
+    type: backendNotPreprocessing ? "not-preprocessing" : classification === "이상없음" ? "ok" : "judgment",
     badge,
     items,
     note: note.join(" \n ") || null,
@@ -81,7 +83,6 @@ function classifyFromBackend(resp) {
 export async function POST(req) {
   const contentType = req.headers.get("content-type") || "";
 
-  // 파일 업로드인 경우
   if (contentType.startsWith("multipart/")) {
     const formData = await req.formData();
     const file = formData.get("file");
@@ -122,7 +123,6 @@ export async function POST(req) {
       return NextResponse.json({ type: "not-preprocessing" });
     }
 
-    // 백엔드 연동 가능하면 백엔드로 전달
     if (BACKEND_URL) {
       try {
         const res = await fetch(`${BACKEND_URL}/api/v1/analyze/file`, {
@@ -147,7 +147,6 @@ export async function POST(req) {
       }
     }
 
-    // 백엔드가 없으면 프론트 기본 판정만 반환
     return NextResponse.json({
       type: "judgment",
       badge: "결과 준비 중",
@@ -163,7 +162,6 @@ export async function POST(req) {
     });
   }
 
-  // 코드 직접 입력인 경우
   let body;
   try {
     body = await req.json();
@@ -184,7 +182,6 @@ export async function POST(req) {
     return NextResponse.json({ type: "not-preprocessing" });
   }
 
-  // 백엔드 연동
   if (BACKEND_URL) {
     try {
       const res = await fetch(`${BACKEND_URL}/api/v1/analyze`, {
