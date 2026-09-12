@@ -1,8 +1,10 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import styles from "./page.module.css";
 import Onboarding from "./components/Onboarding";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
 export default function Home() {
   const [code, setCode] = useState("");
@@ -74,6 +76,9 @@ export default function Home() {
     setCode("");
     setResult(null);
   };
+
+  const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상없음: 0 };
+  const isBackendConnected = Boolean(BACKEND_URL);
 
   return (
     <div className={styles.page}>
@@ -177,24 +182,139 @@ export default function Home() {
               </div>
             )}
 
-            {result.type === "judgment" && result.items.length > 0 && (
+            {result.type === "not-connected" && (
               <div className={styles.items}>
-                {result.items.map((item, i) => (
-                  <div key={i} className={styles.item} style={{ borderColor: "var(--color-hairline)" }}>
-                    <div className={styles.itemHead}>
-                      <span className={styles.itemLine} style={{ color: "var(--color-ink-mute)" }}>{item.line}</span>
-                      <span className={styles.itemVerdict}>{item.verdict}</span>
-                    </div>
-                    <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
-                    {item.fix && (
-                      <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
-                    )}
-                  </div>
-                ))}
+                <div className={styles.item}>
+                  <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
+                    백엔드가 연결되지 않아 실제 검사 결과를 표시할 수 없습니다.
+                  </p>
+                </div>
+                <div className={styles.item}>
+                  <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>
+                    Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL에 백엔드 URL을 설정하면 검사 결과가 표시됩니다.
+                  </p>
+                </div>
               </div>
             )}
 
-            {result.note && result.type !== "error" && (
+            {result.type === "judgment" && (
+              <>
+                <div className={styles.summary}>
+                  <div className={styles.summaryBlock}>
+                    <span className={styles.summaryLabel}>확정위반</span>
+                    <span className={styles.summaryCount}>{summary.확정위반}건</span>
+                  </div>
+                  <div className={styles.summaryBlock}>
+                    <span className={styles.summaryLabel}>의심</span>
+                    <span className={styles.summaryCount}>{summary.의심}건</span>
+                  </div>
+                  <div className={styles.summaryBlock}>
+                    <span className={styles.summaryLabel}>이상없음</span>
+                    <span className={styles.summaryCount}>{summary.이상없음}건</span>
+                  </div>
+                </div>
+
+                {summary.확정위반 > 0 && (
+                  <div className={styles.section}>
+                    <div className={styles.sectionHead}>
+                      <span className={styles.sectionLabel}>확정위반</span>
+                      <span className={styles.sectionCount}>{summary.확정위반}건</span>
+                    </div>
+                    {result.items.filter((it) => it.verdict === "확정위반").length === 0 && (
+                      <div className={styles.item}>
+                        <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
+                          확정위반으로 분류된 항목이 없습니다.
+                        </p>
+                      </div>
+                    )}
+                    {result.items
+                      .filter((it) => it.verdict === "확정위반")
+                      .map((item, i) => (
+                        <div key={i} className={styles.item} style={{ borderColor: "var(--color-ruby)" }}>
+                          <div className={styles.itemHead}>
+                            <span className={styles.itemLine} style={{ color: "var(--color-ruby)" }}>{item.line}</span>
+                            <span className={styles.itemVerdict}>{item.verdict}</span>
+                          </div>
+                          <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
+                          {item.fix && (
+                            <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                {summary.의심 > 0 && (
+                  <div className={styles.section}>
+                    <div className={styles.sectionHead}>
+                      <span className={styles.sectionLabel}>의심</span>
+                      <span className={styles.sectionCount}>{summary.의심}건</span>
+                    </div>
+                    {result.items.filter((it) => it.verdict === "의심").length === 0 && (
+                      <div className={styles.item}>
+                        <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
+                          의심으로 분류된 항목이 없습니다.
+                        </p>
+                      </div>
+                    )}
+                    {result.items
+                      .filter((it) => it.verdict === "의심")
+                      .map((item, i) => (
+                        <div key={i} className={styles.item} style={{ borderColor: "var(--color-primary)" }}>
+                          <div className={styles.itemHead}>
+                            <span className={styles.itemLine} style={{ color: "var(--color-primary)" }}>{item.line}</span>
+                            <span className={styles.itemVerdict}>{item.verdict}</span>
+                          </div>
+                          <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
+                          {item.fix && (
+                            <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                {summary.이상없음 > 0 && (
+                  <div className={styles.section}>
+                    <div className={styles.sectionHead}>
+                      <span className={styles.sectionLabel}>이상없음</span>
+                      <span className={styles.sectionCount}>{summary.이상없음}건</span>
+                    </div>
+                    {result.items.filter((it) => it.verdict === "이상없음").length === 0 && (
+                      <div className={styles.item}>
+                        <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
+                          이상없음으로 분류된 항목이 없습니다.
+                        </p>
+                      </div>
+                    )}
+                    {result.items
+                      .filter((it) => it.verdict === "이상없음")
+                      .map((item, i) => (
+                        <div key={i} className={styles.item} style={{ borderColor: "var(--color-ink-mute)" }}>
+                          <div className={styles.itemHead}>
+                            <span className={styles.itemLine} style={{ color: "var(--color-ink-mute)" }}>{item.line}</span>
+                            <span className={styles.itemVerdict}>{item.verdict}</span>
+                          </div>
+                          <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
+                          {item.fix && (
+                            <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                {summary.확정위반 === 0 && summary.의심 === 0 && summary.이상없음 === 0 && result.items.length === 0 && (
+                  <div className={styles.item}>
+                    <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
+                      항목이 없습니다.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {result.note && result.type !== "error" && result.type !== "not-connected" && (
               <div className={styles.note} style={{ borderLeftColor: "var(--color-primary)" }}>{result.note}</div>
             )}
           </div>

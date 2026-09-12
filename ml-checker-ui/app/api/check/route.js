@@ -48,7 +48,7 @@ function classifyFromBackend(resp) {
       type: "error",
       badge,
       items: [],
-      note: resp.errors.join(" \n ") + (resp.message ? " \n " + resp.message : ""),
+      note: (resp.errors || []).join(" \n ") + (resp.message ? " \n " + resp.message : ""),
     };
   }
 
@@ -75,6 +75,7 @@ function classifyFromBackend(resp) {
     badge,
     items,
     note: note.join(" \n ") || null,
+    summary,
   };
 }
 
@@ -149,17 +150,9 @@ export async function POST(req) {
 
     // 백엔드가 없으면 프론트 기본 판정만 반환
     return NextResponse.json({
-      type: "judgment",
-      badge: "결과 준비 중",
-      items: [
-        {
-          line: "",
-          verdict: "의심",
-          desc: "백엔드 연동 없이 프론트 기본 판정만 표시했습니다.",
-          fix: "Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL을 설정하면 실제 검사 결과가 표시됩니다.",
-        },
-      ],
-      note: "백엔드 URL이 설정되지 않아 기본 응답만 반환합니다.",
+      type: "not-connected",
+      badge: "백엔드 미연결",
+      note: "백엔드 URL이 설정되지 않아 실제 검사 결과를 표시할 수 없습니다.",
     });
   }
 
@@ -210,17 +203,9 @@ export async function POST(req) {
   }
 
   return NextResponse.json({
-    type: "judgment",
-    badge: "결과 준비 중",
-    items: [
-      {
-        line: "",
-        verdict: "의심",
-        desc: "백엔드 연동 없이 프론트 기본 판정만 표시했습니다.",
-        fix: "Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL을 설정하면 실제 검사 결과가 표시됩니다.",
-      },
-    ],
-    note: "백엔드 URL이 설정되지 않아 기본 응답만 반환합니다.",
+    type: "not-connected",
+    badge: "백엔드 미연결",
+    note: "백엔드 URL이 설정되지 않아 실제 검사 결과를 표시할 수 없습니다.",
   });
 }
 
