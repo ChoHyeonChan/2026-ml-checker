@@ -77,6 +77,7 @@ function classifyFromBackend(resp) {
     badge,
     items,
     note: note.join(" \n ") || null,
+    summary,
   };
 }
 
