@@ -15,7 +15,7 @@
   max-width: 520px;
   width: 100%;
   border-radius: 14px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #c0c0c0;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
   overflow: hidden;
 }
@@ -134,8 +134,4 @@ nextButton {
 
 .nextButton:hover {
   background: #222;
-}
-
-.nextButton:hover {
-  opacity: 0.8;
 }
