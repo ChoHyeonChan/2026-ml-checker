@@ -18,7 +18,7 @@ class AnalyzerService:
             return validation
         lines = code.splitlines()
         results, summary = self._judge(lines)
-        return self._build_response(lines, results, summary)
+        return self._build_response(lines, results, summary, not_preprocessing=validation.get("not_preprocessing", False))
 
     def analyze_file(self, file_bytes: bytes, file_name: str) -> dict[str, Any]:
         code = self._extract_code(file_bytes, file_name)
@@ -30,20 +30,26 @@ class AnalyzerService:
                 "message": "분석 가능한 코드를 추출하지 못했습니다.",
                 "warnings": [],
                 "errors": ["파일에서 분석 가능한 코드를 읽을 수 없습니다."],
+                "not_preprocessing": False,
             }
+        validation = self._validate_input(code)
+        if validation["errors"]:
+            return validation
         lines = code.splitlines()
         results, summary = self._judge(lines)
-        return self._build_response(lines, results, summary)
+        return self._build_response(lines, results, summary, not_preprocessing=validation.get("not_preprocessing", False))
 
     def _validate_input(self, code: str) -> dict[str, Any]:
         errors: list[str] = []
         warnings: list[str] = []
+        not_preprocessing = False
         if not code:
             errors.append("분석할 코드가 비어 있습니다.")
         if code and not self._looks_like_python(code):
             errors.append("분석 대상 코드가 파이썬 코드로 보이지 않습니다.")
         if code and not self._looks_like_ml_preprocessing(code):
             warnings.append("ML 전처리 코드로 보기 어려운 부분이 있습니다. 분석 범위는 제한적일 수 있습니다.")
+            not_preprocessing = True
         if errors:
             return {
                 "classification": "이상없음",
@@ -52,8 +58,9 @@ class AnalyzerService:
                 "message": "분석을 진행할 수 없습니다.",
                 "errors": errors,
                 "warnings": warnings,
+                "not_preprocessing": not_preprocessing,
             }
-        return {"errors": [], "warnings": warnings, "code": code}
+        return {"errors": [], "warnings": warnings, "code": code, "not_preprocessing": not_preprocessing}
 
     def _judge(self, lines: list[str]) -> tuple[list[JudgmentResult], dict[str, int]]:
         results: list[JudgmentResult] = []
@@ -347,7 +354,13 @@ class AnalyzerService:
                 continue
         return None
 
-    def _build_response(self, lines: list[str], results: list[JudgmentResult], summary: dict[str, int]) -> dict[str, Any]:
+    def _build_response(
+        self,
+        lines: list[str],
+        results: list[JudgmentResult],
+        summary: dict[str, int],
+        not_preprocessing: bool = False,
+    ) -> dict[str, Any]:
         total = len(lines) or 1
         if summary["확정위반"] > 0:
             classification = "확정위반"
@@ -366,6 +379,7 @@ class AnalyzerService:
             "warnings": [],
             "errors": [],
             "total_lines": total,
+            "not_preprocessing": not_preprocessing,
         }
 
     # ---------- estimate helpers ----------
