@@ -43,7 +43,7 @@ class AnalyzerService:
         if code and not self._looks_like_python(code):
             errors.append("분석 대상 코드가 파이썬 코드로 보이지 않습니다.")
         if code and not self._looks_like_ml_preprocessing(code):
-            warnings.append("ML 전처리 코드로 보기 어려운 부분이 있습니다. 분석 범위는 제한적일 수 있습니다.")
+            errors.append("ML 전처리/학습 코드로 보기 어렵습니다. 분석 범위가 제한될 수 있습니다.")
         if errors:
             return {
                 "classification": "이상없음",
@@ -73,13 +73,11 @@ class AnalyzerService:
         }
         return results, summary
 
-    # ---------- 분류 ----------
     def _classify_line(self, lines: list[str], idx: int, line: str) -> dict[str, str] | None:
         lowered = line.lower()
         ctx_before = lines[max(0, idx - 2):idx]
         ctx_after = lines[idx + 1:idx + 3]
 
-        # 1) 타겟 직접 사용 + 전처리 패턴 -> 확정위반 우선
         if self._has_target_leakage_clear(lines, idx, line, ctx_before, ctx_after):
             return {
                 "type": "확정위반",
@@ -87,7 +85,6 @@ class AnalyzerService:
                 "reason": "타겟 열이 전처리 과정에서 직접 참조된 것으로 보입니다.",
             }
 
-        # 2) 전체 데이터 기준 fit/transform 후 분할 또는 분할 없음 -> 확정위반/의심
         fit_tag = self._has_preprocess_fit_before_split(lines, idx, line, ctx_before, ctx_after)
         if fit_tag:
             if fit_tag["level"] == " 확정위반":
@@ -102,7 +99,6 @@ class AnalyzerService:
                 "reason": "전체 데이터 기준으로 먼저 fit/transform을 적용한 것으로 의심됩니다.",
             }
 
-        # 3) 시계열/순서 관련 전처리 후 fit -> 의심
         time_tag = self._has_time_order_leakage_hint(lines, idx, line, ctx_before, ctx_after)
         if time_tag:
             return {
@@ -111,7 +107,6 @@ class AnalyzerService:
                 "reason": "시간 순서 관련 누수 가능성이 있는 패턴으로 보입니다.",
             }
 
-        # 4) 파이프라인/객체 재할당/재사용 의심 -> 의심
         pipe_tag = self._has_pipeline_reuse_leakage_hint(lines, idx, line, ctx_before, ctx_after)
         if pipe_tag:
             return {
@@ -120,7 +115,6 @@ class AnalyzerService:
                 "reason": "전처리 객체가 여러 데이터/단계에 재사용된 것으로 의심됩니다.",
             }
 
-        # 5) fit_transform이 split boundary 없이 쓰인 경우 -> 확정위반/의심
         ft_tag = self._has_fit_transform_before_split(lines, idx, line, ctx_before, ctx_after)
         if ft_tag:
             if ft_tag["level"] == " 확정위반":
@@ -135,7 +129,6 @@ class AnalyzerService:
                 "reason": "전체 데이터 기준으로 먼저 fit_transform을 적용한 것으로 의심됩니다.",
             }
 
-        # 6) split 전 fit + split 후 transform만 있는 패턴 -> 의심
         fbs_tag = self._has_fit_before_split_only_transform_after(lines, idx, line, ctx_before, ctx_after)
         if fbs_tag:
             return {
@@ -144,7 +137,6 @@ class AnalyzerService:
                 "reason": "분할 전에 fit한 전처리 객체가 분할 후 transform에 재사용된 것으로 의심됩니다.",
             }
 
-        # 7) cross-validation + 외부 preprocess 결합 누수 의심 -> 의심
         cv_tag = self._has_cross_val_preprocess_leakage_hint(lines, idx, line, ctx_before, ctx_after)
         if cv_tag:
             return {
@@ -153,7 +145,6 @@ class AnalyzerService:
                 "reason": "cross-validation과 외부 전처리가 결합되어 누수 가능성이 있는 패턴으로 보입니다.",
             }
 
-        # 8) groupby/분할 기준 전처리 순서 누수 의심 -> 의심
         gb_tag = self._has_groupby_split_preprocess_order_leakage_hint(lines, idx, line, ctx_before, ctx_after)
         if gb_tag:
             return {
@@ -163,8 +154,6 @@ class AnalyzerService:
             }
 
         return None
-
-    # ---------- 패턴 판단 헬퍼 ----------
 
     def _has_fit_transform_before_split(
         self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
@@ -194,7 +183,6 @@ class AnalyzerService:
         has_fit = any(p in lowered for p in ["fit(", "fit_transform("])
         if not has_fit:
             return False
-        # split 전 fit + split 후 transform만 있는 패턴
         window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
         split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
         has_split_context = any(k in " ".join(window).lower() for k in split_kw)
@@ -203,7 +191,6 @@ class AnalyzerService:
             return False
         if not has_split_context:
             return False
-        # split 전 fit + split 후 transform만 있는 경우
         after_split = lines[idx + 1:idx + 10]
         has_transform_after_split = any("transform(" in l.lower() for l in after_split)
         return has_transform_after_split
@@ -217,7 +204,6 @@ class AnalyzerService:
         has_cross_val = any(k in lowered for k in ["cross_val_score", "cross_validate", "cross_val_predict"])
         if not has_cross_val:
             return False
-        # 외부 preprocess 결합 확인
         ctx_all = " ".join(ctx_before + [line] + ctx_after).lower()
         has_preprocess = any(k in ctx_all for k in ["fit(", "transform(", "fit_transform(", "scaler", "encoder", "pipeline"])
         return has_preprocess
@@ -231,7 +217,6 @@ class AnalyzerService:
         has_groupby = any(k in lowered for k in ["groupby", "group_by", "grouped"])
         if not has_groupby:
             return False
-        # split 전/후 전처리 순서 확인
         window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
         split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
         has_split_context = any(k in " ".join(window).lower() for k in split_kw)
@@ -240,7 +225,6 @@ class AnalyzerService:
             return False
         if not has_split_context:
             return False
-        # groupby + 전처리 + split 순서 누수 의심
         ctx_all = " ".join(ctx_before + [line] + ctx_after).lower()
         has_preprocess = any(k in ctx_all for k in ["fit(", "transform(", "fit_transform(", "scaler", "encoder", "pipeline"])
         return has_preprocess
@@ -367,8 +351,6 @@ class AnalyzerService:
             "errors": [],
             "total_lines": total,
         }
-
-    # ---------- estimate helpers ----------
 
     def _estimate_fit_target(self, lines: list[str], idx: int, line: str) -> dict[str, Any] | None:
         lowered = line.lower()
