@@ -1,1 +1,1 @@
-                onPreview={onPreview}
+              />
