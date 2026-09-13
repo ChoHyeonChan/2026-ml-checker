@@ -6,6 +6,47 @@ import Onboarding from "./components/Onboarding";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
+const CHARACTER_MAP = {
+  확정위반: "/character-fail-v3.jpg",
+  의심: "/character-attention-v3.jpg",
+  이상없음: "/character-pass-v3.jpg",
+};
+
+const BANNER_MAP = {
+  통과: "/character-pass-v3.jpg",
+  안내필요: "/character-attention-v3.jpg",
+};
+
+function CharacterBanner({ src, title, text }) {
+  return (
+    <div className={styles.characterBanner}>
+      <div className={styles.characterBannerImage}>
+        <img src={src} alt="" />
+      </div>
+      <div className={styles.characterBannerText}>
+        <p className={styles.characterBannerTitle}>{title}</p>
+        <p>{text}</p>
+      </div>
+    </div>
+  );
+}
+
+function CharacterSection({ verdict, line, desc, fix }) {
+  const src = CHARACTER_MAP[verdict] ?? "/character-attention-v3.jpg";
+  return (
+    <div className={styles.characterSection}>
+      <div className={styles.characterSectionImage}>
+        <img src={src} alt="" />
+      </div>
+      <div className={styles.characterSectionBody}>
+        <p className={styles.characterSectionLabel}>{verdict}</p>
+        <p className={styles.characterSectionDesc}>{desc}</p>
+        {fix && <p className={styles.itemFix}>{fix}</p>}
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState(null);
@@ -91,6 +132,13 @@ export default function Home() {
   const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상없음: 0 };
   const isBackendConnected = Boolean(BACKEND_URL);
 
+  const banner =
+    result?.type === "ok"
+      ? { src: BANNER_MAP["통과"], title: "명확하게 의심되는 패턴이 보이지 않아요", text: "전처리·학습 코드를 더 넣어도 좋고, 지금 상태로도 일단 괜찮아 보여요." }
+      : result?.type === "error"
+      ? { src: BANNER_MAP["안내필요"], title: "검사 중 문제가 있었어요", text: "잠시 뒤 다시 시도해 주세요." }
+      : null;
+
   return (
     <div className={styles.page}>
       <Onboarding onDismiss={handleOnboardingDismiss} />
@@ -141,14 +189,14 @@ export default function Home() {
 
         <div className={styles.actions}>
           <button
-            className={styles.runButton}
+            className="btn-primary-pill"
             onClick={runCheck}
             disabled={status === "loading"}
           >
             {status === "loading" ? "검사 중..." : "누수 검사하기"}
           </button>
           <button
-            className={styles.clearButton}
+            className="btn-secondary"
             onClick={clearContent}
             disabled={status === "loading"}
           >
@@ -162,6 +210,14 @@ export default function Home() {
               <span className={styles.resultLabel} style={{ color: "var(--color-ink)" }}>검사 결과</span>
               <span className={styles.resultBadge}>{result.badge}</span>
             </div>
+
+            {banner && (
+              <CharacterBanner
+                src={banner.src}
+                title={banner.title}
+                text={banner.text}
+              />
+            )}
 
             {result.type === "empty" && (
               <p className={styles.message} style={{ color: "var(--color-ink-mute)" }}>
@@ -245,16 +301,13 @@ export default function Home() {
                     {result.items
                       .filter((it) => it.verdict === "확정위반")
                       .map((item, i) => (
-                        <div key={i} className={styles.item} style={{ borderColor: "var(--color-ruby)" }}>
-                          <div className={styles.itemHead}>
-                            <span className={styles.itemLine} style={{ color: "var(--color-ruby)" }}>{item.line}</span>
-                            <span className={styles.itemVerdict}>{item.verdict}</span>
-                          </div>
-                          <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
-                          {item.fix && (
-                            <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
-                          )}
-                        </div>
+                        <CharacterSection
+                          key={i}
+                          verdict={item.verdict}
+                          line={item.line}
+                          desc={item.desc}
+                          fix={item.fix}
+                        />
                       ))}
                   </div>
                 )}
@@ -275,16 +328,13 @@ export default function Home() {
                     {result.items
                       .filter((it) => it.verdict === "의심")
                       .map((item, i) => (
-                        <div key={i} className={styles.item} style={{ borderColor: "var(--color-primary)" }}>
-                          <div className={styles.itemHead}>
-                            <span className={styles.itemLine} style={{ color: "var(--color-primary)" }}>{item.line}</span>
-                            <span className={styles.itemVerdict}>{item.verdict}</span>
-                          </div>
-                          <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
-                          {item.fix && (
-                            <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
-                          )}
-                        </div>
+                        <CharacterSection
+                          key={i}
+                          verdict={item.verdict}
+                          line={item.line}
+                          desc={item.desc}
+                          fix={item.fix}
+                        />
                       ))}
                   </div>
                 )}
@@ -305,16 +355,13 @@ export default function Home() {
                     {result.items
                       .filter((it) => it.verdict === "이상없음")
                       .map((item, i) => (
-                        <div key={i} className={styles.item} style={{ borderColor: "var(--color-ink-mute)" }}>
-                          <div className={styles.itemHead}>
-                            <span className={styles.itemLine} style={{ color: "var(--color-ink-mute)" }}>{item.line}</span>
-                            <span className={styles.itemVerdict}>{item.verdict}</span>
-                          </div>
-                          <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
-                          {item.fix && (
-                            <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
-                          )}
-                        </div>
+                        <CharacterSection
+                          key={i}
+                          verdict={item.verdict}
+                          line={item.line}
+                          desc={item.desc}
+                          fix={item.fix}
+                        />
                       ))}
                   </div>
                 )}
