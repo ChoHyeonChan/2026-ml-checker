@@ -1,1 +1,1 @@
-                      .map((item, i) => (
+                        <CharacterSection
