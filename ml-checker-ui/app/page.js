@@ -141,14 +141,14 @@ export default function Home() {
 
         <div className={styles.actions}>
           <button
-            className="btn-primary-pill"
+            className={styles.runButton}
             onClick={runCheck}
             disabled={status === "loading"}
           >
             {status === "loading" ? "검사 중..." : "누수 검사하기"}
           </button>
           <button
-            className="btn-secondary"
+            className={styles.clearButton}
             onClick={clearContent}
             disabled={status === "loading"}
           >
