@@ -1,13 +1,10 @@
-// route.js — NextResponse 조건부 import (테스트 환경 대응)
-if (typeof globalThis !== "undefined" && globalThis.__TEST__) {
-  // 테스트 환경에서는 전역 모킹 NextResponse를 사용
-} else {
-  import("next/server").then(({ NextResponse }) => {
-    globalThis.NextResponse = NextResponse;
-  });
-}
+import { NextResponse as NR_from_server } from "next/server";
 
-const NextResponse = globalThis && globalThis.NextResponse;
+// 테스트 환경에서는 전역 모킹 NextResponse를 사용
+const NextResponse =
+  typeof globalThis !== "undefined" && globalThis.__TEST__ && globalThis.NextResponse
+    ? globalThis.NextResponse
+    : NR_from_server;
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
