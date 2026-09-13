@@ -9,6 +9,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 export default function Home() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState(null);
+  const [fileLines, setFileLines] = useState(0);
   const [status, setStatus] = useState("idle");
   const [result, setResult] = useState(null);
 
@@ -64,7 +65,17 @@ export default function Home() {
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0] || null;
     setFile(selected);
+    setFileLines(0);
     setResult(null);
+
+    if (!selected) return;
+
+    selected.text().then((text) => {
+      const lines = text.split("\n").length;
+      setFileLines(lines);
+    }).catch(() => {
+      setFileLines(0);
+    });
   };
 
   const clearFile = () => {
@@ -95,6 +106,7 @@ export default function Home() {
         <div className={styles.card} style={{ borderColor: "var(--color-hairline)", backgroundColor: "var(--color-canvas)" }}>
           <div className={styles.cardHeader}>
             <span className={styles.cardLabel} style={{ color: "var(--color-ink)" }}>전처리 코드 입력</span>
+            <span className={styles.fileFormatHint}>지원 형식: .py, .ipynb</span>
             <label className={styles.fileLabel}>
               <input
                 type="file"
@@ -110,6 +122,9 @@ export default function Home() {
             {file && (
               <span className={styles.fileName} style={{ color: "var(--color-ink-secondary)" }}>
                 선택한 파일: {file.name}
+                {fileLines > 0 && (
+                  <span className={styles.fileLines}> / 총 {fileLines}줄</span>
+                )}
                 <button className={styles.fileClear} onClick={clearFile} style={{ color: "var(--color-ink-mute)" }}>지우기</button>
               </span>
             )}
