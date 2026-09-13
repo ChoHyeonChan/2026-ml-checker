@@ -34,16 +34,25 @@
 - 프론트 라우터 예외 처리 수정 (not-python/not-preprocessing/error 구분)
 - 캐릭터 이미지 생성 (image/ 아래 webp 파일들)
 - GitHub PR #6(백엔드), #7(프론트) 머지됨
+- 온보딩 UI 구현 (중앙 팝업, 단계별 넘기기, 건너뛰기, localStorage 완료 플래그)
+  - ml-checker-ui/app/components/Onboarding.js
+  - ml-checker-ui/app/components/Onboarding.module.css
+  - ml-checker-ui/app/page.js 에 Onboarding 연동
+  - 예시 코드 복사 버튼으로 메인 코드 영역 채우기 연결
+- 백엔드 frontend type 정합 수정 (not-preprocessing 구분 가능화)
+  - analyzer._validate_input 에 not_preprocessing 플래그 추가
+  - analyzer.analyze_code / analyze_file / _build_response 에 not_preprocessing 전달
+  - schemas.AnalyzeResponse / AnalyzeFileResponse 에 not_preprocessing 필드 추가
+  - routes._build_ui_response 에 not_preprocessing 전달
+  - analyzer.py 에 누락된 import re 추가
 
 ## 미완료/남은 작업
-- 백엔드 _validate_input 구분 정리:
-  - 현재 ML 전처리 부족 케이스는 warnings로 들어가는데, 프론트 라우터는 not-preprocessing을 errors만 보고 판단하도록 수정됨
-  - → 백엔드에서 전처리 부족 케이스를 errors로 넣어야 정합됨
 - 백엔드 공개 배포 URL 미설정 (Vercel 프론트가 호출할 외부 URL 필요)
 - Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL 미설정
-- 온보딩 UI 미구현 (문서 구조만 있음)
 - 파일 업로드 프론트 UI 없음 (P1/추후 확장)
 - 캐릭터 디자인 팀원 제공 후 반영 위치 준비
+- 백엔드 analyzer 응답의 warnings 문구 전달/프론트 표시 점검 (선택)
+- 제출 산출물 준비 (PRD/포스터/발표자료/데모 영상)
 
 ## 깃 레포
 - https://github.com/ChoHyeonChan/2026-ml-checker
@@ -58,9 +67,8 @@
 - /workspace/ac36c343-e1f5-4ef6-9b90-ef7bd627c137/image/
 
 ## 다음 단계 (우선순위)
-1. 백엔드 analyzer.py _validate_input 수정 (전처리 부족 → errors)
-2. 백엔드 공개 배포 URL 준비 (Render/Railway/VPS 등)
-3. Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL 설정
-4. Vercel 배포 테스트
-5. 온보딩 UI 뼈대 구현 (선택)
-6. 제출 산출물 준비 (PRD/포스터/발표자료/데모 영상)
+1. 백엔드 공개 배포 URL 준비 (Render/Railway/VPS 등)
+2. Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL 설정
+3. Vercel 배포 테스트
+4. 백엔드 analyzer 응답의 warnings 문구 전달/프론트 표시 점검 (선택)
+5. 제출 산출물 준비 (PRD/포스터/발표자료/데모 영상)

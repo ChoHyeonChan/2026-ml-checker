@@ -1,3 +1,4 @@
+import re
 from typing import Any
 from app.schemas import JudgmentResult
 
@@ -18,7 +19,7 @@ class AnalyzerService:
             return validation
         lines = code.splitlines()
         results, summary = self._judge(lines)
-        return self._build_response(lines, results, summary)
+        return self._build_response(lines, results, summary, not_preprocessing=validation.get("not_preprocessing", False))
 
     def analyze_file(self, file_bytes: bytes, file_name: str) -> dict[str, Any]:
         code = self._extract_code(file_bytes, file_name)
@@ -30,20 +31,26 @@ class AnalyzerService:
                 "message": "분석 가능한 코드를 추출하지 못했습니다.",
                 "warnings": [],
                 "errors": ["파일에서 분석 가능한 코드를 읽을 수 없습니다."],
+                "not_preprocessing": False,
             }
+        validation = self._validate_input(code)
+        if validation["errors"]:
+            return validation
         lines = code.splitlines()
         results, summary = self._judge(lines)
-        return self._build_response(lines, results, summary)
+        return self._build_response(lines, results, summary, not_preprocessing=validation.get("not_preprocessing", False))
 
     def _validate_input(self, code: str) -> dict[str, Any]:
         errors: list[str] = []
         warnings: list[str] = []
+        not_preprocessing = False
         if not code:
             errors.append("분석할 코드가 비어 있습니다.")
         if code and not self._looks_like_python(code):
             errors.append("분석 대상 코드가 파이썬 코드로 보이지 않습니다.")
         if code and not self._looks_like_ml_preprocessing(code):
             warnings.append("ML 전처리 코드로 보기 어려운 부분이 있습니다. 분석 범위는 제한적일 수 있습니다.")
+            not_preprocessing = True
         if errors:
             return {
                 "classification": "이상없음",
@@ -52,8 +59,9 @@ class AnalyzerService:
                 "message": "분석을 진행할 수 없습니다.",
                 "errors": errors,
                 "warnings": warnings,
+                "not_preprocessing": not_preprocessing,
             }
-        return {"errors": [], "warnings": warnings, "code": code}
+        return {"errors": [], "warnings": warnings, "code": code, "not_preprocessing": not_preprocessing}
 
     def _judge(self, lines: list[str]) -> tuple[list[JudgmentResult], dict[str, int]]:
         results: list[JudgmentResult] = []
@@ -347,7 +355,13 @@ class AnalyzerService:
                 continue
         return None
 
-    def _build_response(self, lines: list[str], results: list[JudgmentResult], summary: dict[str, int]) -> dict[str, Any]:
+    def _build_response(
+        self,
+        lines: list[str],
+        results: list[JudgmentResult],
+        summary: dict[str, int],
+        not_preprocessing: bool = False,
+    ) -> dict[str, Any]:
         total = len(lines) or 1
         if summary["확정위반"] > 0:
             classification = "확정위반"
@@ -366,93 +380,5 @@ class AnalyzerService:
             "warnings": [],
             "errors": [],
             "total_lines": total,
+            "not_preprocessing": not_preprocessing,
         }
-
-    # ---------- estimate helpers ----------
-
-    def _estimate_fit_target(self, lines: list[str], idx: int, line: str) -> dict[str, Any] | None:
-        lowered = line.lower()
-        if "fit(" not in lowered and "fit_transform(" not in lowered:
-            return None
-        ctx = " ".join(lines[max(0, idx - 3):idx + 1]).lower()
-        fit_target_patsats = [
-            r"df\s*=\s*.*\n.*fit\(",
-            r"X\s*=\s*.*\n.*fit\(",
-            r"data\s*=\s*.*\n.*fit\(",
-            r"train_df\s*=\s*.*\n.*fit\(",
-            r"test_df\s*=\s*.*\n.*fit\(",
-            r"X_train\s*=\s*.*\n.*fit\(",
-            r"X_test\s*=\s*.*\n.*fit\(",
-            r"y_train\s*=\s*.*\n.*fit\(",
-            r"y_test\s*=\s*.*\n.*fit\(",
-            r"train_inputs\s*=\s*.*\n.*fit\(",
-            r"test_inputs\s*=\s*.*\n.*fit\(",
-        ]
-        for pat in fit_target_patsats:
-            if re.search(pat, ctx):
-                return {"fit_target": pat, "level": "train-like"}
-        return {"fit_target": "unknown", "level": "unknown"}
-
-    def _estimate_transform_target(self, lines: list[str], idx: int, line: str) -> dict[str, Any] | None:
-        lowered = line.lower()
-        if "transform(" not in lowered:
-            return None
-        ctx = " ".join(lines[max(0, idx - 3):idx + 1]).lower()
-        transform_target_patsats = [
-            r"df\s*=\s*.*\n.*transform\(",
-            r"X\s*=\s*.*\n.*transform\(",
-            r"data\s*=\s*.*\n.*transform\(",
-            r"train_df\s*=\s*.*\n.*transform\(",
-            r"test_df\s*=\s*.*\n.*transform\(",
-            r"X_train\s*=\s*.*\n.*transform\(",
-            r"X_test\s*=\s*.*\n.*transform\(",
-            r"y_train\s*=\s*.*\n.*transform\(",
-            r"y_test\s*=\s*.*\n.*transform\(",
-            r"train_inputs\s*=\s*.*\n.*transform\(",
-            r"test_inputs\s*=\s*.*\n.*transform\(",
-        ]
-        for pat in transform_target_patsats:
-            if re.search(pat, ctx):
-                return {"transform_target": pat, "level": "train-like"}
-        return {"transform_target": "unknown", "level": "unknown"}
-
-    def _estimate_split_after_fit(self, lines: list[str], idx: int, line: str) -> dict[str, Any] | None:
-        lowered = line.lower()
-        if "fit(" not in lowered and "fit_transform(" not in lowered:
-            return None
-        ctx = " ".join(lines[max(0, idx - 3):idx + 1]).lower()
-        split_after_fit_patsats = [
-            r"fit\(",
-            r"fit_transform\(",
-            r"split\(",
-            r"train_test_split\(",
-            r"kfold\(",
-            r"cross_val\(",
-            r"partition\(",
-            r"group\(",
-        ]
-        for pat in split_after_fit_patsats:
-            if re.search(pat, ctx):
-                return {"split_after_fit": True, "level": "train-like"}
-        return {"split_after_fit": False, "level": "unknown"}
-
-    def _estimate_order(self, lines: list[str], idx: int, line: str) -> dict[str, Any] | None:
-        lowered = line.lower()
-        if "fit(" not in lowered and "fit_transform(" not in lowered:
-            return None
-        ctx = " ".join(lines[max(0, idx - 3):idx + 1]).lower()
-        order_patsats = [
-            r"fit\(",
-            r"fit_transform\(",
-            r"split\(",
-            r"train_test_split\(",
-            r"kfold\(",
-            r"cross_val\(",
-            r"partition\(",
-            r"group\(",
-            r"transform\(",
-        ]
-        for pat in order_patsats:
-            if re.search(pat, ctx):
-                return {"order": pat, "level": "train-like"}
-        return {"order": "unknown", "level": "unknown"}
