@@ -76,9 +76,16 @@ const STEPS = [
 
 const DONE_KEY = "ml-checker-onboarding-done";
 
+const ONBOARDING_FINISH_MESSAGES = [
+  "코드를 붙여넣어 볼 준비가 됐어요.",
+  "전처리 코드만 넣으면 바로 검사할 수 있어요.",
+  "결과가 줄 번호와 수정 방향 위주로 나와요.",
+];
+
 export default function Onboarding({ onDismiss }) {
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -90,6 +97,7 @@ export default function Onboarding({ onDismiss }) {
     if (typeof window === "undefined") return;
     localStorage.setItem(DONE_KEY, "1");
     setVisible(false);
+    setDone(false);
     onDismiss?.();
   };
 
@@ -97,7 +105,7 @@ export default function Onboarding({ onDismiss }) {
     if (step < STEPS.length - 1) {
       setStep(step + 1);
     } else {
-      close();
+      setDone(true);
     }
   };
 
@@ -112,43 +120,70 @@ export default function Onboarding({ onDismiss }) {
     onDismiss?.({ example });
   };
 
-  if (!visible) return null;
+  if (!visible && !done) return null;
 
-  const currentStep = STEPS[step];
+  const finishMessage =
+    ONBOARDING_FINISH_MESSAGES[Math.floor(Math.random() * ONBOARDING_FINISH_MESSAGES.length)];
 
   return (
     <div className={styles.overlay}>
       <div className={styles.card} role="dialog" aria-modal="true">
-        <div className={styles.head}>
-          <span className={styles.stepIndicator}>{step + 1} / {STEPS.length}</span>
-          <button type="button" className={styles.skipButton} onClick={close}>
-            건너뛰기
-          </button>
-        </div>
-
-        <div className={styles.body}>
-          <h2 className={styles.title}>{currentStep.title}</h2>
-          <div className={styles.content}>
-            {currentStep.body}
-            {currentStep.showExampleButton && (
-              <ExampleButton onClick={fillExample} />
-            )}
+        {done ? (
+          <div className={styles.done}>
+            <div className={styles.doneCharacter}>
+              <img
+                src="/character-pass-v3.jpg"
+                alt="통과 캐릭터"
+                className={styles.doneCharacterImage}
+              />
+            </div>
+            <div className={styles.doneBody}>
+              <h2 className={styles.doneTitle}>처음 쓰는 분을 위한 안내를 마쳤어요</h2>
+              <p className={styles.doneMessage}>{finishMessage}</p>
+              <p className={styles.doneSub}>
+                이제 전처리 코드를 붙여넣거나 파일을 올려서 검사해 보세요.
+              </p>
+            </div>
+            <div className={styles.foot}>
+              <button type="button" className={styles.nextButton} onClick={close}>
+                시작하기
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className={styles.head}>
+              <span className={styles.stepIndicator}>{step + 1} / {STEPS.length}</span>
+              <button type="button" className={styles.skipButton} onClick={close}>
+                건너뛰기
+              </button>
+            </div>
 
-        <div className={styles.foot}>
-          <button
-            type="button"
-            className={styles.prevButton}
-            onClick={prev}
-            disabled={step === 0}
-          >
-            이전
-          </button>
-          <button type="button" className={styles.nextButton} onClick={next}>
-            {step === STEPS.length - 1 ? "확인했으니 닫기" : "다음"}
-          </button>
-        </div>
+            <div className={styles.body}>
+              <h2 className={styles.title}>{currentStep.title}</h2>
+              <div className={styles.content}>
+                {currentStep.body}
+                {currentStep.showExampleButton && (
+                  <ExampleButton onClick={fillExample} />
+                )}
+              </div>
+            </div>
+
+            <div className={styles.foot}>
+              <button
+                type="button"
+                className={styles.prevButton}
+                onClick={prev}
+                disabled={step === 0}
+              >
+                이전
+              </button>
+              <button type="button" className={styles.nextButton} onClick={next}>
+                {step === STEPS.length - 1 ? "확인했으니 닫기" : "다음"}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
