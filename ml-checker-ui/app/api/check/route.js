@@ -203,7 +203,11 @@ export async function POST(req) {
           return NextResponse.json({
             type: "error",
             message: data.message || data.detail || "백엔드 검사 중 오류가 발생했습니다.",
-            note: data.errors ? data.errors.join("\n ") : null,
+            note: data.errors
+              ? data.errors.join("\n ")
+              : data.message
+              ? data.message + (data.detail ? "\n " + data.detail : "")
+              : "백엔드 검사 중 오류가 발생했습니다.",
           });
         }
         return NextResponse.json(classifyFromBackend(data));
@@ -256,7 +260,11 @@ export async function POST(req) {
         return NextResponse.json({
           type: "error",
           message: data.message || data.detail || "백엔드 검사 중 오류가 발생했습니다.",
-          note: data.errors ? data.errors.join("\n ") : null,
+          note: data.errors
+            ? data.errors.join("\n ")
+            : data.message
+            ? data.message + (data.detail ? "\n " + data.detail : "")
+            : "백엔드 검사 중 오류가 발생했습니다.",
         });
       }
       return NextResponse.json(classifyFromBackend(data));
