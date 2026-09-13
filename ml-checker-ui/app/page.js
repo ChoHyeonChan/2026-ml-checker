@@ -1,1 +1,1 @@
-                text={banner.text}
+                onPreview={onPreview}
