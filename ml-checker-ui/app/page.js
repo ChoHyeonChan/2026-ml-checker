@@ -1,1 +1,1 @@
-                      .filter((it) => it.verdict === "이상없음")
+                      .map((item, i) => (
