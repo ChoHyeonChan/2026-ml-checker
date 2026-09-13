@@ -122,6 +122,8 @@ export default function Onboarding({ onDismiss }) {
 
   if (!visible && !done) return null;
 
+  const currentStep = STEPS[step];
+
   const finishMessage =
     ONBOARDING_FINISH_MESSAGES[Math.floor(Math.random() * ONBOARDING_FINISH_MESSAGES.length)];
 
@@ -183,7 +185,7 @@ export default function Onboarding({ onDismiss }) {
               </button>
             </div>
           </>
-        )}
+        )
       </div>
     </div>
   );
