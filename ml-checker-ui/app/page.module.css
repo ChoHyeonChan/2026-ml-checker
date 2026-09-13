@@ -56,6 +56,12 @@
   color: #333;
 }
 
+.fileFormatHint {
+  font-size: 11px;
+  color: #888;
+  margin-left: 12px;
+}
+
 .codeArea {
   width: 100%;
   min-height: 220px;
@@ -282,6 +288,10 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.fileLines {
+  color: #555;
 }
 
 .fileClear {
