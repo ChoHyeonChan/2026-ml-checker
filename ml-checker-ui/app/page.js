@@ -1,1 +1,1 @@
-              <CharacterBanner
+                src={banner.src}
