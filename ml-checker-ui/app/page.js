@@ -1,1 +1,1 @@
-                      .filter((it) => it.verdict === "의심")
+                      .map((item, i) => (
