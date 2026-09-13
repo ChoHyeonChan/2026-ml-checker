@@ -1,1 +1,1 @@
-                      .filter((it) => it.verdict === "확정위반")
+                      .map((item, i) => (
