@@ -1,17 +1,14 @@
-const BANNER_MAP = {
-  통과: "/character-pass-v3.jpg",
-  안내필요: "/character-attention-v3.jpg",
-};
-
-function CharacterBanner({ src, title, text }) {
+function CharacterSection({ verdict, line, desc, fix }) {
+  const src = CHARACTER_MAP[verdict] ?? "/character-attention-v3.jpg";
   return (
-    <div className={styles.characterBanner}>
-      <div className={styles.characterBannerImage}>
+    <div className={styles.characterSection}>
+      <div className={styles.characterSectionImage}>
         <img src={src} alt="" />
       </div>
-      <div className={styles.characterBannerText}>
-        <p className={styles.characterBannerTitle}>{title}</p>
-        <p>{text}</p>
+      <div className={styles.characterSectionBody}>
+        <p className={styles.characterSectionLabel}>{verdict}</p>
+        <p className={styles.characterSectionDesc}>{desc}</p>
+        {fix && <p className={styles.itemFix}>{fix}</p>}
       </div>
     </div>
   );
