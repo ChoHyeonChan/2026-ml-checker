@@ -6,6 +6,25 @@ import Onboarding from "./components/Onboarding";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
+const EXAMPLE_CODE = `import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv("data.csv")
+X = df.drop("target", axis=1)
+y = df["target"]
+
+# 분할 전에 스케일링을 해버린 예
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)`;
+
+const LEAKAGE_EXAMPLE = "예시: df['x_enc'] = df.groupby('y')['x'].transform('mean')";
+
+const IPYNB_NOTE =
+  "참고: .ipynb는 셀 표시 순서 ≠ 실제 실행 순서일 수 있어요. 실행 순서대로 정리한 파일을 올리면 더 정확해요.";
+
 const CHARACTER_MAP = {
   확정위반: "/character-fail-v3.jpg",
   의심: "/character-attention-v3.jpg",
@@ -53,11 +72,18 @@ export default function Home() {
   const [fileLines, setFileLines] = useState(0);
   const [status, setStatus] = useState("idle");
   const [result, setResult] = useState(null);
+  const [collapsed, setCollapsed] = useState(false);
+  const [showIpynbNotice, setShowIpynbNotice] = useState(false);
 
   const handleOnboardingDismiss = (payload) => {
     if (payload && payload.example) {
       setCode(payload.example);
     }
+  };
+
+  const loadExample = () => {
+    setCode(EXAMPLE_CODE);
+    setCollapsed(false);
   };
 
   const runCheck = async () => {
@@ -108,8 +134,13 @@ export default function Home() {
     setFile(selected);
     setFileLines(0);
     setResult(null);
+    setShowIpynbNotice(false);
 
     if (!selected) return;
+
+    if (selected.name.endsWith(".ipynb")) {
+      setShowIpynbNotice(true);
+    }
 
     selected.text().then((text) => {
       const lines = text.split("\n").length;
@@ -122,19 +153,26 @@ export default function Home() {
   const clearFile = () => {
     setFile(null);
     setResult(null);
+    setShowIpynbNotice(false);
   };
 
   const clearContent = () => {
     setCode("");
     setResult(null);
+    setCollapsed(false);
   };
 
   const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상없음: 0 };
   const isBackendConnected = Boolean(BACKEND_URL);
+  const isUsingFile = Boolean(file);
+
+  const inputModeNote = isUsingFile
+    ? "파일이 선택돼 있어요. 파일이 있으면 파일 기준으로 검사하고, 코드가 비어 있으면 파일만 사용해요."
+    : "파일이 없으면 여기에 붙여넣은 코드 기준으로 검사해요. 파일과 코드가 둘 다 있으면 파일이 우선이에요.";
 
   const banner =
     result?.type === "ok"
-      ? { src: BANNER_MAP["통과"], title: "명확하게 의심되는 패턴이 보이지 않아요", text: "전처리·학습 코드를 더 넣어도 좋고, 지금 상태로도 일단 괜찮아 보여요." }
+      ? { src: BANNER_MAP["통과"], title: "명확하게 의심되는 패턴은 보이지 않아요", text: "전처리·학습 코드를 더 넣어도 좋고, 지금 상태로도 일단 괜찮아 보여요." }
       : result?.type === "error"
       ? { src: BANNER_MAP["안내필요"], title: "검사 중 문제가 있었어요", text: "잠시 뒤 다시 시도해 주세요." }
       : null;
@@ -144,12 +182,17 @@ export default function Home() {
       <Onboarding onDismiss={handleOnboardingDismiss} />
       <main className={styles.main}>
         <div className={styles.header}>
-          <h1 className={styles.title} style={{ color: "var(--color-ink)" }}>
-            ML Data Leakage Checker
-          </h1>
-          <p className={styles.subtitle} style={{ color: "var(--color-ink-secondary)" }}>
-            전처리 코드를 붙여넣거나 .py/.ipynb 파일을 올리면 데이터 누수 의심 패턴을 줄 번호와 수정 방향만 짧게 보여줍니다.
-          </p>
+          <div className={styles.headerText}>
+            <h1 className={styles.title} style={{ color: "var(--color-ink)" }}>
+              ML Data Leakage Checker
+            </h1>
+            <p className={styles.subtitle} style={{ color: "var(--color-ink-secondary)" }}>
+              전처리 코드를 붙여넣거나 .py/.ipynb 파일을 올리면 데이터 누수 의심 패턴을 줄 번호와 수정 방향만 짧게 보여줍니다.
+            </p>
+          </div>
+          <button className={styles.exampleLoadButton} onClick={loadExample}>
+            예시 코드 불러오기
+          </button>
         </div>
 
         <div className={styles.card} style={{ borderColor: "var(--color-hairline)", backgroundColor: "var(--color-canvas)" }}>
@@ -167,6 +210,10 @@ export default function Home() {
             </label>
           </div>
 
+          <div className={styles.inputModeNote}>
+            <span>{inputModeNote}</span>
+          </div>
+
           <div className={styles.fileInfo}>
             {file && (
               <span className={styles.fileName} style={{ color: "var(--color-ink-secondary)" }}>
@@ -177,14 +224,27 @@ export default function Home() {
                 <button className={styles.fileClear} onClick={clearFile} style={{ color: "var(--color-ink-mute)" }}>지우기</button>
               </span>
             )}
+            {showIpynbNotice && (
+              <span className={styles.ipynbNotice}>{IPYNB_NOTE}</span>
+            )}
           </div>
 
-          <textarea
-            className={styles.codeArea}
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder={`pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
-          />
+          {collapsed ? (
+            <div className={styles.codeAreaFolded}>
+              <button className={styles.foldToggle} onClick={() => setCollapsed(false)}>
+                코드 보기 ({code.split("\n").length}줄)
+              </button>
+            </div>
+          ) : (
+            <textarea
+              className={styles.codeArea}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder={`${LEAKAGE_EXAMPLE}
+
+pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
+            />
+          )}
         </div>
 
         <div className={styles.actions}>
@@ -202,6 +262,14 @@ export default function Home() {
           >
             내용 지우기
           </button>
+          {!collapsed && code && (
+            <button
+              className={styles.foldToggle}
+              onClick={() => setCollapsed(true)}
+            >
+              코드 접기
+            </button>
+          )}
         </div>
 
         {result && (
