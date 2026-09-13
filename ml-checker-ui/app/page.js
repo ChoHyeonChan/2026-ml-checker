@@ -245,9 +245,9 @@ export default function Home() {
 
             {result.type === "error" && (
               <div className={styles.items}>
-                {result.note && (
+                {(result.note || result.message) && (
                   <div className={styles.item}>
-                    <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{result.note}</p>
+                    <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{(result.note || result.message) || "검사 실행 중 문제가 생겼습니다."}</p>
                   </div>
                 )}
               </div>
