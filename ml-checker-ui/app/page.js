@@ -1,4 +1,4 @@
-          <div className={styles.fileInfo}>
-            {file && (
-              <span className={styles.fileName} style={{ color: "var(--color-ink-secondary)" }}>
-                선택한 파일: {file.name}
+                {fileLines > 0 && (
+                  <span className={styles.fileLines}> / 총 {fileLines}줄</span>
+                )}
+                <button className={styles.fileClear} onClick={clearFile} style={{ color: "var(--color-ink-mute)" }}>지우기</button>
