@@ -1,1 +1,1 @@
-                          verdict={item.verdict}
+                          line={item.line}
