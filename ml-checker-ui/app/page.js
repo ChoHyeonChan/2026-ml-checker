@@ -1,1 +1,1 @@
-                          fix={item.fix}
+                        />
