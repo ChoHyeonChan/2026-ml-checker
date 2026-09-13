@@ -1,8 +1,8 @@
-        <div className={styles.actions}>
           <button
-            className="btn-primary-pill"
-            onClick={runCheck}
+            className="btn-secondary"
+            onClick={clearContent}
             disabled={status === "loading"}
           >
-            {status === "loading" ? "검사 중..." : "누수 검사하기"}
+            내용 지우기
           </button>
+        </div>
