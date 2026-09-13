@@ -18,6 +18,16 @@
 }
 
 .header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  width: 100%;
+}
+
+.headerText {
+  flex: 1;
   text-align: center;
 }
 
@@ -34,6 +44,23 @@
   margin-top: 8px;
 }
 
+.exampleLoadButton {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111;
+  background: #f3f4f6;
+  border: 1px solid #e2e6ee;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.exampleLoadButton:hover {
+  background: #e5e7eb;
+}
+
 .card {
   background: #fff;
   border: 1px solid #e2e6ee;
@@ -48,6 +75,8 @@
   padding: 12px 16px;
   background: #f5f7fb;
   border-bottom: 1px solid #e2e6ee;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .cardLabel {
@@ -80,9 +109,29 @@
   outline-offset: -2px;
 }
 
+.codeAreaFolded {
+  padding: 12px 16px;
+  background: #fafbfc;
+  border-top: 1px solid #e2e6ee;
+  border-bottom: 1px solid #e2e6ee;
+  text-align: center;
+}
+
+.foldToggle {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
 .actions {
   display: flex;
   justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .runButton {
@@ -339,12 +388,16 @@
   color: #666;
   background: #fafbfc;
   border-top: 1px solid #e2e6ee;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .fileName {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .fileLines {
@@ -358,6 +411,17 @@
   cursor: pointer;
   font-size: 12px;
   text-decoration: underline;
+}
+
+.ipynbNotice {
+  display: block;
+  background: #fff7e6;
+  border: 1px solid #f5d98a;
+  color: #7a5400;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .reference {
@@ -429,5 +493,14 @@
 .characterSectionDesc {
   font-size: 13px;
   color: #333;
+  line-height: 1.5;
+}
+
+.inputModeNote {
+  padding: 8px 16px;
+  font-size: 12px;
+  color: #555;
+  background: #f5f7fb;
+  border-bottom: 1px solid #e2e6ee;
   line-height: 1.5;
 }
