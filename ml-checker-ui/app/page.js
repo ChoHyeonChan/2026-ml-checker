@@ -1,1 +1,1 @@
-
+            {result.type === "judgment" && (
