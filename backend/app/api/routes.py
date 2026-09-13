@@ -18,13 +18,26 @@ router = APIRouter()
 analyzer = AnalyzerService()
 
 
-def _to_ui_result(item: JudgmentResult) -> dict:
+def _to_ui_result(item) -> dict:
+    if isinstance(item, JudgmentResult):
+        return {
+            "line": item.line,
+            "type": item.type,
+            "fix_suggestion": item.fix_suggestion,
+            "reason": item.reason,
+        }
     return {
-        "line": item.line,
-        "type": item.type,
-        "fix_suggestion": item.fix_suggestion,
-        "reason": item.reason,
+        "line": item.get("line", 0) if isinstance(item.get("line"), int) else item.get("line", ""),
+        "type": item.get("type", "의심"),
+        "fix_suggestion": item.get("fix_suggestion", ""),
+        "reason": item.get("reason", ""),
     }
+
+
+def _to_judgment_result(item) -> JudgmentResult:
+    if isinstance(item, JudgmentResult):
+        return item
+    return JudgmentResult(**item)
 
 
 def _build_ui_response(resp: AnalyzeResponse | AnalyzeFileResponse) -> dict:
@@ -87,7 +100,7 @@ async def analyze_file(file: UploadFile = File(...)) -> AnalyzeFileResponse:
     return AnalyzeFileResponse(
         classification=result.get("classification", "이상없음"),
         summary=result.get("summary", {"확정위반": 0, "의심": 0, "이상없음": 0}),
-        results=[JudgmentResult(**r) for r in result.get("results", [])],
+        results=[_to_judgment_result(r) for r in result.get("results", [])],
         message=result.get("message", ""),
         warnings=result.get("warnings", []),
         errors=result.get("errors", []),
