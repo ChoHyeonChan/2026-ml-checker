@@ -9,6 +9,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 export default function Home() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState(null);
+  const [fileLines, setFileLines] = useState(0);
   const [status, setStatus] = useState("idle");
   const [result, setResult] = useState(null);
 
@@ -64,7 +65,17 @@ export default function Home() {
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0] || null;
     setFile(selected);
+    setFileLines(0);
     setResult(null);
+
+    if (!selected) return;
+
+    selected.text().then((text) => {
+      const lines = text.split("\n").length;
+      setFileLines(lines);
+    }).catch(() => {
+      setFileLines(0);
+    });
   };
 
   const clearFile = () => {
@@ -77,6 +88,7 @@ export default function Home() {
     setResult(null);
   };
 
+  const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상없음: 0 };
   const isBackendConnected = Boolean(BACKEND_URL);
 
   return (
@@ -95,6 +107,7 @@ export default function Home() {
         <div className={styles.card} style={{ borderColor: "var(--color-hairline)", backgroundColor: "var(--color-canvas)" }}>
           <div className={styles.cardHeader}>
             <span className={styles.cardLabel} style={{ color: "var(--color-ink)" }}>전처리 코드 입력</span>
+            <span className={styles.fileFormatHint}>지원 형식: .py, .ipynb</span>
             <label className={styles.fileLabel}>
               <input
                 type="file"
@@ -110,6 +123,9 @@ export default function Home() {
             {file && (
               <span className={styles.fileName} style={{ color: "var(--color-ink-secondary)" }}>
                 선택한 파일: {file.name}
+                {fileLines > 0 && (
+                  <span className={styles.fileLines}> / 총 {fileLines}줄</span>
+                )}
                 <button className={styles.fileClear} onClick={clearFile} style={{ color: "var(--color-ink-mute)" }}>지우기</button>
               </span>
             )}
@@ -196,21 +212,121 @@ export default function Home() {
               </div>
             )}
 
-            {result.type === "judgment" && result.items.length > 0 && (
-              <div className={styles.items}>
-                {result.items.map((item, i) => (
-                  <div key={i} className={styles.item} style={{ borderColor: "var(--color-hairline)" }}>
-                    <div className={styles.itemHead}>
-                      <span className={styles.itemLine} style={{ color: "var(--color-ink-mute)" }}>{item.line}</span>
-                      <span className={styles.itemVerdict}>{item.verdict}</span>
-                    </div>
-                    <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
-                    {item.fix && (
-                      <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
-                    )}
+            {result.type === "judgment" && (
+              <>
+                <div className={styles.summary}>
+                  <div className={styles.summaryBlock}>
+                    <span className={styles.summaryLabel}>확정위반</span>
+                    <span className={styles.summaryCount}>{summary.확정위반}건</span>
                   </div>
-                ))}
-              </div>
+                  <div className={styles.summaryBlock}>
+                    <span className={styles.summaryLabel}>의심</span>
+                    <span className={styles.summaryCount}>{summary.의심}건</span>
+                  </div>
+                  <div className={styles.summaryBlock}>
+                    <span className={styles.summaryLabel}>이상없음</span>
+                    <span className={styles.summaryCount}>{summary.이상없음}건</span>
+                  </div>
+                </div>
+
+                {summary.확정위반 > 0 && (
+                  <div className={styles.section}>
+                    <div className={styles.sectionHead}>
+                      <span className={styles.sectionLabel}>확정위반</span>
+                      <span className={styles.sectionCount}>{summary.확정위반}건</span>
+                    </div>
+                    {result.items.filter((it) => it.verdict === "확정위반").length === 0 && (
+                      <div className={styles.item}>
+                        <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
+                          확정위반으로 분류된 항목이 없습니다.
+                        </p>
+                      </div>
+                    )}
+                    {result.items
+                      .filter((it) => it.verdict === "확정위반")
+                      .map((item, i) => (
+                        <div key={i} className={styles.item} style={{ borderColor: "var(--color-ruby)" }}>
+                          <div className={styles.itemHead}>
+                            <span className={styles.itemLine} style={{ color: "var(--color-ruby)" }}>{item.line}</span>
+                            <span className={styles.itemVerdict}>{item.verdict}</span>
+                          </div>
+                          <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
+                          {item.fix && (
+                            <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                {summary.의심 > 0 && (
+                  <div className={styles.section}>
+                    <div className={styles.sectionHead}>
+                      <span className={styles.sectionLabel}>의심</span>
+                      <span className={styles.sectionCount}>{summary.의심}건</span>
+                    </div>
+                    {result.items.filter((it) => it.verdict === "의심").length === 0 && (
+                      <div className={styles.item}>
+                        <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
+                          의심으로 분류된 항목이 없습니다.
+                        </p>
+                      </div>
+                    )}
+                    {result.items
+                      .filter((it) => it.verdict === "의심")
+                      .map((item, i) => (
+                        <div key={i} className={styles.item} style={{ borderColor: "var(--color-primary)" }}>
+                          <div className={styles.itemHead}>
+                            <span className={styles.itemLine} style={{ color: "var(--color-primary)" }}>{item.line}</span>
+                            <span className={styles.itemVerdict}>{item.verdict}</span>
+                          </div>
+                          <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
+                          {item.fix && (
+                            <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                {summary.이상없음 > 0 && (
+                  <div className={styles.section}>
+                    <div className={styles.sectionHead}>
+                      <span className={styles.sectionLabel}>이상없음</span>
+                      <span className={styles.sectionCount}>{summary.이상없음}건</span>
+                    </div>
+                    {result.items.filter((it) => it.verdict === "이상없음").length === 0 && (
+                      <div className={styles.item}>
+                        <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
+                          이상없음으로 분류된 항목이 없습니다.
+                        </p>
+                      </div>
+                    )}
+                    {result.items
+                      .filter((it) => it.verdict === "이상없음")
+                      .map((item, i) => (
+                        <div key={i} className={styles.item} style={{ borderColor: "var(--color-ink-mute)" }}>
+                          <div className={styles.itemHead}>
+                            <span className={styles.itemLine} style={{ color: "var(--color-ink-mute)" }}>{item.line}</span>
+                            <span className={styles.itemVerdict}>{item.verdict}</span>
+                          </div>
+                          <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{item.desc}</p>
+                          {item.fix && (
+                            <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>{item.fix}</p>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                {summary.확정위반 === 0 && summary.의심 === 0 && summary.이상없음 === 0 && result.items.length === 0 && (
+                  <div className={styles.item}>
+                    <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
+                      항목이 없습니다.
+                    </p>
+                  </div>
+                )}
+              </>
             )}
 
             {result.note && result.type !== "error" && result.type !== "not-connected" && (
