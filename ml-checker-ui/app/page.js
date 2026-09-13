@@ -1,1 +1,1 @@
-                title={banner.title}
+                text={banner.text}
