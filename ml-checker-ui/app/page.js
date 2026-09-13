@@ -1,1 +1,1 @@
-                          key={i}
+                          verdict={item.verdict}
