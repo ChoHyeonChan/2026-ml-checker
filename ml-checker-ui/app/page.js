@@ -6,19 +6,138 @@ import Onboarding from "./components/Onboarding";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
-const EXAMPLE_CODE = `import pandas as pd
+const EXAMPLE_CODES = [
+  {
+    name: "이상없음 (정상)",
+    code: `import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+df = pd.read_csv("customer.csv")
+X = df.drop("churn", axis=1)
+y = df["churn"]
+
+# 분할 먼저
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# train에만 fit, test는 transform만
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train_scaled, y_train)
+
+train_acc = model.score(X_train_scaled, y_train)
+test_acc = model.score(X_test_scaled, y_test)
+print(f"train: {train_acc:.3f}, test: {test_acc:.3f}")`,
+    desc: "분할 후 전처리, test는 transform만 — 이상없음",
+  },
+  {
+    name: "확정위반 #1 (타겟 groupby)",
+    code: `import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+df = pd.read_csv("customer.csv")
+
+# 타겟 기준 groupby 연산 (타겟 정보 직접 사용)
+df["age_enc"] = df.groupby("churn")["age"].transform("mean")
+
+# 분할 전 정제 (테스트 정보 영향)
+df = df.dropna()
+
+X = df.drop("churn", axis=1)
+y = df["churn"]
+
+# 전체 데이터로 fit_transform (분할 전 스케일링)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2, random_state=42
+)
+
+model = LogisticRegression()
+model.fit(X_train, y_train)`,
+    desc: "타겟 groupby + 분할 전 정제 + 전체 fit_transform — 확정위반",
+  },
+  {
+    name: "확정위반 #2 (test 데이터로 fit)",
+    code: `from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+model = LogisticRegression()
+# test 데이터로 모델 fit — 명백한 누수
+model.fit(X_test, y_test)`,
+    desc: "test 데이터로 모델 fit — 확정위반",
+  },
+  {
+    name: "의심 #1 (시계열 shuffle)",
+    code: `import pandas as pd
+from sklearn.model_selection import train_test_split
+
+df = pd.read_csv("sales.csv")
+df = df.sample(frac=1)  # 시계열 데이터 shuffle
+df["date"] = pd.to_datetime(df["date"])
+
+X = df.drop("sales", axis=1)
+y = df["sales"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)`,
+    desc: "시계열 데이터 shuffle 후 무작위 split — 의심",
+  },
+  {
+    name: "확정위반+의심 (전체 fit + 정제)",
+    code: `import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 df = pd.read_csv("data.csv")
+
+# 분할 전 정제
+df = df.dropna()
+
 X = df.drop("target", axis=1)
 y = df["target"]
 
-# 분할 전에 스케일링을 해버린 예
+# 전체 데이터로 fit_transform (분할 전 스케일링)
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)`;
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2
+)
+
+model = LogisticRegression()
+model.fit(X_train, y_train)`,
+    desc: "분할 전 정제 + 전체 fit_transform — 확정위반 + 의심",
+  },
+  {
+    name: "의심 #2 (CV 외부 전처리)",
+    code: `from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+# 외부 전처리 (CV 바깥에서 fit_transform)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# CV 실행 (전처리가 CV 내부에 없음)
+scores = cross_val_score(
+    LogisticRegression(), X_scaled, y, cv=5
+)`,
+    desc: "CV 외부 전처리 + cross_val_score — 의심",
+  },
+];
+
+const EXAMPLE_CODE = EXAMPLE_CODES[0].code;
 
 const LEAKAGE_EXAMPLE = "예시: df['x_enc'] = df.groupby('y')['x'].transform('mean')";
 
@@ -171,8 +290,8 @@ export default function Home() {
     }
   };
 
-  const loadExample = () => {
-    setCode(EXAMPLE_CODE);
+  const loadExample = (codeStr) => {
+    setCode(codeStr);
     setCollapsed(false);
   };
 
@@ -309,9 +428,22 @@ export default function Home() {
               <p className={styles.subtitle}>전처리·학습 코드에서 데이터 누수 의심 패턴을 줄 번호와 수정 방향 위주로 확인합니다.</p>
             </div>
           </div>
-          <button className={styles.exampleLoadButton} onClick={loadExample}>
+          <button className={styles.exampleLoadButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
             예시 불러오기
           </button>
+        </div>
+
+        <div className={styles.exampleSelector}>
+          {EXAMPLE_CODES.map((ex, i) => (
+            <button
+              key={i}
+              className={styles.exampleOption}
+              onClick={() => loadExample(ex.code)}
+            >
+              <span className={styles.exampleOptionName}>{ex.name}</span>
+              <span className={styles.exampleOptionDesc}>{ex.desc}</span>
+            </button>
+          ))}
         </div>
 
         <div className={styles.card} style={{ borderColor: "var(--color-hairline)", backgroundColor: "var(--color-canvas)" }}>
@@ -416,7 +548,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                 <p className={styles.feedbackTitle}>빈 입력 상태예요</p>
                 <p className={styles.feedbackDesc}>코드를 붙여넣거나 파일을 올려주세요.</p>
                 <div className={styles.feedbackActions}>
-                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                  <button className={styles.feedbackActionButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
                     예시 불러오기
                   </button>
                   <button className={styles.feedbackSecondaryButton} onClick={clearContent}>
@@ -439,7 +571,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                   <strong>이렇게 바꿔보세요</strong>: pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣거나 .py/.ipynb 파일을 선택해 주세요.
                 </p>
                 <div className={styles.feedbackActions}>
-                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                  <button className={styles.feedbackActionButton} onClick={() => loadExample(EXAMPLE_CODES[1].code)}>
                     예시 불러오기
                   </button>
                 </div>
@@ -459,7 +591,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                   <strong>이렇게 바꿔보세요</strong>: 전처리·학습 코드를 더 넣어 다시 검사해 보세요.
                 </p>
                 <div className={styles.feedbackActions}>
-                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                  <button className={styles.feedbackActionButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
                     예시 불러오기
                   </button>
                 </div>
@@ -471,7 +603,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                 <p className={styles.feedbackTitle}>명확하게 의심되는 패턴이 보이지 않아요</p>
                 <p className={styles.feedbackDesc}>전처리·학습 코드를 더 넣어도 좋고, 지금 상태로도 일단 괜찮아 보여요.</p>
                 <div className={styles.feedbackActions}>
-                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                  <button className={styles.feedbackActionButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
                     예시 불러오기
                   </button>
                   <button className={styles.feedbackSecondaryButton} onClick={clearContent}>
@@ -492,7 +624,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                   <button className={styles.feedbackActionButton} onClick={() => { setResult(null); setStatus("idle"); }}>
                     다시 시도
                   </button>
-                  <button className={styles.feedbackSecondaryButton} onClick={loadExample}>
+                  <button className={styles.feedbackSecondaryButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
                     예시 불러오기
                   </button>
                 </div>
@@ -596,7 +728,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
               <div className={styles.resultActions}>
                 <button
                   className={styles.resultActionButton}
-                  onClick={() => { setResult(null); setCode(EXAMPLE_CODE); setCollapsed(false); }}
+                  onClick={() => { setResult(null); setCode(EXAMPLE_CODES[1].code); setCollapsed(false); }}
                 >
                   예시 코드로 다시 검사
                 </button>
@@ -608,7 +740,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                 </button>
                 <button
                   className={styles.resultActionButtonTertiary}
-                  onClick={loadExample}
+                  onClick={() => loadExample(EXAMPLE_CODES[0].code)}
                 >
                   예시 불러오기
                 </button>
