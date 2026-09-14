@@ -3,13 +3,12 @@
   --foreground: #171717;
 }
 
-/* Minimal Stripi color tokens for page.js */
 :root {
-  --color-primary: #533afd;
-  --color-primary-deep: #4434d4;
-  --color-primary-press: #2e2b8c;
-  --color-primary-soft: #665efd;
-  --color-primary-bg-subdued-hover: #b9b9f9;
+  --color-primary: #3b82f6;
+  --color-primary-deep: #2563eb;
+  --color-primary-press: #1d4ed8;
+  --color-primary-soft: #93b3e0;
+  --color-primary-bg-subdued-hover: #dbeafe;
   --color-brand-dark-900: #1c1e54;
   --color-ruby: #ea2261;
   --color-magenta: #f96bee;
@@ -84,8 +83,6 @@ a {
   }
 }
 
-/* Stripi button classes used by page.js */
-
 .btn-primary-pill {
   display: inline-flex;
   align-items: center;
@@ -99,7 +96,7 @@ a {
   letter-spacing: 0;
   padding: 8px 16px;
   border: none;
-  border-radius: 9999px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
   min-height: 40px;
@@ -131,7 +128,7 @@ a {
   letter-spacing: 0;
   padding: 8px 16px;
   border: 1px solid var(--color-primary);
-  border-radius: 9999px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
   min-height: 40px;

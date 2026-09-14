@@ -409,7 +409,7 @@
   margin-bottom: 12px;
 }
 
-.notConnectedBannerInner {
+.notConnectedBannnerInner {
   display: flex;
   gap: 8px;
   align-items: flex-start;
@@ -726,16 +726,24 @@
 }
 
 .fileButton {
-  padding: 4px 10px;
-  border: 1px solid #d0d5dd;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 12px;
-  color: #333;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
 
 .fileButton:hover {
-  background: #f3f4f6;
+  background: #2563eb;
+}
+
+.fileButton:disabled {
+  background: #93b3e0;
+  cursor: not-allowed;
 }
 
 .fileInfo {
@@ -796,7 +804,7 @@
 }
 
 .referenceBlock {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 12px;
   line-height: 1.5;
   background: #fff;
