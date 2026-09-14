@@ -106,6 +106,8 @@ class AnalyzerService:
                     preprocess_objs.setdefault(name, []).append(idx)
                 fit_lines.append(idx)
                 transform_lines.append(idx)
+                if self._has_test_data_fit_line(low):
+                    test_fit_lines.append(idx)
                 continue
 
             if "fit(" in low:
@@ -113,6 +115,8 @@ class AnalyzerService:
                 name = self._guess_preprocess_obj_name_at_line(low, idx, preprocess_objs)
                 if name:
                     preprocess_objs.setdefault(name, []).append(idx)
+                if self._has_test_data_fit_line(low):
+                    test_fit_lines.append(idx)
                 continue
 
             if "transform(" in low:
@@ -130,9 +134,6 @@ class AnalyzerService:
 
             if self._has_filter_operation(low):
                 filter_lines.append(idx)
-
-            if self._has_test_data_fit_line(low):
-                test_fit_lines.append(idx)
 
             if self._has_shuffle_operation(low):
                 shuffle_lines.append(idx)
@@ -484,6 +485,9 @@ class AnalyzerService:
 
         has_split_anywhere = len(context["split_lines"]) > 0
         if not has_split_anywhere:
+            # cross_val 패턴이 있으면 의심으로
+            if any(k in " ".join(lines).lower() for k in ["cross_val_score", "cross_validate", "cross_val_predict"]):
+                return {"level": " 의", "note": "CV 외부 전처리 의심"}
             return {"level": " 확정위반", "note": "분할 호출이 보이지 않음"}
 
         earliest_split = min(context["split_lines"])
