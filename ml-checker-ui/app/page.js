@@ -4,9 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
 import Onboarding from "./components/Onboarding";
 
-import characterFailV3 from "../assets/characters/character-fail-v3.png";
-import characterAttentionV3 from "../assets/characters/character-attention-v3.png";
-import characterPassV3 from "../assets/characters/character-pass-v3.png";
+import characterFailV3 from "../assets/characters/character-fail-v3.jpg";
+import characterAttentionV3 from "../assets/characters/character-attention-v3.jpg";
+import characterPassV3 from "../assets/characters/character-pass-v3.jpg";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
