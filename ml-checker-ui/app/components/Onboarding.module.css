@@ -213,11 +213,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  min-height: 340px;
   background: #fafafa;
   border-left: 1px solid #e5e5e5;
-  padding: 20px 16px;
+  padding: 24px 16px;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .characterImage {
@@ -227,7 +229,7 @@
   overflow: hidden;
   background: #fff;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .characterImage img {
@@ -240,7 +242,8 @@
 .characterText {
   font-size: 15px;
   color: #222;
-  line-height: 1.55;
+  line-height: 1.6;
+  flex: 1;
 }
 
 .characterTitle {
@@ -264,6 +267,7 @@
     border-left: none;
     border-top: 1px solid #e5e5e5;
     padding: 16px 18px;
+    min-height: auto;
   }
 
   .characterImage {
