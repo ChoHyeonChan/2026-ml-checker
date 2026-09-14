@@ -4,9 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
 import Onboarding from "./components/Onboarding";
 
-import characterFailV3 from "./assets/characters/character-fail-v3.png";
-import characterAttentionV3 from "./assets/characters/character-attention-v3.png";
-import characterPassV3 from "./assets/characters/character-pass-v3.png";
+const CHARACTER_MAP = {
+  확정위반: "/characters/character-fail-v3.png",
+  의심: "/characters/character-attention-v3.png",
+  이상없음: "/characters/character-pass-v3.png",
+};
+const BANNER_MAP = {
+  통과: "/characters/character-pass-v3.png",
+  안내필요: "/characters/character-attention-v3.png",
+};
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
