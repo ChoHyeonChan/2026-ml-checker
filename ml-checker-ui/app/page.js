@@ -387,6 +387,14 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
           >
             내용 지우기
           </button>
+          {!collapsed && code && (
+            <button
+              className={styles.foldToggle}
+              onClick={() => setCollapsed(true)}
+            >
+              코드 접기
+            </button>
+          )}
         </div>
 
         {result && (
@@ -498,21 +506,6 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                   <p className={styles.notConnectedBannerTitle}>백엔드 미연결 상태예요</p>
                   <p className={styles.notConnectedBannerDesc}>
                     지금은 결과 대신 안내만 보여요. 백엔드를 연결하면 검사 결과가 표시됩니다.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {result.type === "not-connected" && (
-              <div className={styles.items}>
-                <div className={styles.item}>
-                  <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
-                    백엔드가 연결되지 않아 실제 검사 결과를 표시할 수 없습니다.
-                  </p>
-                </div>
-                <div className={styles.item}>
-                  <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>
-                    Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL에 백엔드 URL을 설정하면 검사 결과가 표시됩니다.
                   </p>
                 </div>
               </div>
