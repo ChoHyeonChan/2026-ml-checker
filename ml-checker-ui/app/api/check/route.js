@@ -193,10 +193,10 @@ export async function POST(req) {
 
     if (BACKEND_URL) {
       try {
+        const form = makeFormData(file);
         const res = await fetch(`${BACKEND_URL}/api/v1/analyze/file`, {
           method: "POST",
-          headers: { "Content-Type": "multipart/form-data" },
-          body: await makeFormData(file),
+          body: form,
         });
         const data = await res.json();
         if (!res.ok) {
