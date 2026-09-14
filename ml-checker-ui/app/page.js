@@ -286,6 +286,7 @@ export default function Home() {
     의심: true,
     이상없음: true,
   }));
+  const [showExamplePopup, setShowExamplePopup] = useState(false);
 
   const codeRef = useRef(null);
   const lineRefs = useRef([]);
@@ -296,9 +297,12 @@ export default function Home() {
     }
   };
 
+  const openExamplePopup = () => setShowExamplePopup(true);
+  const closeExamplePopup = () => setShowExamplePopup(false);
   const loadExample = (codeStr) => {
     setCode(codeStr);
     setCollapsed(false);
+    setShowExamplePopup(false);
   };
 
   const scrollToLine = (lineNumber) => {
@@ -434,10 +438,34 @@ export default function Home() {
               <p className={styles.subtitle}>전처리·학습 코드에서 데이터 누수 의심 패턴을 줄 번호와 수정 방향 위주로 확인합니다.</p>
             </div>
           </div>
-          <button className={styles.exampleLoadButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
-            예시 불러오기
+          <button className={styles.exampleLoadButton} onClick={openExamplePopup}>
+            예시로 테스트하기
           </button>
         </div>
+
+        {showExamplePopup && (
+          <div className={styles.examplePopupOverlay} onClick={closeExamplePopup}>
+            <div className={styles.examplePopup} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.examplePopupHeader}>
+                <h3 className={styles.examplePopupTitle}>예시 코드 선택</h3>
+                <button className={styles.examplePopupClose} onClick={closeExamplePopup}>닫기</button>
+              </div>
+              <div className={styles.examplePopupList}>
+                {EXAMPLE_CODES.map((ex, i) => (
+                  <button
+                    key={i}
+                    className={styles.examplePopupOption}
+                    style={{ borderLeftColor: ex.color, borderLeftWidth: "4px" }}
+                    onClick={() => loadExample(ex.code)}
+                  >
+                    <span className={styles.examplePopupOptionName}>{ex.name}</span>
+                    <span className={styles.examplePopupOptionDesc}>{ex.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className={styles.exampleSelector}>
           {EXAMPLE_CODES.map((ex, i) => (
