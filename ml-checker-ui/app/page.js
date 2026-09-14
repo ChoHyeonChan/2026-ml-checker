@@ -302,13 +302,12 @@ export default function Home() {
       <Onboarding onDismiss={handleOnboardingDismiss} />
       <main className={styles.main}>
         <div className={styles.header}>
-          <div className={styles.headerText}>
-            <h1 className={styles.title} style={{ color: "var(--color-ink)" }}>
-              ML Data Leakage Checker
-            </h1>
-            <p className={styles.subtitle} style={{ color: "var(--color-ink-secondary)" }}>
-              전처리 코드를 붙여넣거나 .py/.ipynb 파일을 올리면 데이터 누수 의심 패턴을 줄 번호와 수정 방향만 짧게 보여줍니다.
-            </p>
+          <div className={styles.brand}>
+            <img className={styles.brandLogo} src="/logo-leakage-check.png" alt="Leakage Check 로고" />
+            <div className={styles.brandText}>
+              <h1 className={styles.title}>Leakage Check</h1>
+              <p className={styles.subtitle}>전처리·학습 코드에서 데이터 누수 의심 패턴을 줄 번호와 수정 방향 위주로 확인합니다.</p>
+            </div>
           </div>
           <button className={styles.exampleLoadButton} onClick={loadExample}>
             예시 불러오기
