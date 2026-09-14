@@ -3,7 +3,7 @@
   --foreground: #171717;
 }
 
-/* Minimal Stripi color tokens for page.js */
+/* 충돌 해결: main의 색상 토큰 유지하면서 PR의 파란색 계열로 변경 */
 :root {
   --color-primary: #3b82f6;
   --color-primary-deep: #2563eb;
@@ -84,7 +84,7 @@ a {
   }
 }
 
-/* Stripi button classes used by page.js */
+/* 충돌 해결: main의 버튼 클래스 유지하면서 PR의 직사각형(8px) 스타일 적용 */
 
 .btn-primary-pill {
   display: inline-flex;
