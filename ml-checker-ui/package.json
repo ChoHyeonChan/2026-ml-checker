@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --experimental-vm-modules test/router-route.test.mjs && node --experimental-vm-modules test/front-exception.test.js"
+    "test": "node --experimental-vm-modules test/router-response.test.mjs && node --experimental-vm-modules test/front-exception.test.js && node --experimental-vm-modules test/file-upload.test.mjs"
   },
   "dependencies": {
     "jsdom": "^30.0.1",
