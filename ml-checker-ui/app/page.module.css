@@ -103,6 +103,7 @@
   padding: 10px 14px;
   background: #fff;
   border: 1px solid #e2e6ee;
+  border-left-width: 4px;
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
@@ -110,7 +111,7 @@
 }
 
 .exampleOption:hover {
-  border-color: #3b82f6;
+  border-color: var(--example-color, #3b82f6);
   background: #f5f8ff;
 }
 
@@ -125,6 +126,99 @@
 .exampleOptionDesc {
   display: block;
   font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.examplePopupOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+  padding: 24px;
+}
+
+.examplePopup {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e6ee;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+  width: 100%;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.examplePopupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e6ee;
+}
+
+.examplePopupTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.examplePopupClose {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.examplePopupClose:hover {
+  background: #f3f4f6;
+}
+
+.examplePopupList {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.examplePopupOption {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #e2e6ee;
+  border-left-width: 4px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.examplePopupOption:hover {
+  border-color: var(--example-color, #3b82f6);
+  background: #f5f8ff;
+}
+
+.examplePopupOptionName {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 6px;
+}
+
+.examplePopupOptionDesc {
+  display: block;
+  font-size: 13px;
   color: #666;
   line-height: 1.4;
 }
