@@ -1,43 +1,24 @@
-# 환경변수/키/토큰
+node_modules/
+.next/
+out/
+build/
 .env
 .env.local
-.env.*
-!.env.example
-
-# 비밀/인증 관련
-*.pem
-*.key
-*.p12
-*.pfx
-
-# Python 실행 관련
-__pycache__/
-*.py[cod]
-*.so
-*.egg-info/
-dist/
-build/
-
-# 가상환경/의존성은 레포에 넣지 않음
-.venv/
-venv/
-
-# Node.js 작업 의존성
-node_modules/
-
-# Next.js 빌드 출력
-.next/
-
-# IDE/편집기
-.vscode/
-.idea/
-*.swp
-*.swo
+.vercel/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# 로그/임시
+# logs
 *.log
-/tmp/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# misc
+*.tsbuildinfo
+dist/
