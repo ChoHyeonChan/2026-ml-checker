@@ -178,6 +178,8 @@ class AnalyzerService:
     def _has_split_call(self, low: str) -> bool:
         if "train_test_split" in low and not any(k in low for k in ["=", "("]):
             return False
+        if any(k in low for k in ["cross_val_score(", "cross_validate(", "cross_val_predict("]):
+            return False
         return any(k in low for k in ["train_test_split", "split(", "kfold", "stratify", "cross_val", "partition"])
 
     def _has_target_reference(self, low: str) -> bool:
