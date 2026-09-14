@@ -225,13 +225,13 @@
 }
 
 .characterBannerImage {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
   overflow: hidden;
   background: #fff;
   flex-shrink: 0;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .characterBannerImage img {
@@ -514,8 +514,8 @@
 .characterSection {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 14px;
+  padding: 12px 14px;
   border-radius: 10px;
   background: #f7f8fa;
   border: 1px solid #e5e7eb;
@@ -523,13 +523,13 @@
 }
 
 .characterSectionImage {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  width: 76px;
+  height: 76px;
+  border-radius: 16px;
   overflow: hidden;
   background: #fff;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .characterSectionImage img {
