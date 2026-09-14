@@ -3,8 +3,5 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "regions": ["icn1"],
-  "routes": [
-    { "src": "^(/.*)", "dest": "$1" }
-  ]
+  "regions": ["icn1"]
 }
