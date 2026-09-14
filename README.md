@@ -1,39 +1,35 @@
 # 2026-ml-checker
 
-MABC 2026 결선 MVP 프로젝트 — `ml-data-leakage-checker` 서비스화
+ML 데이터 누수 점검 + 프론트 UI 프로젝트.
 
-- 예선 당선 스킬: `ml-data-leakage-checker`
-- 목표: 나만의 스킬을 누구나 쓸 수 있는 서비스 MVP로 확장
-- 제출 마감: 2026년 9월 16일(수) 18:00 KST
-- 현장 발표: 2026년 9월 19일(토) @ 한국과학기술회관
+## 레퍼런스 / 출처
 
-## 저장소 용도
+이 프로젝트의 일부 UI 표기 방식은 아래 레퍼런스를 참고하여 적용했습니다.
 
-이 레포는 팀 협업용 + 제출용 Public 레포예요.
+- 출처 파일: `DESIGN-stripe.md`
+- 사용 방식: 콜아웃/레퍼런스 표시 스타일 참조
 
-- 협업은 **이슈 + PR**로 진행
-- 지침서/체크리스트는 `guide/`
-- 스크립트는 `scripts/`
-- 스킬 설명은 `skill/`
-- 서비스 코드/설정/민감 정보는 별도로 관리하고, 키·토큰·개인정보는 절대 커밋하지 않음
+```
+::tly
+{"c":[["file","DESIGN-stripe.md"]]}
+[참조] 파일 DESIGN-stripe.md
+:::
+```
 
-## 주요 파일
+위 표기는 참고 레퍼런스를 명시하기 위한 방식입니다.
 
-- `guide/mabc-mvp-guide.md` — 본선 MVP 지침서 (팀 공유용)
-- `guide/mabc-checklist.md` — 제출 전 체크리스트
-- `scripts/mabc-checklist.py` — 체크리스트 실행 도구
-- `skill/ml-data-leakage-checker-팀공유.md` — 예선 스킬 설명
+## UI 확인
 
-## 규칙
+- 로컬 개발 서버: `cd ml-checker-ui && npm run dev`
+- 접속: http://localhost:3000
 
-- LLM / 개발 도구는 대회 규정 범위 내에서만 사용
-- 예선 당선 스킬을 서비스 핵심에 포함
-- 배포 URL은 공개 URL(로컬·타임리 내 동작·타임리 공유 링크 불가)
-- 제출용 코드는 Public 유지
+## 기존 상태 기록
 
-## 참고 링크
+- 루트 README 원본: 없음
+- ml-checker-ui README 원본: Next.js 기본 README
+- UI 원본: 파일 입력 없는 기본 ml-checker UI
 
-- 공식 디스코드: https://discord.gg/DeaJSfCDW
-- 결선 세부 규정(구글 독스): https://docs.google.com/document/d/1-OeACWsekruPr25Xo0Ng48-MuZ5t83fw5_pCs1fqu9w/edit
-- OT/교육 다시보기: https://bit.ly/mabc2026-final-ot
-- OT 발표자료: https://bit.ly/mabc-final-deck
+## 브랜치/PR 규칙
+
+- main 직접 반영 금지
+- 기능 변경 시 새 브랜치 생성 후 PR로 반영

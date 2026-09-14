@@ -24,6 +24,7 @@ class AnalyzeResponse(BaseModel):
     message: str
     warnings: list[str] = []
     errors: list[str] = []
+    not_preprocessing: bool = False
 
 class AnalyzeFileResponse(BaseModel):
     classification: str
@@ -34,6 +35,7 @@ class AnalyzeFileResponse(BaseModel):
     errors: list[str] = []
     file_name: str | None = None
     total_lines: int | None = None
+    not_preprocessing: bool = False
 
 class ErrorResponse(BaseModel):
     detail: str
