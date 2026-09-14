@@ -1,12 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import styles from "./page.module.css";
 import Onboarding from "./components/Onboarding";
-
-import characterPassV3 from "./assets/characters/character-pass-v3.png";
-import characterAttentionV3 from "./assets/characters/character-attention-v3.png";
-import characterFailV3 from "./assets/characters/character-fail-v3.png";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
@@ -50,14 +46,14 @@ const VERDICT_COLORS = {
 };
 
 const CHARACTER_MAP = {
-  확정위반: characterFailV3,
-  의심: characterAttentionV3,
-  이상없음: characterPassV3,
+  확정위반: "/characters/character-fail-v3.png",
+  의심: "/characters/character-attention-v3.png",
+  이상없음: "/characters/character-pass-v3.png",
 };
 
 const BANNER_MAP = {
-  통과: characterPassV3,
-  안내필요: characterAttentionV3,
+  통과: "/characters/character-pass-v3.png",
+  안내필요: "/characters/character-attention-v3.png",
 };
 
 function CharacterBanner({ src, title, text }) {
@@ -75,7 +71,7 @@ function CharacterBanner({ src, title, text }) {
 }
 
 function CharacterSection({ verdict, line, desc, fix }) {
-  const src = CHARACTER_MAP[verdict] ?? characterAttentionV3;
+  const src = CHARACTER_MAP[verdict] ?? "/characters/character-attention-v3.png";
   const color = VERDICT_COLORS[verdict] ?? VERDICT_COLORS.의심;
   return (
     <div className={styles.characterSection}>
@@ -159,15 +155,6 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [collapsed, setCollapsed] = useState(false);
   const [showIpynbNotice, setShowIpynbNotice] = useState(false);
-  const [highlightedLine, setHighlightedLine] = useState(null);
-  const [sectionCollapsed, setSectionCollapsed] = useState(() => ({
-    확정위반: false,
-    의심: true,
-    이상없음: true,
-  }));
-
-  const codeRef = useRef(null);
-  const lineRefs = useRef([]);
 
   const handleOnboardingDismiss = (payload) => {
     if (payload && payload.example) {
@@ -178,33 +165,6 @@ export default function Home() {
   const loadExample = () => {
     setCode(EXAMPLE_CODE);
     setCollapsed(false);
-  };
-
-  const scrollToLine = (lineNumber) => {
-    setHighlightedLine(lineNumber);
-    setTimeout(() => {
-      if (codeRef.current) {
-        codeRef.current.focus();
-        const lines = codeRef.current.value.split("\n");
-        const targetLine = lineNumber - 1;
-        if (targetLine >= 0 && targetLine < lines.length) {
-          let position = 0;
-          for (let i = 0; i < targetLine; i++) {
-            position += lines[i].length + 1;
-          }
-          const start = codeRef.current.selectionStart;
-          const end = codeRef.current.selectionEnd;
-          codeRef.current.setSelectionRange(position, position);
-          codeRef.current.scrollTop =
-            (targetLine / lines.length) * codeRef.current.scrollHeight -
-            codeRef.current.clientHeight / 2;
-        }
-      }
-    }, 50);
-  };
-
-  const handleLineClick = (lineNumber) => {
-    scrollToLine(lineNumber);
   };
 
   const runCheck = async () => {
@@ -256,7 +216,6 @@ export default function Home() {
     setFileLines(0);
     setResult(null);
     setShowIpynbNotice(false);
-    setHighlightedLine(null);
 
     if (!selected) return;
 
@@ -276,14 +235,12 @@ export default function Home() {
     setFile(null);
     setResult(null);
     setShowIpynbNotice(false);
-    setHighlightedLine(null);
   };
 
   const clearContent = () => {
     setCode("");
     setResult(null);
     setCollapsed(false);
-    setHighlightedLine(null);
   };
 
   const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상없음: 0 };
@@ -361,14 +318,10 @@ export default function Home() {
             </div>
           ) : (
             <textarea
-              ref={codeRef}
-              className={`${styles.codeArea} ${highlightedLine !== null ? styles.codeAreaHighlighted : ""}`}
-              style={highlightedLine !== null ? { backgroundImage: `linear-gradient(to bottom, transparent ${Math.max(0, (highlightedLine - 1) * 22)}px, #fef08a ${Math.max(0, (highlightedLine - 1) * 22)}px, #fef08a ${(highlightedLine) * 22}px, transparent ${(highlightedLine) * 22}px)`, backgroundSize: "100% 22px" } : {}}
+              className={styles.codeArea}
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder={`${LEAKAGE_EXAMPLE}
-
-pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
+              placeholder="pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요."
             />
           )}
         </div>
@@ -382,7 +335,6 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
             {status === "loading" ? (
               <span className="spinner" />
             ) : "누수 검사하기"}
-            <span className="loading-text">검사 중…</span>
           </button>
           <button
             className="btn-secondary"
