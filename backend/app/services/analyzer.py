@@ -5,8 +5,12 @@ from app.schemas import JudgmentResult
 
 class AnalyzerService:
     """예선 ml-data-leakage-checker 기반 + 서비스화 확장 로직.
+
     MVP P0에서는 LLM 없이 패턴/규칙 기반 1차 판정을 먼저 구현하고,
-    실제 예선 스킬 호출/확장은 이후 연결한다. 규칙은 확실히 잡을 수 있는 누수부터 우선한다.
+    실제 예선 스킬 호출/확장은 이후 연결한다.
+
+    지금은 라인 단위 키워드 중심에서 벗어나,
+    전처리 객체 이름과 split 전후 맥락을 더 보도록 보정한다.
     """
 
     def __init__(self, settings: Any = None) -> None:
@@ -18,7 +22,9 @@ class AnalyzerService:
         if validation["errors"]:
             return validation
         lines = code.splitlines()
-        results, summary = self._judge(lines)
+        context = self._build_context(lines)
+        results = self._judge_with_context(lines, context)
+        summary = self._compute_summary(lines, results)
         return self._build_response(lines, results, summary, not_preprocessing=validation.get("not_preprocessing", False))
 
     def analyze_file(self, file_bytes: bytes, file_name: str) -> dict[str, Any]:
@@ -37,7 +43,9 @@ class AnalyzerService:
         if validation["errors"]:
             return validation
         lines = code.splitlines()
-        results, summary = self._judge(lines)
+        context = self._build_context(lines)
+        results = self._judge_with_context(lines, context)
+        summary = self._compute_summary(lines, results)
         return self._build_response(lines, results, summary, not_preprocessing=validation.get("not_preprocessing", False))
 
     def _validate_input(self, code: str) -> dict[str, Any]:
@@ -63,10 +71,98 @@ class AnalyzerService:
             }
         return {"errors": [], "warnings": warnings, "code": code, "not_preprocessing": not_preprocessing}
 
-    def _judge(self, lines: list[str]) -> tuple[list[JudgmentResult], dict[str, int]]:
+    def _build_context(self, lines: list[str]) -> dict[str, Any]:
+        preprocess_objs: dict[str, list[int]] = {}
+        fit_lines: list[int] = []
+        transform_lines: list[int] = []
+        fit_transform_lines: list[int] = []
+        decl_lines: list[int] = []
+        import_lines: list[int] = []
+        split_lines: list[int] = []
+        target_var_lines: list[int] = []
+
+        for idx, line in enumerate(lines, start=1):
+            low = line.lower()
+            stripped = line.strip()
+
+            if stripped.startswith("import ") or stripped.startswith("from "):
+                import_lines.append(idx)
+
+            if self._looks_like_preprocess_declaration(stripped):
+                decl_lines.append(idx)
+                name = self._extract_preprocess_obj_name(stripped)
+                if name:
+                    preprocess_objs.setdefault(name, []).append(idx)
+
+            if "fit_transform(" in low:
+                fit_transform_lines.append(idx)
+                name = self._guess_preprocess_obj_name_at_line(low, idx, preprocess_objs)
+                if name:
+                    preprocess_objs.setdefault(name, []).append(idx)
+                fit_lines.append(idx)
+                transform_lines.append(idx)
+                continue
+
+            if "fit(" in low:
+                fit_lines.append(idx)
+                name = self._guess_preprocess_obj_name_at_line(low, idx, preprocess_objs)
+                if name:
+                    preprocess_objs.setdefault(name, []).append(idx)
+                continue
+
+            if "transform(" in low:
+                transform_lines.append(idx)
+                name = self._guess_preprocess_obj_name_at_line(low, idx, preprocess_objs)
+                if name:
+                    preprocess_objs.setdefault(name, []).append(idx)
+                continue
+
+            if self._has_split_call(low):
+                split_lines.append(idx)
+
+            if self._has_target_reference(low):
+                target_var_lines.append(idx)
+
+        return {
+            "lines": lines,
+            "preprocess_objs": preprocess_objs,
+            "fit_lines": fit_lines,
+            "transform_lines": transform_lines,
+            "fit_transform_lines": fit_transform_lines,
+            "decl_lines": decl_lines,
+            "import_lines": import_lines,
+            "split_lines": split_lines,
+            "target_var_lines": target_var_lines,
+        }
+
+    def _looks_like_preprocess_declaration(self, stripped: str) -> bool:
+        return bool(re.match(r"^\s*\w+\s*=\s*", stripped)) and self._has_preprocess_keywords(stripped)
+
+    def _extract_preprocess_obj_name(self, stripped: str) -> str | None:
+        m = re.match(r"^\s*([a-zA-Z_]\w*)\s*=", stripped)
+        if not m:
+            return None
+        return m.group(1)
+
+    def _guess_preprocess_obj_name_at_line(self, low: str, idx: int, objs: dict[str, list[int]]) -> str | None:
+        m = re.search(r"([a-zA-Z_]\w*)\s*\.\s*(fit|transform|fit_transform)\s*\(", low)
+        if m:
+            return m.group(1)
+        for name in objs:
+            if f"{name}." in low:
+                return name
+        return None
+
+    def _has_split_call(self, low: str) -> bool:
+        return any(k in low for k in ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition"])
+
+    def _has_target_reference(self, low: str) -> bool:
+        return any(t in low for t in ["y", "target", "label"])
+
+    def _judge_with_context(self, lines: list[str], context: dict[str, Any]) -> list[JudgmentResult]:
         results: list[JudgmentResult] = []
         for idx, line in enumerate(lines, start=1):
-            tag = self._classify_line(lines, idx, line)
+            tag = self._classify_line(lines, idx, line, context)
             if tag:
                 results.append(JudgmentResult(
                     line=idx,
@@ -74,21 +170,37 @@ class AnalyzerService:
                     fix_suggestion=tag["fix"],
                     reason=tag["reason"],
                 ))
-        summary = {
+        return results
+
+    def _compute_summary(self, lines: list[str], results: list[JudgmentResult]) -> dict[str, int]:
+        return {
             "확정위반": sum(1 for r in results if r.type == "확정위반"),
             "의심": sum(1 for r in results if r.type == "의심"),
             "이상없음": max(0, len(lines) - len(results)),
         }
-        return results, summary
 
-    # ---------- 분류 ----------
-    def _classify_line(self, lines: list[str], idx: int, line: str) -> dict[str, str] | None:
-        lowered = line.lower()
+    def _classify_line(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        context: dict[str, Any],
+    ) -> dict[str, str] | None:
+        low = line.lower()
         ctx_before = lines[max(0, idx - 2):idx]
         ctx_after = lines[idx + 1:idx + 3]
 
+        # 전처리 키워드가 전혀 없으면 전처리 판정은 보류
+        if not self._has_preprocess_keywords(low):
+            return None
+
+        # import/단순 선언 라인은 전처리 사용맥락이 없으면 보류
+        if idx in context["import_lines"] or idx in context["decl_lines"]:
+            if not self._has_active_preprocess_use(low):
+                return None
+
         # 1) 타겟 직접 사용 + 전처리 패턴 -> 확정위반 우선
-        if self._has_target_leakage_clear(lines, idx, line, ctx_before, ctx_after):
+        if self._has_target_leakage_clear(lines, idx, line, ctx_before, ctx_after, context):
             return {
                 "type": "확정위반",
                 "fix": "타겟 정보를 전처리 과정에서 직접 사용하지 않도록 분리하세요.",
@@ -96,7 +208,7 @@ class AnalyzerService:
             }
 
         # 2) 전체 데이터 기준 fit/transform 후 분할 또는 분할 없음 -> 확정위반/의심
-        fit_tag = self._has_preprocess_fit_before_split(lines, idx, line, ctx_before, ctx_after)
+        fit_tag = self._has_preprocess_fit_before_split(lines, idx, line, ctx_before, ctx_after, context)
         if fit_tag:
             if fit_tag["level"] == " 확정위반":
                 return {
@@ -110,26 +222,8 @@ class AnalyzerService:
                 "reason": "전체 데이터 기준으로 먼저 fit/transform을 적용한 것으로 의심됩니다.",
             }
 
-        # 3) 시계열/순서 관련 전처리 후 fit -> 의심
-        time_tag = self._has_time_order_leakage_hint(lines, idx, line, ctx_before, ctx_after)
-        if time_tag:
-            return {
-                "type": "의심",
-                "fix": "시간 순서가 중요한 데이터라면 분할/전처리 순서를 점검하세요.",
-                "reason": "시간 순서 관련 누수 가능성이 있는 패턴으로 보입니다.",
-            }
-
-        # 4) 파이프라인/객체 재할당/재사용 의심 -> 의심
-        pipe_tag = self._has_pipeline_reuse_leakage_hint(lines, idx, line, ctx_before, ctx_after)
-        if pipe_tag:
-            return {
-                "type": "의심",
-                "fix": "fit 정보가 여러 fold/데이터에 공유되지 않도록 파이프라인을 분리하세요.",
-                "reason": "전처리 객체가 여러 데이터/단계에 재사용된 것으로 의심됩니다.",
-            }
-
-        # 5) fit_transform이 split boundary 없이 쓰인 경우 -> 확정위반/의심
-        ft_tag = self._has_fit_transform_before_split(lines, idx, line, ctx_before, ctx_after)
+        # 5) fit_transform이 split boundary 없이 쓰인 경우
+        ft_tag = self._has_fit_transform_before_split(lines, idx, line, ctx_before, ctx_after, context)
         if ft_tag:
             if ft_tag["level"] == " 확정위반":
                 return {
@@ -143,27 +237,32 @@ class AnalyzerService:
                 "reason": "전체 데이터 기준으로 먼저 fit_transform을 적용한 것으로 의심됩니다.",
             }
 
-        # 6) split 전 fit + split 후 transform만 있는 패턴 -> 의심
-        fbs_tag = self._has_fit_before_split_only_transform_after(lines, idx, line, ctx_before, ctx_after)
-        if fbs_tag:
+        # 6) split 전 fit + split 후 transform만 있는 패턴
+        if self._has_fit_before_split_only_transform_after(lines, idx, line, ctx_before, ctx_after, context):
             return {
                 "type": "의심",
                 "fix": "train/test 분할 전에 fit한 전처리 객체를 분할 후에 transform하지 않도록 순서를 점검하세요.",
                 "reason": "분할 전에 fit한 전처리 객체가 분할 후 transform에 재사용된 것으로 의심됩니다.",
             }
 
-        # 7) cross-validation + 외부 preprocess 결합 누수 의심 -> 의심
-        cv_tag = self._has_cross_val_preprocess_leakage_hint(lines, idx, line, ctx_before, ctx_after)
-        if cv_tag:
+        # 3) 시계열/순서 관련 전처리 후 fit -> 의심
+        if self._has_time_order_leakage_hint(lines, idx, line, ctx_before, ctx_after):
+            return {
+                "type": "의심",
+                "fix": "시간 순서가 중요한 데이터라면 분할/전처리 순서를 점검하세요.",
+                "reason": "시간 순서 관련 누수 가능성이 있는 패턴으로 보입니다.",
+            }
+
+        # 7) cross-validation + 외부 preprocess 결합
+        if self._has_cross_val_preprocess_leakage_hint(lines, idx, line, ctx_before, ctx_after):
             return {
                 "type": "의심",
                 "fix": "cross-validation 내부에 전처리가 포함되도록 Pipeline을 구성하세요.",
                 "reason": "cross-validation과 외부 전처리가 결합되어 누수 가능성이 있는 패턴으로 보입니다.",
             }
 
-        # 8) groupby/분할 기준 전처리 순서 누수 의심 -> 의심
-        gb_tag = self._has_groupby_split_preprocess_order_leakage_hint(lines, idx, line, ctx_before, ctx_after)
-        if gb_tag:
+        # 8) groupby/분할 기준 전처리 순서
+        if self._has_groupby_split_preprocess_order_leakage_hint(lines, idx, line, ctx_before, ctx_after):
             return {
                 "type": "의심",
                 "fix": "groupby/분할 기준이 여러 데이터에 공유되지 않도록 그룹별 또는 분할별 전처리를 분리하세요.",
@@ -172,147 +271,201 @@ class AnalyzerService:
 
         return None
 
-    # ---------- 패턴 판단 헬퍼 ----------
-
-    def _has_fit_transform_before_split(
-        self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
-    ) -> dict[str, str] | None:
-        lowered = line.lower()
-        if not self._has_preprocess_keywords(lowered):
-            return None
-        has_fit_transform = "fit_transform(" in lowered
-        if not has_fit_transform:
-            return None
-        window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
-        split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
-        has_split_context = any(k in " ".join(window).lower() for k in split_kw)
-        has_any_split_call = any(k in " ".join(lines).lower() for k in ["train_test_split", "split", "kfold", "cross_val", "partition"])
-        if not has_any_split_call:
-            return {"level": " 확정위반", "note": "분할 호출이 보이지 않음"}
-        if not has_split_context:
-            return {"level": " 의", "note": "근처에 분할 맥락 부족"}
-        return None
-
-    def _has_fit_before_split_only_transform_after(
-        self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
-    ) -> bool:
-        lowered = line.lower()
-        if not self._has_preprocess_keywords(lowered):
-            return False
-        has_fit = any(p in lowered for p in ["fit(", "fit_transform("])
-        if not has_fit:
-            return False
-        # split 전 fit + split 후 transform만 있는 패턴
-        window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
-        split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
-        has_split_context = any(k in " ".join(window).lower() for k in split_kw)
-        has_any_split_call = any(k in " ".join(lines).lower() for k in ["train_test_split", "split", "kfold", "cross_val", "partition"])
-        if not has_any_split_call:
-            return False
-        if not has_split_context:
-            return False
-        # split 전 fit + split 후 transform만 있는 경우
-        after_split = lines[idx + 1:idx + 10]
-        has_transform_after_split = any("transform(" in l.lower() for l in after_split)
-        return has_transform_after_split
-
-    def _has_cross_val_preprocess_leakage_hint(
-        self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
-    ) -> bool:
-        lowered = line.lower()
-        if not self._has_preprocess_keywords(lowered):
-            return False
-        has_cross_val = any(k in lowered for k in ["cross_val_score", "cross_validate", "cross_val_predict"])
-        if not has_cross_val:
-            return False
-        # 외부 preprocess 결합 확인
-        ctx_all = " ".join(ctx_before + [line] + ctx_after).lower()
-        has_preprocess = any(k in ctx_all for k in ["fit(", "transform(", "fit_transform(", "scaler", "encoder", "pipeline"])
-        return has_preprocess
-
-    def _has_groupby_split_preprocess_order_leakage_hint(
-        self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
-    ) -> bool:
-        lowered = line.lower()
-        if not self._has_preprocess_keywords(lowered):
-            return False
-        has_groupby = any(k in lowered for k in ["groupby", "group_by", "grouped"])
-        if not has_groupby:
-            return False
-        # split 전/후 전처리 순서 확인
-        window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
-        split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
-        has_split_context = any(k in " ".join(window).lower() for k in split_kw)
-        has_any_split_call = any(k in " ".join(lines).lower() for k in ["train_test_split", "split", "kfold", "cross_val", "partition"])
-        if not has_any_split_call:
-            return False
-        if not has_split_context:
-            return False
-        # groupby + 전처리 + split 순서 누수 의심
-        ctx_all = " ".join(ctx_before + [line] + ctx_after).lower()
-        has_preprocess = any(k in ctx_all for k in ["fit(", "transform(", "fit_transform(", "scaler", "encoder", "pipeline"])
-        return has_preprocess
+    def _has_active_preprocess_use(self, low: str) -> bool:
+        return any(k in low for k in ["fit(", "transform(", "fit_transform(", "="]) and self._has_preprocess_keywords(low)
 
     def _has_target_leakage_clear(
-        self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+        context: dict[str, Any],
     ) -> bool:
-        lowered = line.lower()
-        if not self._has_preprocess_keywords(lowered):
+        low = line.lower()
+        if not self._has_preprocess_keywords(low):
             return False
         target_vars = self._extract_tokens(ctx_before + [line] + ctx_after, ["y", "target", "label"])
         if not target_vars:
             return False
         leak_patterns = ["fit", "transform", "fit_transform", "encoder", "scaler", "normali", "standard", "map", "apply"]
-        if not any(p in lowered for p in leak_patterns):
+        if not any(p in low for p in leak_patterns):
             return False
-        if any(k in lowered for k in ["map(", "apply(", "replace(", "merge", "join"]):
+        if any(k in low for k in ["map(", "apply(", "replace(", "merge", "join"]):
             return True
-        return any(t in lowered for t in target_vars)
+        return any(t in low for t in target_vars)
 
     def _has_preprocess_fit_before_split(
-        self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+        context: dict[str, Any],
     ) -> dict[str, str] | None:
-        lowered = line.lower()
-        if not self._has_preprocess_keywords(lowered):
+        low = line.lower()
+        if not self._has_preprocess_keywords(low):
             return None
-        has_fit = any(p in lowered for p in ["fit(", "fit_transform(", "transform("])
+        has_fit = any(p in low for p in ["fit(", "fit_transform(", "transform("])
         if not has_fit:
             return None
+        if idx in context["import_lines"] or idx in context["decl_lines"]:
+            if not self._has_active_preprocess_use(low):
+                return None
+
+        has_split_anywhere = len(context["split_lines"]) > 0
+        if not has_split_anywhere:
+            return {"level": " 확정위반", "note": "분할 호출이 보이지 않음"}
+
         window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
         split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
         has_split_context = any(k in " ".join(window).lower() for k in split_kw)
-        has_any_split_call = any(k in " ".join(lines).lower() for k in ["train_test_split", "split", "kfold", "cross_val", "partition"])
-        if not has_any_split_call:
-            return {"level": " 확정위반", "note": "분할 호출이 보이지 않음"}
         if not has_split_context:
             return {"level": " 의", "note": "근처에 분할 맥락 부족"}
         return None
 
-    def _has_time_order_leakage_hint(
-        self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
+    def _has_fit_transform_before_split(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+        context: dict[str, Any],
+    ) -> dict[str, str] | None:
+        low = line.lower()
+        if not self._has_preprocess_keywords(low):
+            return None
+        if "fit_transform(" not in low:
+            return None
+        if idx in context["import_lines"] or idx in context["decl_lines"]:
+            if not self._has_active_preprocess_use(low):
+                return None
+
+        has_split_anywhere = len(context["split_lines"]) > 0
+        if not has_split_anywhere:
+            return {"level": " 확정위반", "note": "분할 호출이 보이지 않음"}
+
+        window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
+        split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
+        has_split_context = any(k in " ".join(window).lower() for k in split_kw)
+        if not has_split_context:
+            return {"level": " 의", "note": "근처에 분할 맥락 부족"}
+        return None
+
+    def _has_fit_before_split_only_transform_after(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+        context: dict[str, Any],
     ) -> bool:
-        lowered = line.lower()
-        if not self._has_preprocess_keywords(lowered):
+        low = line.lower()
+        if not self._has_preprocess_keywords(low):
             return False
-        if "fit(" not in lowered and "transform(" not in lowered and "fit_transform(" not in lowered:
+        if idx in context["import_lines"] or idx in context["decl_lines"]:
+            if not self._has_active_preprocess_use(low):
+                return False
+
+        has_fit = any(p in low for p in ["fit(", "fit_transform("])
+        if not has_fit:
             return False
+
+        has_split_anywhere = len(context["split_lines"]) > 0
+        if not has_split_anywhere:
+            return False
+
+        window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
+        split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
+        has_split_context = any(k in " ".join(window).lower() for k in split_kw)
+        if not has_split_context:
+            return False
+
+        after_split = lines[idx + 1:idx + 10]
+        has_transform_after_split = any("transform(" in l.lower() for l in after_split)
+        return has_transform_after_split
+
+    def _has_cross_val_preprocess_leakage_hint(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+    ) -> bool:
+        low = line.lower()
+        if not self._has_preprocess_keywords(low):
+            return False
+        if idx in context["import_lines"] or idx in context["decl_lines"]:
+            if not self._has_active_preprocess_use(low):
+                return False
+
+        has_cross_val = any(k in low for k in ["cross_val_score", "cross_validate", "cross_val_predict"])
+        if not has_cross_val:
+            return False
+
+        ctx_all = " ".join(ctx_before + [line] + ctx_after).lower()
+        has_preprocess = any(k in ctx_all for k in ["fit(", "transform(", "fit_transform(", "scaler", "encoder", "pipeline"])
+        return has_preprocess
+
+    def _has_groupby_split_preprocess_order_leakage_hint(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+    ) -> bool:
+        low = line.lower()
+        if not self._has_preprocess_keywords(low):
+            return False
+        if idx in context["import_lines"] or idx in context["decl_lines"]:
+            if not self._has_active_preprocess_use(low):
+                return False
+
+        has_groupby = any(k in low for k in ["groupby", "group_by", "grouped"])
+        if not has_groupby:
+            return False
+
+        has_split_anywhere = len(context["split_lines"]) > 0
+        if not has_split_anywhere:
+            return False
+
+        window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
+        split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
+        has_split_context = any(k in " ".join(window).lower() for k in split_kw)
+        if not has_split_context:
+            return False
+
+        ctx_all = " ".join(ctx_before + [line] + ctx_after).lower()
+        has_preprocess = any(k in ctx_all for k in ["fit(", "transform(", "fit_transform(", "scaler", "encoder", "pipeline"])
+        return has_preprocess
+
+    def _has_time_order_leakage_hint(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+    ) -> bool:
+        low = line.lower()
+        if not self._has_preprocess_keywords(low):
+            return False
+        if idx in context["import_lines"] or idx in context["decl_lines"]:
+            if not self._has_active_preprocess_use(low):
+                return False
+
+        if "fit(" not in low and "transform(" not in low and "fit_transform(" not in low:
+            return False
+
         time_kw = ["shift", "lag", "rolling", "sort_values", "sort", "date", "time", "timestamp", "before", "after"]
         window = " ".join(lines[max(0, idx - 3):idx + 4]).lower()
         return any(k in window for k in time_kw)
-
-    def _has_pipeline_reuse_leakage_hint(
-        self, lines: list[str], idx: int, line: str, ctx_before: list[str], ctx_after: list[str]
-    ) -> bool:
-        lowered = line.lower()
-        if not self._has_preprocess_keywords(lowered):
-            return False
-        reuse_hints = ["scaler", "encoder", "pipeline", "preprocessor", "imputer", "le", "std", "mean", "std"]
-        window = " ".join(lines[max(0, idx - 5):idx + 5]).lower()
-        if not any(k in lowered for k in reuse_hints):
-            return False
-        if lowered.count("fit(") + lowered.count("transform(") >= 2:
-            return True
-        return any(k in window for k in ["scaler", "encoder", "pipeline", "preprocessor"])
 
     def _has_preprocess_keywords(self, lowered: str) -> bool:
         keywords = [
