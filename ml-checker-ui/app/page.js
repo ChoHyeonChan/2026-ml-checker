@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
 import Onboarding from "./components/Onboarding";
 
@@ -24,6 +24,14 @@ const LEAKAGE_EXAMPLE = "예시: df['x_enc'] = df.groupby('y')['x'].transform('m
 
 const IPYNB_NOTE =
   "참고: .ipynb는 셀 표시 순서 ≠ 실제 실행 순서일 수 있어요. 실행 순서대로 정리한 파일을 올리면 더 정확해요.";
+
+const VERDICT_ORDER = ["확정위반", "의심", "이상없음"];
+
+const VERDICT_COLORS = {
+  확정위반: { badge: "#ef4444", badgeBg: "#fef2f2", text: "#b91c1c" },
+  의심: { badge: "#f59e0b", badgeBg: "#fffbeb", text: "#b45309" },
+  이상없음: { badge: "#22c55e", badgeBg: "#f0fdf4", text: "#15803d" },
+};
 
 const CHARACTER_MAP = {
   확정위반: "/character-fail-v3.jpg",
@@ -52,6 +60,7 @@ function CharacterBanner({ src, title, text }) {
 
 function CharacterSection({ verdict, line, desc, fix }) {
   const src = CHARACTER_MAP[verdict] ?? "/character-attention-v3.jpg";
+  const color = VERDICT_COLORS[verdict] ?? VERDICT_COLORS.의심;
   return (
     <div className={styles.characterSection}>
       <div className={styles.characterSectionImage}>
@@ -66,6 +75,66 @@ function CharacterSection({ verdict, line, desc, fix }) {
   );
 }
 
+function VerdictBadge({ verdict }) {
+  const color = VERDICT_COLORS[verdict] ?? VERDICT_COLORS.의심;
+  return (
+    <span
+      className={styles.verdictBadge}
+      style={{
+        backgroundColor: color.badgeBg,
+        color: color.text,
+        borderColor: color.badge,
+      }}
+    >
+      {verdict}
+    </span>
+  );
+}
+
+function SummaryTop({ summary }) {
+  const total = summary.확정위반 + summary.의심 + summary.이상없음;
+  if (total === 0) return null;
+  const parts = [];
+  if (summary.확정위반 > 0) parts.push(`확정위반 ${summary.확정위반}건`);
+  if (summary.의심 > 0) parts.push(`의심 ${summary.의심}건`);
+  if (summary.이상없음 > 0) parts.push(`이상없음 ${summary.이상없음}건`);
+  return (
+    <div className={styles.summaryTop}>
+      <span className={styles.summaryTopLabel}>전체 요약</span>
+      <span className={styles.summaryTopText}>{parts.join(" · ")}</span>
+    </div>
+  );
+}
+
+function SectionContainer({ title, count, children, defaultCollapsed = false }) {
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  return (
+    <div className={styles.sectionContainer}>
+      <div
+        className={styles.sectionHead}
+        style={{
+          borderBottomColor: VERDICT_COLORS[title]?.badge ?? "#ccc",
+          borderBottomWidth: "2px",
+        }}
+      >
+        <div className={styles.sectionHeadInner}>
+          <VerdictBadge verdict={title} />
+          <span className={styles.sectionLabel}>{title}</span>
+          <span className={styles.sectionCount}>{count}건</span>
+        </div>
+        <button
+          className={styles.sectionToggle}
+          onClick={() => setCollapsed(!collapsed)}
+          aria-expanded={!collapsed}
+        >
+          {collapsed ? "펼치기" : "접기"}
+        </button>
+      </div>
+      {!collapsed && children}
+    </div>
+  );
+}
+
 export default function Home() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState(null);
@@ -74,6 +143,15 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [collapsed, setCollapsed] = useState(false);
   const [showIpynbNotice, setShowIpynbNotice] = useState(false);
+  const [highlightedLine, setHighlightedLine] = useState(null);
+  const [sectionCollapsed, setSectionCollapsed] = useState(() => ({
+    확정위반: false,
+    의심: true,
+    이상없음: true,
+  }));
+
+  const codeRef = useRef(null);
+  const lineRefs = useRef([]);
 
   const handleOnboardingDismiss = (payload) => {
     if (payload && payload.example) {
@@ -84,6 +162,33 @@ export default function Home() {
   const loadExample = () => {
     setCode(EXAMPLE_CODE);
     setCollapsed(false);
+  };
+
+  const scrollToLine = (lineNumber) => {
+    setHighlightedLine(lineNumber);
+    setTimeout(() => {
+      if (codeRef.current) {
+        codeRef.current.focus();
+        const lines = codeRef.current.value.split("\n");
+        const targetLine = lineNumber - 1;
+        if (targetLine >= 0 && targetLine < lines.length) {
+          let position = 0;
+          for (let i = 0; i < targetLine; i++) {
+            position += lines[i].length + 1;
+          }
+          const start = codeRef.current.selectionStart;
+          const end = codeRef.current.selectionEnd;
+          codeRef.current.setSelectionRange(position, position);
+          codeRef.current.scrollTop =
+            (targetLine / lines.length) * codeRef.current.scrollHeight -
+            codeRef.current.clientHeight / 2;
+        }
+      }
+    }, 50);
+  };
+
+  const handleLineClick = (lineNumber) => {
+    scrollToLine(lineNumber);
   };
 
   const runCheck = async () => {
@@ -135,6 +240,7 @@ export default function Home() {
     setFileLines(0);
     setResult(null);
     setShowIpynbNotice(false);
+    setHighlightedLine(null);
 
     if (!selected) return;
 
@@ -154,12 +260,14 @@ export default function Home() {
     setFile(null);
     setResult(null);
     setShowIpynbNotice(false);
+    setHighlightedLine(null);
   };
 
   const clearContent = () => {
     setCode("");
     setResult(null);
     setCollapsed(false);
+    setHighlightedLine(null);
   };
 
   const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상없음: 0 };
@@ -237,7 +345,9 @@ export default function Home() {
             </div>
           ) : (
             <textarea
-              className={styles.codeArea}
+              ref={codeRef}
+              className={`${styles.codeArea} ${highlightedLine !== null ? styles.codeAreaHighlighted : ""}`}
+              style={highlightedLine !== null ? { backgroundImage: `linear-gradient(to bottom, transparent ${Math.max(0, (highlightedLine - 1) * 22)}px, #fef08a ${Math.max(0, (highlightedLine - 1) * 22)}px, #fef08a ${(highlightedLine) * 22}px, transparent ${(highlightedLine) * 22}px)`, backgroundSize: "100% 22px" } : {}}
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder={`${LEAKAGE_EXAMPLE}
@@ -338,100 +448,70 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
 
             {result.type === "judgment" && (
               <>
+                <SummaryTop summary={summary} />
+
                 <div className={styles.summary}>
-                  <div className={styles.summaryBlock}>
-                    <span className={styles.summaryLabel}>확정위반</span>
-                    <span className={styles.summaryCount}>{summary.확정위반}건</span>
-                  </div>
-                  <div className={styles.summaryBlock}>
-                    <span className={styles.summaryLabel}>의심</span>
-                    <span className={styles.summaryCount}>{summary.의심}건</span>
-                  </div>
-                  <div className={styles.summaryBlock}>
-                    <span className={styles.summaryLabel}>이상없음</span>
-                    <span className={styles.summaryCount}>{summary.이상없음}건</span>
-                  </div>
+                  {VERDICT_ORDER.map((verdict) => (
+                    <div
+                      key={verdict}
+                      className={styles.summaryBlock}
+                      style={{
+                        background: VERDICT_COLORS[verdict]?.badgeBg ?? "#f7f8fa",
+                        borderColor: VERDICT_COLORS[verdict]?.badge ?? "#e2e6ee",
+                      }}
+                    >
+                      <span className={styles.summaryLabel}>{verdict}</span>
+                      <span className={styles.summaryCount}>{summary[verdict]}건</span>
+                    </div>
+                  ))}
                 </div>
 
                 {summary.확정위반 > 0 && (
-                  <div className={styles.section}>
-                    <div className={styles.sectionHead}>
-                      <span className={styles.sectionLabel}>확정위반</span>
-                      <span className={styles.sectionCount}>{summary.확정위반}건</span>
-                    </div>
-                    {result.items.filter((it) => it.verdict === "확정위반").length === 0 && (
-                      <div className={styles.item}>
-                        <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
-                          확정위반으로 분류된 항목이 없습니다.
-                        </p>
-                      </div>
-                    )}
+                  <SectionContainer title="확정위반" count={summary.확정위반}>
                     {result.items
                       .filter((it) => it.verdict === "확정위반")
                       .map((item, i) => (
                         <CharacterSection
-                          key={i}
+                          key={`확정위반-${i}`}
                           verdict={item.verdict}
                           line={item.line}
                           desc={item.desc}
                           fix={item.fix}
                         />
                       ))}
-                  </div>
+                  </SectionContainer>
                 )}
 
                 {summary.의심 > 0 && (
-                  <div className={styles.section}>
-                    <div className={styles.sectionHead}>
-                      <span className={styles.sectionLabel}>의심</span>
-                      <span className={styles.sectionCount}>{summary.의심}건</span>
-                    </div>
-                    {result.items.filter((it) => it.verdict === "의심").length === 0 && (
-                      <div className={styles.item}>
-                        <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
-                          의심으로 분류된 항목이 없습니다.
-                        </p>
-                      </div>
-                    )}
+                  <SectionContainer title="의심" count={summary.의심} defaultCollapsed={true}>
                     {result.items
                       .filter((it) => it.verdict === "의심")
                       .map((item, i) => (
                         <CharacterSection
-                          key={i}
+                          key={`의심-${i}`}
                           verdict={item.verdict}
                           line={item.line}
                           desc={item.desc}
                           fix={item.fix}
                         />
                       ))}
-                  </div>
+                  </SectionContainer>
                 )}
 
                 {summary.이상없음 > 0 && (
-                  <div className={styles.section}>
-                    <div className={styles.sectionHead}>
-                      <span className={styles.sectionLabel}>이상없음</span>
-                      <span className={styles.sectionCount}>{summary.이상없음}건</span>
-                    </div>
-                    {result.items.filter((it) => it.verdict === "이상없음").length === 0 && (
-                      <div className={styles.item}>
-                        <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
-                          이상없음으로 분류된 항목이 없습니다.
-                        </p>
-                      </div>
-                    )}
+                  <SectionContainer title="이상없음" count={summary.이상없음} defaultCollapsed={true}>
                     {result.items
                       .filter((it) => it.verdict === "이상없음")
                       .map((item, i) => (
                         <CharacterSection
-                          key={i}
+                          key={`이상없음-${i}`}
                           verdict={item.verdict}
                           line={item.line}
                           desc={item.desc}
                           fix={item.fix}
                         />
                       ))}
-                  </div>
+                  </SectionContainer>
                 )}
 
                 {summary.확정위반 === 0 && summary.의심 === 0 && summary.이상없음 === 0 && result.items.length === 0 && (
