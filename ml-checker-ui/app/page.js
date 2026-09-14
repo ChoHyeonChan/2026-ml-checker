@@ -144,7 +144,7 @@ scores = cross_val_score(
 ];
 
 // 색상 우선순휘: 초록(1) > 노랑(2) > 빨강(3)
-const _colorRank: Record<string, number> = {
+const _colorRank = {
   "#22c55e": 1,
   "#f59e0b": 2,
   "#ef4444": 3,
@@ -760,7 +760,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
               <div className={styles.resultActions}>
                 <button
                   className={styles.resultActionButton}
-                  onClick={() => { setResult(null); setCode(EXAMPLE_CODES[0].code); setCollapsed(false); }}
+                  onClick={() => { setResult(null); setCode(EXAMPLE_CODES[1].code); setCollapsed(false); }}
                 >
                   예시 코드로 다시 검사
                 </button>
