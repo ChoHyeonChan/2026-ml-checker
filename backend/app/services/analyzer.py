@@ -496,12 +496,7 @@ class AnalyzerService:
         if idx < earliest_split:
             return {"level": " 확정위반"}
 
-        window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
-        split_kw = ["train_test_split", "split(", "kfold", "stratify", "cross_val", "partition", "group"]
-        has_split_context = any(k in " ".join(window).lower() for k in split_kw)
-        if not has_split_context:
-            return {"level": " 의", "note": "근처에 분할 맥락 부족"}
-
+        # 분할선이 코드 내에 있고 현재 라인이 분할 이후면, window에 분할 키워드 없어도 OK
         return None
 
     def _has_fit_transform_before_split(
