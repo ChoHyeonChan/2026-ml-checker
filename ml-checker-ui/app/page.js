@@ -9,6 +9,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 const EXAMPLE_CODES = [
   {
     name: "이상없음 (정상)",
+    color: "#22c55e",
     code: `import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -38,6 +39,7 @@ print(f"train: {train_acc:.3f}, test: {test_acc:.3f}")`,
   },
   {
     name: "확정위반 #1 (타겟 groupby)",
+    color: "#ef4444",
     code: `import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -68,6 +70,7 @@ model.fit(X_train, y_train)`,
   },
   {
     name: "확정위반 #2 (test 데이터로 fit)",
+    color: "#ef4444",
     code: `from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 
@@ -80,6 +83,7 @@ model.fit(X_test, y_test)`,
   },
   {
     name: "의심 #1 (시계열 shuffle)",
+    color: "#f59e0b",
     code: `import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -95,6 +99,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)`,
   },
   {
     name: "확정위반+의심 (전체 fit + 정제)",
+    color: "#ef4444",
     code: `import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -121,6 +126,7 @@ model.fit(X_train, y_train)`,
   },
   {
     name: "의심 #2 (CV 외부 전처리)",
+    color: "#f59e0b",
     code: `from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
@@ -438,6 +444,7 @@ export default function Home() {
             <button
               key={i}
               className={styles.exampleOption}
+              style={{ borderLeftColor: ex.color, borderLeftWidth: "4px" }}
               onClick={() => loadExample(ex.code)}
             >
               <span className={styles.exampleOptionName}>{ex.name}</span>
