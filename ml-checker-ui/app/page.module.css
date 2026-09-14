@@ -57,7 +57,7 @@
   white-space: nowrap;
 }
 
-.exampleLoadButton:hover {
+exampleLoadButton:hover {
   background: #e5e7eb;
 }
 
@@ -65,7 +65,7 @@
   background: #fff;
   border: 1px solid #e2e6ee;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .cardHeader {
@@ -166,24 +166,6 @@
   display: none;
 }
 
-.spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  display: none;
-}
-
-.btn-primary-pill[disabled] .spinner {
-  display: inline-block;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .feedbackCard {
   padding: 14px 16px;
   border-radius: 10px;
@@ -206,15 +188,10 @@
   margin-bottom: 8px;
 }
 
-.feedbackList {
-  margin: 0 0 8px 0;
-  padding-left: 18px;
+.feedbackExample {
   font-size: 12px;
-  color: var(--color-ink-mute);
-}
-
-.feedbackList li {
-  margin-bottom: 2px;
+  color: var(--color-ink);
+  margin-bottom: 8px;
 }
 
 .feedbackFix {
@@ -380,13 +357,14 @@
 }
 
 .characterBannerImage {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 96px;
+  height: 96px;
+  border-radius: 16px;
   overflow: hidden;
   background: #fff;
   flex-shrink: 0;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
 }
 
 .characterBannerImage img {
@@ -394,6 +372,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  image-rendering: auto;
 }
 
 .characterBannerText {
@@ -406,6 +385,27 @@
   font-weight: 600;
   color: #171717;
   margin-bottom: 2px;
+}
+
+.summaryTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #052e16 0%, #064e3b 100%);
+  color: #fff;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.summaryTopLabel {
+  font-weight: 600;
+}
+
+.summaryTopText {
+  font-weight: 700;
+  opacity: 0.9;
 }
 
 .summary {
@@ -423,6 +423,11 @@
   border-radius: 10px;
   background: #f7f8fa;
   border: 1px solid #e2e6ee;
+  transition: transform 0.15s ease;
+}
+
+.summaryBlock:hover {
+  transform: translateY(-2px);
 }
 
 .summaryLabel {
@@ -437,8 +442,8 @@
   color: #111;
 }
 
-.section {
-  margin-bottom: 16px;
+.sectionContainer {
+  margin-bottom: 20px;
 }
 
 .sectionHead {
@@ -446,21 +451,55 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.sectionHeadInner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .sectionLabel {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   color: #111;
 }
 
 .sectionCount {
   font-size: 12px;
   font-weight: 600;
-  color: #555;
+  color: #666;
   background: #f1f3f6;
   padding: 2px 8px;
   border-radius: 999px;
+}
+
+.sectionToggle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3b82f6;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.sectionToggle:hover {
+  background: #eef4ff;
+}
+
+.verdictBadge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .item {
@@ -502,115 +541,13 @@
   margin: 2px 0 0 0;
 }
 
-.resultActions {
-  display: flex;
-  gap: 8px;
-  margin-top: 16px;
+.note {
+  margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid var(--color-hairline);
-}
-
-.resultActionButton {
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  background: #3b82f6;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.resultActionButton:hover {
-  background: #2563eb;
-}
-
-.resultActionButtonSecondary {
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #111;
-  background: #f3f4f6;
-  border: 1px solid #e2e6ee;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.resultActionButtonSecondary:hover {
-  background: #e5e7eb;
-}
-
-.resultActionButtonTertiary {
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 600;
+  border-top: 1px solid #e2e6ee;
+  font-size: 12px;
   color: #666;
-  background: transparent;
-  border: 1px dashed #d0d5dd;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.resultActionButtonTertiary:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
-
-.resultActions {
-  display: flex;
-  gap: 8px;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-hairline);
-}
-
-.resultActionButton {
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  background: #3b82f6;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.resultActionButton:hover {
-  background: #2563eb;
-}
-
-.resultActionButtonSecondary {
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #111;
-  background: #f3f4f6;
-  border: 1px solid #e2e6ee;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.resultActionButtonSecondary:hover {
-  background: #e5e7eb;
-}
-
-.resultActionButtonTertiary {
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #666;
-  background: transparent;
-  border: 1px dashed #d0d5dd;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.resultActionButtonTertiary:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  line-height: 1.5;
 }
 
 .fileLabel {
@@ -711,8 +648,8 @@
 .characterSection {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 14px;
+  padding: 12px 14px;
   border-radius: 10px;
   background: #f7f8fa;
   border: 1px solid #e5e7eb;
@@ -720,13 +657,14 @@
 }
 
 .characterSectionImage {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  width: 96px;
+  height: 96px;
+  border-radius: 16px;
   overflow: hidden;
-  background: #fff;
+  background: #ffffff;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
 }
 
 .characterSectionImage img {
@@ -734,6 +672,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  image-rendering: auto;
 }
 
 .characterSectionBody {
@@ -760,4 +699,61 @@
   background: #f5f7fb;
   border-bottom: 1px solid #e2e6ee;
   line-height: 1.5;
+}
+
+.resultActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.resultActionButton {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.resultActionButton:hover {
+  background: #2563eb;
+}
+
+.resultActionButtonSecondary {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  background: #f3f4f6;
+  border: 1px solid #e2e6ee;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.resultActionButtonSecondary:hover {
+  background: #e5e7eb;
+}
+
+.resultActionButtonTertiary {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  background: transparent;
+  border: 1px dashed #d0d5dd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.resultActionButtonTertiary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
 }
