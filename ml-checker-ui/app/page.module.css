@@ -1,4 +1,3 @@
-/* 충돌 해결: main의 버튼 스타일 유지하면서 PR의 파란색/직사각형 변경사항 적용 */
 .page {
   min-height: 100vh;
   display: flex;
@@ -86,11 +85,149 @@
   background: #e5e7eb;
 }
 
+.exampleSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fafbfc;
+  border: 1px solid #e2e6ee;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.exampleOption {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #e2e6ee;
+  border-left-width: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.exampleOption:hover {
+  border-color: var(--example-color, #3b82f6);
+  background: #f5f8ff;
+}
+
+.exampleOptionName {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+.exampleOptionDesc {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.examplePopupOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+  padding: 24px;
+}
+
+.examplePopup {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e6ee;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+  width: 100%;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.examplePopupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e6ee;
+}
+
+.examplePopupTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.examplePopupClose {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.examplePopupClose:hover {
+  background: #f3f4f6;
+}
+
+.examplePopupList {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.examplePopupOption {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #e2e6ee;
+  border-left-width: 4px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.examplePopupOption:hover {
+  border-color: var(--example-color, #3b82f6);
+  background: #f5f8ff;
+}
+
+.examplePopupOptionName {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 6px;
+}
+
+.examplePopupOptionDesc {
+  display: block;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
 .card {
   background: #fff;
   border: 1px solid #e2e6ee;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .cardHeader {
@@ -100,6 +237,8 @@
   padding: 12px 16px;
   background: #f5f7fb;
   border-bottom: 1px solid #e2e6ee;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .cardLabel {
@@ -132,10 +271,32 @@
   outline-offset: -2px;
 }
 
+.codeAreaFolded {
+  padding: 12px 16px;
+  background: #fafbfc;
+  border-top: 1px solid #e2e6ee;
+  border-bottom: 1px solid #e2e6ee;
+  text-align: center;
+}
+
+.foldToggle {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
 .actions {
   display: flex;
   gap: 10px;
   margin-top: 12px;
+}
+
+.actions .btn-secondary {
+  margin-left: auto;
 }
 
 .spinner {
@@ -238,6 +399,33 @@
 
 .feedbackSecondaryButton:hover {
   background: #e5e7eb;
+}
+
+.notConnectedBanner {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  margin-bottom: 12px;
+}
+
+.notConnectedBannerInner {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.notConnectedBannerTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #92400e;
+  margin: 0;
+}
+
+.notConnectedBannerDesc {
+  font-size: 12px;
+  color: #b45309;
+  margin: 0;
 }
 
 .runButton {
@@ -359,6 +547,27 @@
   font-weight: 600;
   color: #171717;
   margin-bottom: 2px;
+}
+
+.summaryTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #052e16 0%, #064e3b 100%);
+  color: #fff;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.summaryTopLabel {
+  font-weight: 600;
+}
+
+.summaryTopText {
+  font-weight: 700;
+  opacity: 0.9;
 }
 
 .summary {
@@ -568,6 +777,17 @@
   text-decoration: underline;
 }
 
+.ipynbNotice {
+  display: block;
+  background: #fff7e6;
+  border: 1px solid #f5d98a;
+  color: #7a5400;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .reference {
   margin-top: 20px;
   padding: 14px 16px;
@@ -584,7 +804,7 @@
 }
 
 .referenceBlock {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 12px;
   line-height: 1.5;
   background: #fff;
