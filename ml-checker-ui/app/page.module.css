@@ -44,7 +44,7 @@
   margin-top: 8px;
 }
 
-.exampleLoadButton {
+exampleLoadButton {
   padding: 8px 14px;
   font-size: 12px;
   font-weight: 600;
@@ -57,7 +57,7 @@
   white-space: nowrap;
 }
 
-.exampleLoadButton:hover {
+exampleLoadButton:hover {
   background: #e5e7eb;
 }
 
@@ -129,9 +129,141 @@
 
 .actions {
   display: flex;
-  justify-content: flex-start;
   gap: 10px;
+  margin-top: 12px;
+}
+
+.actions .btn-secondary {
+  margin-left: auto;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-primary-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary-pill[disabled] .spinner {
+  display: inline-block;
+}
+
+.btn-primary-pill[disabled] .loading-text {
+  display: none;
+}
+
+.feedbackCard {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 12px;
+}
+
+.feedbackTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: 6px;
+}
+
+.feedbackDesc {
+  font-size: 13px;
+  color: var(--color-ink-secondary);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.feedbackExample {
+  font-size: 12px;
+  color: var(--color-ink);
+  margin-bottom: 8px;
+}
+
+.feedbackFix {
+  font-size: 12px;
+  color: var(--color-ink);
+  margin-bottom: 12px;
+}
+
+.feedbackActions {
+  display: flex;
+  gap: 8px;
   flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.feedbackActionButton {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.feedbackActionButton:hover {
+  background: #2563eb;
+}
+
+.feedbackSecondaryButton {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111;
+  background: #f3f4f6;
+  border: 1px solid #e2e6ee;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.feedbackSecondaryButton:hover {
+  background: #e5e7eb;
+}
+
+.notConnectedBanner {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  margin-bottom: 12px;
+}
+
+.notConnectedBannerInner {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.notConnectedBannerTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #92400e;
+  margin: 0;
+}
+
+.notConnectedBannerDesc {
+  font-size: 12px;
+  color: #b45309;
+  margin: 0;
 }
 
 .runButton {
@@ -567,4 +699,61 @@
   background: #f5f7fb;
   border-bottom: 1px solid #e2e6ee;
   line-height: 1.5;
+}
+
+.resultActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.resultActionButton {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.resultActionButton:hover {
+  background: #2563eb;
+}
+
+.resultActionButtonSecondary {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  background: #f3f4f6;
+  border: 1px solid #e2e6ee;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.resultActionButtonSecondary:hover {
+  background: #e5e7eb;
+}
+
+.resultActionButtonTertiary {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  background: transparent;
+  border: 1px dashed #d0d5dd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.resultActionButtonTertiary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
 }

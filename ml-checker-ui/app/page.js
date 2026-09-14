@@ -25,6 +25,18 @@ const LEAKAGE_EXAMPLE = "예시: df['x_enc'] = df.groupby('y')['x'].transform('m
 const IPYNB_NOTE =
   "참고: .ipynb는 셀 표시 순서 ≠ 실제 실행 순서일 수 있어요. 실행 순서대로 정리한 파일을 올리면 더 정확해요.";
 
+const NOT_PYTHON_EXAMPLES = [
+  "단순 유틸리티 함수 (pandas/sklearn import 없이 데이터만 처리하는 함수)",
+  "데이터 로드만 있는 코드 (read_csv 등 입출력만 있는 코드)",
+  "통계 계산만 있는 스크립트 (fit/transform/split이 없는 코드)",
+];
+
+const NOT_PREPROCESSING_EXAMPLES = [
+  "단순 데이터 로드 (pd.read_csv만 있는 코드)",
+  "파일 I/O만 있는 코드 (저장/불러오기만 있는 코드)",
+  "일반 연산/통계만 있는 코드 (ML 라이브러리 사용이 없는 코드)",
+];
+
 const VERDICT_ORDER = ["확정위반", "의심", "이상없음"];
 
 const VERDICT_COLORS = {
@@ -282,7 +294,7 @@ export default function Home() {
     result?.type === "ok"
       ? { src: BANNER_MAP["통과"], title: "명확하게 의심되는 패턴은 보이지 않아요", text: "전처리·학습 코드를 더 넣어도 좋고, 지금 상태로도 일단 괜찮아 보여요." }
       : result?.type === "error"
-      ? { src: BANNER_MAP["안내필요"], title: "검사 중 문제가 있었어요", text: "잠시 뒤 다시 시도해 주세요." }
+      ? { src: BANNER_MAP["안내필요"], title: "검사 중 문제가 있었어요", text: "다시 시도해 주세요." }
       : null;
 
   return (
@@ -299,7 +311,7 @@ export default function Home() {
             </p>
           </div>
           <button className={styles.exampleLoadButton} onClick={loadExample}>
-            예시 코드 불러오기
+            예시 불러오기
           </button>
         </div>
 
@@ -340,7 +352,7 @@ export default function Home() {
           {collapsed ? (
             <div className={styles.codeAreaFolded}>
               <button className={styles.foldToggle} onClick={() => setCollapsed(false)}>
-                코드 보기 ({code.split("\n").length}줄)
+                코드 펼치기 ({code.split("\n").length}줄)
               </button>
             </div>
           ) : (
@@ -363,7 +375,10 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
             onClick={runCheck}
             disabled={status === "loading"}
           >
-            {status === "loading" ? "검사 중..." : "누수 검사하기"}
+            {status === "loading" ? (
+              <span className="spinner" />
+            ) : "누수 검사하기"}
+            <span className="loading-text">검사 중…</span>
           </button>
           <button
             className="btn-secondary"
@@ -398,49 +413,99 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
             )}
 
             {result.type === "empty" && (
-              <p className={styles.message} style={{ color: "var(--color-ink-mute)" }}>
-                빈 입력이라 검사할 수 없습니다. 전처리 코드를 붙여넣거나 파일을 선택해 주세요.
-              </p>
+              <div className={styles.feedbackCard}>
+                <p className={styles.feedbackTitle}>빈 입력 상태예요</p>
+                <p className={styles.feedbackDesc}>코드를 붙여넣거나 파일을 올려주세요.</p>
+                <div className={styles.feedbackActions}>
+                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                    예시 불러오기
+                  </button>
+                  <button className={styles.feedbackSecondaryButton} onClick={clearContent}>
+                    코드 지우기
+                  </button>
+                </div>
+              </div>
             )}
 
             {result.type === "not-python" && (
-              <p className={styles.message} style={{ color: "var(--color-ink-mute)" }}>
-                파이썬 코드로 보기 어렵습니다. 파이썬 전처리/학습 코드를 붙여넣거나 .py/.ipynb 파일을 선택해 주세요.
-              </p>
+              <div className={styles.feedbackCard}>
+                <p className={styles.feedbackTitle}>파이썬 코드로 보기 어려워요</p>
+                <p className={styles.feedbackDesc}>
+                  파이썬 전처리/학습 코드로 인식되지 않았어요.
+                </p>
+                <p className={styles.feedbackExample}>
+                  <strong>이런 코드면 안 걸려요</strong>: 단순 유틸리티 함수, 데이터 로드만 있는 코드, 통계 계산만 있는 스크립트
+                </p>
+                <p className={styles.feedbackFix}>
+                  <strong>이렇게 바꿔보세요</strong>: pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣거나 .py/.ipynb 파일을 선택해 주세요.
+                </p>
+                <div className={styles.feedbackActions}>
+                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                    예시 불러오기
+                  </button>
+                </div>
+              </div>
             )}
 
             {result.type === "not-preprocessing" && (
-              <p className={styles.message} style={{ color: "var(--color-ink-mute)" }}>
-                ML 전처리/학습 패턴이 충분히 보이지 않습니다. 전처리 코드인지 확인해 주세요.
-              </p>
+              <div className={styles.feedbackCard}>
+                <p className={styles.feedbackTitle}>전처리/학습 패턴이 충분하지 않아요</p>
+                <p className={styles.feedbackDesc}>
+                  ML 전처리·학습 코드가 충분히 보이지 않아요.
+                </p>
+                <p className={styles.feedbackExample}>
+                  <strong>이런 코드면 안 걸려요</strong>: 단순 데이터 로드(pd.read_csv만), 파일 I/O만 있는 코드, 일반 연산/통계만 있는 코드
+                </p>
+                <p className={styles.feedbackFix}>
+                  <strong>이렇게 바꿔보세요</strong>: 전처리·학습 코드를 더 넣어 다시 검사해 보세요.
+                </p>
+                <div className={styles.feedbackActions}>
+                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                    예시 불러오기
+                  </button>
+                </div>
+              </div>
             )}
 
             {result.type === "ok" && (
-              <p className={styles.message}>
-                명확하게 의심되는 패턴이 보이지 않습니다.
-              </p>
+              <div className={styles.feedbackCard}>
+                <p className={styles.feedbackTitle}>명확하게 의심되는 패턴이 보이지 않아요</p>
+                <p className={styles.feedbackDesc}>전처리·학습 코드를 더 넣어도 좋고, 지금 상태로도 일단 괜찮아 보여요.</p>
+                <div className={styles.feedbackActions}>
+                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                    예시 불러오기
+                  </button>
+                  <button className={styles.feedbackSecondaryButton} onClick={clearContent}>
+                    코드로 돌아가기
+                  </button>
+                </div>
+              </div>
             )}
 
             {result.type === "error" && (
-              <div className={styles.items}>
-                {(result.note || result.message) && (
-                  <div className={styles.item}>
-                    <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>{(result.note || result.message) || "검사 실행 중 문제가 생겼습니다."}</p>
-                  </div>
-                )}
+              <div className={styles.feedbackCard}>
+                <p className={styles.feedbackTitle}>검사 중 문제가 있었어요</p>
+                <p className={styles.feedbackDesc}>{(result.note || result.message) || "검사 실행 중 문제가 생겼습니다."}</p>
+                <p className={styles.feedbackFix}>
+                  코드/파일 형식을 다시 확인한 뒤 다시 시도해 주세요. 빈 입력이나 지원되지 않는 형식이 원인일 수 있어요.
+                </p>
+                <div className={styles.feedbackActions}>
+                  <button className={styles.feedbackActionButton} onClick={() => { setResult(null); setStatus("idle"); }}>
+                    다시 시도
+                  </button>
+                  <button className={styles.feedbackSecondaryButton} onClick={loadExample}>
+                    예시 불러오기
+                  </button>
+                </div>
               </div>
             )}
 
             {result.type === "not-connected" && (
-              <div className={styles.items}>
-                <div className={styles.item}>
-                  <p className={styles.itemDesc} style={{ color: "var(--color-ink)" }}>
-                    백엔드가 연결되지 않아 실제 검사 결과를 표시할 수 없습니다.
-                  </p>
-                </div>
-                <div className={styles.item}>
-                  <p className={styles.itemFix} style={{ color: "var(--color-ink-secondary)" }}>
-                    Vercel 환경변수 NEXT_PUBLIC_BACKEND_URL에 백엔드 URL을 설정하면 검사 결과가 표시됩니다.
+              <div className={styles.notConnectedBanner}>
+                <div className={styles.notConnectedBannerInner}>
+                  <p className={styles.notConnectedBannerTitle}>백엔드 미연결 상태예요</p>
+                  <p className={styles.notConnectedBannerDesc}>
+                    지금은 결과 대신 안내만 보여요. 백엔드를 연결하면 검사 결과가 표시됩니다.
                   </p>
                 </div>
               </div>
@@ -526,6 +591,29 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
 
             {result.note && result.type !== "error" && result.type !== "not-connected" && (
               <div className={styles.note} style={{ borderLeftColor: "var(--color-primary)" }}>{result.note}</div>
+            )}
+
+            {result.type === "judgment" && (
+              <div className={styles.resultActions}>
+                <button
+                  className={styles.resultActionButton}
+                  onClick={() => { setResult(null); setCode(EXAMPLE_CODE); setCollapsed(false); }}
+                >
+                  예시 코드로 다시 검사
+                </button>
+                <button
+                  className={styles.resultActionButtonSecondary}
+                  onClick={() => { setResult(null); }}
+                >
+                  코드로 돌아가기
+                </button>
+                <button
+                  className={styles.resultActionButtonTertiary}
+                  onClick={loadExample}
+                >
+                  예시 불러오기
+                </button>
+              </div>
             )}
           </div>
         )}
