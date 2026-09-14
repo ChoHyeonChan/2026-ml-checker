@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from "react";
 import styles from "./Onboarding.module.css";
 
-import characterOnboardingV3 from "../assets/characters/character-onboarding-v3.jpg";
-import characterPassV3 from "../assets/characters/character-pass-v3.jpg";
-import characterAttentionV3 from "../assets/characters/character-attention-v3.jpg";
-import characterFailV3 from "../assets/characters/character-fail-v3.jpg";
+import characterOnboardingV3 from "../assets/characters/character-onboarding-v3.png";
+import characterPassV3 from "../assets/characters/character-pass-v3.png";
+import characterAttentionV3 from "../assets/characters/character-attention-v3.png";
+import characterFailV3 from "../assets/characters/character-fail-v3.png";
 
 const CHARACTER_MAP = {
   onboarding: characterOnboardingV3,
