@@ -321,12 +321,13 @@ class AnalyzerService:
 
         earliest_split = min(context["split_lines"])
         if idx < earliest_split:
-            window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
-            split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
-            has_split_context = any(k in " ".join(window).lower() for k in split_kw)
-            if not has_split_context:
-                return {"level": " 의", "note": "근처에 분할 맥락 부족"}
-            return None
+            return {"level": " 확정위반"}
+
+        window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
+        split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
+        has_split_context = any(k in " ".join(window).lower() for k in split_kw)
+        if not has_split_context:
+            return {"level": " 의", "note": "근처에 분할 맥락 부족"}
 
         return None
 
@@ -354,12 +355,7 @@ class AnalyzerService:
 
         earliest_split = min(context["split_lines"])
         if idx < earliest_split:
-            window = lines[max(0, idx - 8):idx] + lines[idx + 1:idx + 10]
-            split_kw = ["train_test_split", "split", "kfold", "stratify", "cross_val", "partition", "group"]
-            has_split_context = any(k in " ".join(window).lower() for k in split_kw)
-            if not has_split_context:
-                return {"level": " 의", "note": "근처에 분할 맥락 부족"}
-            return None
+            return {"level": " 확정위반"}
 
         return None
 
