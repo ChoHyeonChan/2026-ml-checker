@@ -1,4 +1,4 @@
-"use client";
+use client
 
 import { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
@@ -228,11 +228,7 @@ function VerdictBadge({ verdict }) {
   return (
     <span
       className={styles.verdictBadge}
-      style={{
-        backgroundColor: color.badgeBg,
-        color: color.text,
-        borderColor: color.badge,
-      }}
+      style={{ backgroundColor: color.badgeBg, color: color.text, borderColor: color.badge }}
     >
       {verdict}
     </span>
@@ -260,10 +256,7 @@ function SectionContainer({ title, count, children, defaultCollapsed = false }) 
     <div className={styles.sectionContainer}>
       <div
         className={styles.sectionHead}
-        style={{
-          borderBottomColor: VERDICT_COLORS[title]?.badge ?? "#ccc",
-          borderBottomWidth: "2px",
-        }}
+        style={{ borderBottomColor: VERDICT_COLORS[title]?.badge ?? "#ccc", borderBottomWidth: "2px" }}
       >
         <div className={styles.sectionHeadInner}>
           <VerdictBadge verdict={title} />
@@ -489,7 +482,7 @@ export default function Home() {
                 onChange={handleFileChange}
                 className={styles.fileInput}
               />
-              <span className={styles.fileButton} style={{ color: "var(--color-primary)" }}>파일 선택</span>
+              <span className={styles.fileButton}>파일 선택</span>
             </label>
           </div>
 
@@ -539,9 +532,13 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
             disabled={status === "loading"}
           >
             {status === "loading" ? (
-              <span className="spinner" />
-            ) : "누수 검사하기"}
-            <span className="loading-text">검사 중…</span>
+              <>
+                <span className="spinner" />
+                <span className="loading-text">검사 중…</span>
+              </>
+            ) : (
+              "누수 검사하기"
+            )}
           </button>
           <button
             className="btn-secondary"
@@ -683,10 +680,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                     <div
                       key={verdict}
                       className={styles.summaryBlock}
-                      style={{
-                        background: VERDICT_COLORS[verdict]?.badgeBg ?? "#f7f8fa",
-                        borderColor: VERDICT_COLORS[verdict]?.badge ?? "#e2e6ee",
-                      }}
+                      style={{ background: VERDICT_COLORS[verdict]?.badgeBg ?? "#f7f8fa", borderColor: VERDICT_COLORS[verdict]?.badge ?? "#e2e6ee" }}
                     >
                       <span className={styles.summaryLabel}>{verdict}</span>
                       <span className={styles.summaryCount}>{summary[verdict]}건</span>
@@ -784,3 +778,4 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
     </div>
   );
 }
+
