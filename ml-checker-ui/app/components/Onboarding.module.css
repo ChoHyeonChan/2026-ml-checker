@@ -48,18 +48,18 @@
 
 .title {
   font-size: 28px;
-  margin-bottom: 16px;
+  margin: 0 0 16px 0;
   color: #171717;
 }
 
 .content {
   font-size: 17px;
-  line-height: 1.75;
+  line-height: 1.8;
   color: #222;
 }
 
 .content ul {
-  margin: 10px 0 10px 22px;
+  margin: 12px 0 12px 22px;
 }
 
 .content li {
@@ -96,45 +96,10 @@
   font-size: 15px;
 }
 
-.foot {
-  display: flex;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-top: 1px solid #e5e5e5;
-  background: #fafafa;
-}
-
-.prevButton,
-.nextButton {
-  border: none;
-  padding: 10px 22px;
-  font-size: 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.prevButton {
-  background: transparent;
-  color: #555;
-}
-
-.prevButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.nextButton {
-  background: #171717;
-  color: #fff;
-}
-
-.nextButton:hover {
-  background: #222;
-}
-
 .stepRow {
   display: flex;
-  gap: 32px;
+  flex-direction: column;
+  gap: 0;
   align-items: stretch;
 }
 
@@ -185,6 +150,42 @@
   font-weight: 600;
   color: #171717;
   margin-bottom: 8px;
+}
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 28px;
+  border-top: 1px solid #e5e5e5;
+  background: #fafafa;
+}
+
+.prevButton,
+.nextButton {
+  border: none;
+  padding: 10px 22px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.prevButton {
+  background: transparent;
+  color: #555;
+}
+
+.prevButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.nextButton {
+  background: #171717;
+  color: #fff;
+}
+
+.nextButton:hover {
+  background: #222;
 }
 
 .doneRow {
@@ -273,5 +274,9 @@
 
   .stepBody {
     padding: 20px 18px;
+  }
+
+  .foot {
+    padding: 14px 18px;
   }
 }
