@@ -246,7 +246,7 @@ class AnalyzerService:
             }
 
         # 3) 시계열/순서 관련 전처리 후 fit -> 의심
-        if self._has_time_order_leakage_hint(lines, idx, line, ctx_before, ctx_after):
+        if self._has_time_order_leakage_hint(lines, idx, line, ctx_before, ctx_after, context):
             return {
                 "type": "의심",
                 "fix": "시간 순서가 중요한 데이터라면 분할/전처리 순서를 점검하세요.",
@@ -254,7 +254,7 @@ class AnalyzerService:
             }
 
         # 7) cross-validation + 외부 preprocess 결합
-        if self._has_cross_val_preprocess_leakage_hint(lines, idx, line, ctx_before, ctx_after):
+        if self._has_cross_val_preprocess_leakage_hint(lines, idx, line, ctx_before, ctx_after, context):
             return {
                 "type": "의심",
                 "fix": "cross-validation 내부에 전처리가 포함되도록 Pipeline을 구성하세요.",
@@ -262,7 +262,7 @@ class AnalyzerService:
             }
 
         # 8) groupby/분할 기준 전처리 순서
-        if self._has_groupby_split_preprocess_order_leakage_hint(lines, idx, line, ctx_before, ctx_after):
+        if self._has_groupby_split_preprocess_order_leakage_hint(lines, idx, line, ctx_before, ctx_after, context):
             return {
                 "type": "의심",
                 "fix": "groupby/분할 기준이 여러 데이터에 공유되지 않도록 그룹별 또는 분할별 전처리를 분리하세요.",
@@ -396,6 +396,7 @@ class AnalyzerService:
         line: str,
         ctx_before: list[str],
         ctx_after: list[str],
+        context: dict[str, Any],
     ) -> bool:
         low = line.lower()
         if not self._has_preprocess_keywords(low):
@@ -419,6 +420,7 @@ class AnalyzerService:
         line: str,
         ctx_before: list[str],
         ctx_after: list[str],
+        context: dict[str, Any],
     ) -> bool:
         low = line.lower()
         if not self._has_preprocess_keywords(low):
@@ -452,6 +454,7 @@ class AnalyzerService:
         line: str,
         ctx_before: list[str],
         ctx_after: list[str],
+        context: dict[str, Any],
     ) -> bool:
         low = line.lower()
         if not self._has_preprocess_keywords(low):
