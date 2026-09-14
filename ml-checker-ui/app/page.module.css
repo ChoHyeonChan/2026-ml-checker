@@ -65,7 +65,7 @@
   background: #fff;
   border: 1px solid #e2e6ee;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .cardHeader {
@@ -225,13 +225,14 @@
 }
 
 .characterBannerImage {
-  width: 72px;
-  height: 72px;
+  width: 96px;
+  height: 96px;
   border-radius: 16px;
   overflow: hidden;
   background: #fff;
   flex-shrink: 0;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
 }
 
 .characterBannerImage img {
@@ -239,6 +240,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  image-rendering: auto;
 }
 
 .characterBannerText {
@@ -523,13 +525,14 @@
 }
 
 .characterSectionImage {
-  width: 76px;
-  height: 76px;
+  width: 96px;
+  height: 96px;
   border-radius: 16px;
   overflow: hidden;
-  background: #fff;
+  background: #ffffff;
   flex-shrink: 0;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
 }
 
 .characterSectionImage img {
@@ -537,6 +540,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  image-rendering: auto;
 }
 
 .characterSectionBody {
