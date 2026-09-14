@@ -467,20 +467,6 @@ export default function Home() {
           </div>
         )}
 
-        <div className={styles.exampleSelector}>
-          {EXAMPLE_CODES.map((ex, i) => (
-            <button
-              key={i}
-              className={styles.exampleOption}
-              style={{ borderLeftColor: ex.color, borderLeftWidth: "4px" }}
-              onClick={() => loadExample(ex.code)}
-            >
-              <span className={styles.exampleOptionName}>{ex.name}</span>
-              <span className={styles.exampleOptionDesc}>{ex.desc}</span>
-            </button>
-          ))}
-        </div>
-
         <div className={styles.card} style={{ borderColor: "var(--color-hairline)", backgroundColor: "var(--color-canvas)" }}>
           <div className={styles.cardHeader}>
             <span className={styles.cardLabel} style={{ color: "var(--color-ink)" }}>전처리 코드 입력</span>
