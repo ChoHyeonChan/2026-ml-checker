@@ -6,7 +6,7 @@ import Onboarding from "./components/Onboarding";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
-const EXAMPLE_CODES = [
+const _rawExampleCodes = [
   {
     name: "이상없음 (정상)",
     color: "#22c55e",
@@ -142,6 +142,17 @@ scores = cross_val_score(
     desc: "CV 외부 전처리 + cross_val_score — 의심",
   },
 ];
+
+// 색상 우선순휘: 초록(1) > 노랑(2) > 빨강(3)
+const _colorRank: Record<string, number> = {
+  "#22c55e": 1,
+  "#f59e0b": 2,
+  "#ef4444": 3,
+};
+
+const EXAMPLE_CODES = _rawExampleCodes
+  .slice()
+  .sort((a, b) => (_colorRank[a.color] ?? 99) - (_colorRank[b.color] ?? 99));
 
 const EXAMPLE_CODE = EXAMPLE_CODES[0].code;
 
@@ -592,7 +603,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                   <strong>이렇게 바꿔보세요</strong>: pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣거나 .py/.ipynb 파일을 선택해 주세요.
                 </p>
                 <div className={styles.feedbackActions}>
-                  <button className={styles.feedbackActionButton} onClick={() => loadExample(EXAMPLE_CODES[1].code)}>
+                  <button className={styles.feedbackActionButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
                     예시 불러오기
                   </button>
                 </div>
@@ -749,7 +760,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
               <div className={styles.resultActions}>
                 <button
                   className={styles.resultActionButton}
-                  onClick={() => { setResult(null); setCode(EXAMPLE_CODES[1].code); setCollapsed(false); }}
+                  onClick={() => { setResult(null); setCode(EXAMPLE_CODES[0].code); setCollapsed(false); }}
                 >
                   예시 코드로 다시 검사
                 </button>
