@@ -4,16 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
 import Onboarding from "./components/Onboarding";
 
-const CHARACTER_MAP = {
-  확정위반: "/characters/character-fail-v3.png",
-  의심: "/characters/character-attention-v3.png",
-  이상없음: "/characters/character-pass-v3.png",
-};
-const BANNER_MAP = {
-  통과: "/characters/character-pass-v3.png",
-  안내필요: "/characters/character-attention-v3.png",
-};
-
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
 const EXAMPLE_CODE = `import pandas as pd
@@ -56,14 +46,14 @@ const VERDICT_COLORS = {
 };
 
 const CHARACTER_MAP = {
-  확정위반: characterFailV3,
-  의심: characterAttentionV3,
-  이상없음: characterPassV3,
+  확정위반: "/characters/character-fail-v3.png",
+  의심: "/characters/character-attention-v3.png",
+  이상없음: "/characters/character-pass-v3.png",
 };
 
 const BANNER_MAP = {
-  통과: characterPassV3,
-  안내필요: characterAttentionV3,
+  통과: "/characters/character-pass-v3.png",
+  안내필요: "/characters/character-attention-v3.png",
 };
 
 function CharacterBanner({ src, title, text }) {
@@ -81,7 +71,7 @@ function CharacterBanner({ src, title, text }) {
 }
 
 function CharacterSection({ verdict, line, desc, fix }) {
-  const src = CHARACTER_MAP[verdict] ?? characterAttentionV3;
+  const src = CHARACTER_MAP[verdict] ?? "/characters/character-attention-v3.png";
   const color = VERDICT_COLORS[verdict] ?? VERDICT_COLORS.의심;
   return (
     <div className={styles.characterSection}>
