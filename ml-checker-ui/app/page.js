@@ -145,7 +145,7 @@ export default function Home() {
             onClick={runCheck}
             disabled={status === "loading"}
           >
-            {status === "loading" ? "검사 중..." : "누수 검사하기"}
+            {status === "loading" ? "검사 중..." : "검사하기"}
           </button>
           <button
             className={styles.clearButton}
