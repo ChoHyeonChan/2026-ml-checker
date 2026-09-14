@@ -85,6 +85,50 @@
   background: #e5e7eb;
 }
 
+.exampleSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fafbfc;
+  border: 1px solid #e2e6ee;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.exampleOption {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #e2e6ee;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.exampleOption:hover {
+  border-color: #3b82f6;
+  background: #f5f8ff;
+}
+
+.exampleOptionName {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+.exampleOptionDesc {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
 .card {
   background: #fff;
   border: 1px solid #e2e6ee;
