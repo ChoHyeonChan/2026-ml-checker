@@ -3,11 +3,16 @@
 import React, { useState, useEffect } from "react";
 import styles from "./Onboarding.module.css";
 
+import characterOnboardingV3 from "../assets/characters/character-onboarding-v3.jpg";
+import characterPassV3 from "../assets/characters/character-pass-v3.jpg";
+import characterAttentionV3 from "../assets/characters/character-attention-v3.jpg";
+import characterFailV3 from "../assets/characters/character-fail-v3.jpg";
+
 const CHARACTER_MAP = {
-  onboarding: "/character-onboarding-v3.jpg",
-  pass: "/character-pass-v3.jpg",
-  attention: "/character-attention-v3.jpg",
-  fail: "/character-fail-v3.jpg",
+  onboarding: characterOnboardingV3,
+  pass: characterPassV3,
+  attention: characterAttentionV3,
+  fail: characterFailV3,
 };
 
 const STEPS = [
