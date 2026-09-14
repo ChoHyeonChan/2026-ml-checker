@@ -12,7 +12,7 @@
 .card {
   background: var(--brand-light, #ffffff);
   color: var(--foreground, #171717);
-  max-width: 820px;
+  max-width: 1000px;
   width: 100%;
   border-radius: 18px;
   border: 1px solid #d0d0d0;
@@ -46,19 +46,15 @@
   color: #171717;
 }
 
-.body {
-  padding: 20px;
-}
-
 .title {
-  font-size: 24px;
-  margin-bottom: 14px;
+  font-size: 28px;
+  margin-bottom: 16px;
   color: #171717;
 }
 
 .content {
-  font-size: 16px;
-  line-height: 1.7;
+  font-size: 17px;
+  line-height: 1.75;
   color: #222;
 }
 
@@ -67,7 +63,7 @@
 }
 
 .content li {
-  margin: 5px 0;
+  margin: 6px 0;
   color: #222;
 }
 
@@ -80,13 +76,13 @@
 }
 
 .exampleButton {
-  margin-top: 14px;
-  padding: 9px 20px;
+  margin-top: 16px;
+  padding: 10px 22px;
   border: 1px solid #d0d0d0;
   background: #fff;
   color: #171717;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   border-radius: 6px;
 }
 
@@ -95,15 +91,15 @@
 }
 
 .closeNote {
-  margin-top: 14px;
+  margin-top: 16px;
   color: #555;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .foot {
   display: flex;
   justify-content: space-between;
-  padding: 14px 20px;
+  padding: 16px 20px;
   border-top: 1px solid #e5e5e5;
   background: #fafafa;
 }
@@ -111,8 +107,8 @@
 .prevButton,
 .nextButton {
   border: none;
-  padding: 9px 20px;
-  font-size: 15px;
+  padding: 10px 22px;
+  font-size: 16px;
   border-radius: 6px;
   cursor: pointer;
 }
@@ -136,6 +132,97 @@
   background: #222;
 }
 
+.stepRow {
+  display: flex;
+  gap: 32px;
+  align-items: stretch;
+}
+
+.stepBody {
+  flex: 1;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.characterBlock {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: #fafafa;
+  border-left: 1px solid #e5e5e5;
+  padding: 20px 18px;
+  text-align: center;
+}
+
+.characterImage {
+  width: 200px;
+  height: 200px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+  margin-bottom: 16px;
+}
+
+.characterImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.characterText {
+  font-size: 16px;
+  color: #222;
+  line-height: 1.6;
+}
+
+.characterTitle {
+  font-weight: 600;
+  color: #171717;
+  margin-bottom: 8px;
+}
+
+.doneRow {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  padding: 28px 32px;
+  text-align: left;
+}
+
+.doneBody {
+  flex: 1;
+  padding: 0 8px;
+}
+
+.doneTitle {
+  font-size: 24px;
+  color: #171717;
+  margin: 0 0 10px 0;
+}
+
+.doneMessage {
+  font-size: 17px;
+  color: #333;
+  margin: 0 0 8px 0;
+  line-height: 1.6;
+}
+
+.doneSub {
+  font-size: 15px;
+  color: #555;
+  margin: 0 0 18px 0;
+}
+
+.doneActions {
+  margin-top: 16px;
+}
+
 .done {
   display: flex;
   flex-direction: column;
@@ -145,8 +232,8 @@
 }
 
 .doneCharacter {
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
   overflow: hidden;
   background: #fff;
@@ -161,95 +248,7 @@
   display: block;
 }
 
-.doneTitle {
-  font-size: 20px;
-  color: #171717;
-  margin: 0 0 8px 0;
-}
-
-.doneMessage {
-  font-size: 15px;
-  color: #333;
-  margin: 0 0 6px 0;
-}
-
-.doneSub {
-  font-size: 14px;
-  color: #555;
-  margin: 0;
-}
-
-.doneRow {
-  display: flex;
-  gap: 28px;
-  align-items: center;
-  padding: 28px 32px;
-  text-align: left;
-}
-
-.doneBody {
-  flex: 1;
-}
-
-.doneActions {
-  margin-top: 16px;
-}
-
-.stepRow {
-  display: flex;
-  gap: 28px;
-  align-items: stretch;
-}
-
-.stepBody {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.characterBlock {
-  width: 220px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #fafafa;
-  border-left: 1px solid #e5e5e5;
-  padding: 20px 16px;
-  text-align: center;
-}
-
-.characterImage {
-  width: 168px;
-  height: 168px;
-  border-radius: 22px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
-  margin-bottom: 14px;
-}
-
-.characterImage img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.characterText {
-  font-size: 15px;
-  color: #222;
-  line-height: 1.55;
-}
-
-.characterTitle {
-  font-weight: 600;
-  color: #171717;
-  margin-bottom: 8px;
-}
-
-@media (max-width: 680px) {
+@media (max-width: 760px) {
   .card {
     max-width: 100%;
   }
@@ -267,8 +266,12 @@
   }
 
   .characterImage {
-    width: 132px;
-    height: 132px;
-    margin-bottom: 12px;
+    width: 150px;
+    height: 150px;
+    margin-bottom: 14px;
+  }
+
+  .stepBody {
+    padding: 20px 18px;
   }
 }
