@@ -153,7 +153,7 @@ export default function Onboarding({ onDismiss }) {
             </div>
           </div>
         ) : (
-          <React.Fragment>
+          <div className={styles.cardBody}>
             <div className={styles.head}>
               <span className={styles.stepIndicator}>{step + 1} / {STEPS.length}</span>
               <button type="button" className={styles.skipButton} onClick={close}>
@@ -184,8 +184,8 @@ export default function Onboarding({ onDismiss }) {
                 {step === STEPS.length - 1 ? "확인했으니 닫기" : "다음"}
               </button>
             </div>
-          </React.Fragment>
-        )
+          </div>
+        )}
       </div>
     </div>
   );
