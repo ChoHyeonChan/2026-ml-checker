@@ -194,7 +194,7 @@ export default function Home() {
     result?.type === "ok"
       ? { src: BANNER_MAP["통과"], title: "명확하게 의심되는 패턴은 보이지 않아요", text: "전처리·학습 코드를 더 넣어도 좋고, 지금 상태로도 일단 괜찮아 보여요." }
       : result?.type === "error"
-      ? { src: BANNER_MAP["안내필요"], title: "검사 중 문제가 있었어요", text: "잠시 뒤 다시 시도해 주세요." }
+      ? { src: BANNER_MAP["안내필요"], title: "검사 중 문제가 있었어요", text: "다시 시도해 주세요." }
       : null;
 
   return (
@@ -211,7 +211,7 @@ export default function Home() {
             </p>
           </div>
           <button className={styles.exampleLoadButton} onClick={loadExample}>
-            예시 코드 불러오기
+            예시 불러오기
           </button>
         </div>
 
@@ -252,7 +252,7 @@ export default function Home() {
           {collapsed ? (
             <div className={styles.codeAreaFolded}>
               <button className={styles.foldToggle} onClick={() => setCollapsed(false)}>
-                코드 보기 ({code.split("\n").length}줄)
+                코드 펼치기 ({code.split("\n").length}줄)
               </button>
             </div>
           ) : (
@@ -308,10 +308,10 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                 <p className={styles.feedbackDesc}>코드를 붙여넣거나 파일을 올려주세요.</p>
                 <div className={styles.feedbackActions}>
                   <button className={styles.feedbackActionButton} onClick={loadExample}>
-                    예시 코드 불러오기
+                    예시 불러오기
                   </button>
                   <button className={styles.feedbackSecondaryButton} onClick={clearContent}>
-                    입력 초기화
+                    코드 지우기
                   </button>
                 </div>
               </div>
@@ -331,7 +331,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                 </p>
                 <div className={styles.feedbackActions}>
                   <button className={styles.feedbackActionButton} onClick={loadExample}>
-                    예시 코드 불러오기
+                    예시 불러오기
                   </button>
                 </div>
               </div>
@@ -351,7 +351,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                 </p>
                 <div className={styles.feedbackActions}>
                   <button className={styles.feedbackActionButton} onClick={loadExample}>
-                    예시 코드 불러오기
+                    예시 불러오기
                   </button>
                 </div>
               </div>
@@ -363,7 +363,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                 <p className={styles.feedbackDesc}>전처리·학습 코드를 더 넣어도 좋고, 지금 상태로도 일단 괜찮아 보여요.</p>
                 <div className={styles.feedbackActions}>
                   <button className={styles.feedbackActionButton} onClick={loadExample}>
-                    예시 코드 불러오기
+                    예시 불러오기
                   </button>
                   <button className={styles.feedbackSecondaryButton} onClick={clearContent}>
                     코드로 돌아가기
@@ -384,7 +384,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                     다시 시도
                   </button>
                   <button className={styles.feedbackSecondaryButton} onClick={loadExample}>
-                    예시 코드 불러오기
+                    예시 불러오기
                   </button>
                 </div>
               </div>
