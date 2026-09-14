@@ -1,4 +1,4 @@
-use client
+"use client";
 
 import { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
@@ -778,4 +778,3 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
     </div>
   );
 }
-
