@@ -291,11 +291,13 @@ export default function Home() {
     이상없음: true,
   }));
   const [showExamplePopup, setShowExamplePopup] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const codeRef = useRef(null);
   const lineRefs = useRef([]);
 
   const handleOnboardingDismiss = (payload) => {
+    setShowOnboarding(false);
     if (payload && payload.example) {
       setCode(payload.example);
     }
@@ -432,7 +434,7 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      <Onboarding onDismiss={handleOnboardingDismiss} />
+      <Onboarding onDismiss={handleOnboardingDismiss} forceShow={showOnboarding} />
       <main className={styles.main}>
         <div className={styles.header}>
           <div className={styles.brand}>
@@ -442,9 +444,14 @@ export default function Home() {
               <p className={styles.subtitle}>전처리·학습 코드에서 데이터 누수 의심 패턴을 줄 번호와 수정 방향 위주로 확인합니다.</p>
             </div>
           </div>
-          <button className={styles.exampleLoadButton} onClick={openExamplePopup}>
-            예시로 테스트하기
-          </button>
+          <div className={styles.headerButtons}>
+            <button className={styles.exampleLoadButton} onClick={openExamplePopup}>
+              예시로 테스트하기
+            </button>
+            <button className={styles.firstTimeButton} onClick={() => setShowOnboarding(true)}>
+              처음이에요?
+            </button>
+          </div>
         </div>
 
         {showExamplePopup && (
