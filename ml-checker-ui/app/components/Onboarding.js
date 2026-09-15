@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import styles from "./Onboarding.module.css";
 
 
-
 const CHARACTER_MAP = {
   onboarding: "/characters/character-onboarding-v3.png",
   pass: "/characters/character-pass-v3.png",
@@ -108,16 +107,20 @@ const ONBOARDING_FINISH_MESSAGES = [
   "결과가 줄 번호와 수정 방향 위주로 나와요.",
 ];
 
-export default function Onboarding({ onDismiss }) {
+export default function Onboarding({ onDismiss, forceShow = false }) {
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (forceShow) {
+      setVisible(true);
+      return;
+    }
     if (localStorage.getItem(DONE_KEY) === "1") return;
     setVisible(true);
-  }, []);
+  }, [forceShow]);
 
   const close = () => {
     if (typeof window === "undefined") return;
