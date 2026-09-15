@@ -29,7 +29,7 @@ class AnalyzeResponse(BaseModel):
     warnings: list[str] = []
     errors: list[str] = []
     not_preprocessing: bool = False
-    llm_explanation: dict[str, Any] | None = None
+    llm_explanation: Any = None
 
 
 class AnalyzeFileResponse(BaseModel):
