@@ -4,7 +4,7 @@
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
-  padding: 16px 24px;
+  padding: 10px 24px 24px;
   background: #f7f8fa;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
@@ -15,7 +15,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 /* Hero 배경 */
@@ -24,7 +24,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 280px;
+  height: 260px;
   background: linear-gradient(180deg, #f0f4ff 0%, #f7f8fa 100%);
   z-index: 0;
   pointer-events: none;
@@ -41,7 +41,7 @@
   position: relative;
   z-index: 1;
   flex-wrap: wrap;
-  padding: 4px 0;
+  padding: 0 0 6px;
 }
 
 .headerLeft {
@@ -89,7 +89,7 @@
   font-size: 15px;
   color: #333;
   margin-top: 6px;
-  max-width: 680px;
+  max-width: 720px;
   line-height: 1.5;
 }
 
@@ -153,6 +153,41 @@
   border-color: #93c5fd;
 }
 
+/* 가치 제안 카드 */
+.valueProps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.valuePropCard {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e2e6ee;
+  border-radius: 12px;
+}
+
+.valuePropIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.valuePropTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin: 0 0 4px 0;
+}
+
+.valuePropDesc {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* 카드 */
 .card {
   background: #fff;
@@ -187,7 +222,7 @@
 /* 코드 영역 */
 .codeArea {
   width: 100%;
-  min-height: 180px;
+  min-height: 160px;
   padding: 14px;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 13px;
@@ -196,6 +231,10 @@
   resize: vertical;
   background: #fff;
   color: #111;
+}
+
+.codeArea::placeholder {
+  color: #7a7f87;
 }
 
 .codeArea:focus {
@@ -233,11 +272,10 @@
   justify-content: flex-start;
   gap: 10px;
   flex-wrap: wrap;
-  padding: 0 16px 14px;
+  padding: 12px 16px;
   background: #fff;
   border-top: 1px solid #e2e6ee;
-  border-radius: 0 0 12px 12px;
-  margin-top: -1px;
+  border-bottom: 1px solid #e2e6ee;
 }
 
 /* 파일 관련 */
@@ -592,41 +630,6 @@
 .examplePopupOptionDesc {
   font-size: 12px;
   color: #555;
-}
-
-/* 가치 제안 카드 */
-.valueProps {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.valuePropCard {
-  display: flex;
-  gap: 14px;
-  padding: 16px;
-  background: #fff;
-  border: 1px solid #e2e6ee;
-  border-radius: 12px;
-}
-
-.valuePropIcon {
-  font-size: 24px;
-  flex-shrink: 0;
-}
-
-.valuePropTitle {
-  font-size: 15px;
-  font-weight: 600;
-  color: #111;
-  margin: 0 0 4px 0;
-}
-
-.valuePropDesc {
-  font-size: 13px;
-  color: #333;
-  line-height: 1.5;
-  margin: 0;
 }
 
 /* 요약 상단 */
