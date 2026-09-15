@@ -496,8 +496,7 @@ export default function Home() {
       <div className={styles.heroBg} />
       <Onboarding onDismiss={handleOnboardingDismiss} forceShow={showOnboarding} />
       <main className={styles.main}>
-        {/* Hero 섹션 */}
-        <div className={styles.hero}>
+        <div className={styles.header}>
           <div className={styles.brand}>
             <img className={styles.brandLogo} src="/logo-leakage-check.png" alt="Leakage Check 로고" />
             <div className={styles.brandText}>
