@@ -23,7 +23,7 @@ const STEPS = [
     ),
     character: {
       src: CHARACTER_MAP.onboarding,
-      title: "옆에서 같이 봐주는 느낌",
+      title: "여러분 옆에서 도와드릴게요",
       text: "코드를 넣으면 자동으로 의심되는 부분을 골라주고, 왜 의심인지도 짧게 알려줘요.",
     },
   },
