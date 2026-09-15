@@ -198,3 +198,65 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
     result = analyzer.analyze_code(code)
     assert result["classification"] == "의심"
     assert result["summary"]["의심"] >= 1
+
+
+# ========== 12. stratify + 타겟 인코딩이 split 전이면 의심 ==========
+def test_stratify_target_encoding_leakage(analyzer):
+    code = """
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+df['target_enc'] = df['target'].map({0: 'A', 1: 'B'})
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
+"""
+    result = analyzer.analyze_code(code)
+    assert result["classification"] == "의심"
+    assert result["summary"]["의심"] >= 1
+
+
+# ========== 13. 피처 선택/생성(SelectKBest, PCA 등)이 split 전이면 의심 ==========
+def test_feature_selection_before_split(analyzer):
+    code = """
+from sklearn.model_selection import train_test_split
+from sklearn.feature_selection import SelectKBest
+from sklearn.preprocessing import StandardScaler
+
+selector = SelectKBest()
+X_selected = selector.fit_transform(X, y)
+X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.2)
+"""
+    result = analyzer.analyze_code(code)
+    assert result["classification"] == "의심"
+    assert result["summary"]["의심"] >= 1
+
+
+# ========== 14. SMOTE 등 오버샘플링이 split 전이면 확정위반 ==========
+def test_sampling_before_split(analyzer):
+    code = """
+from imblearn.over_sampling import SMOTE
+from sklearn.model_selection import train_test_split
+
+smote = SMOTE()
+X_resampled, y_resampled = smote.fit_resample(X, y)
+X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, test_size=0.2)
+"""
+    result = analyzer.analyze_code(code)
+    assert result["classification"] == "확정위반"
+    assert result["summary"]["확정위반"] >= 1
+
+
+# ========== 15. GroupKFold + 그룹 전처리가 split 전이면 의심 ==========
+def test_group_split_preprocess_leakage(analyzer):
+    code = """
+from sklearn.model_selection import GroupKFold
+from sklearn.preprocessing import StandardScaler
+
+df['group_enc'] = df.groupby('group')['value'].transform('mean')
+gkf = GroupKFold(n_splits=5)
+for train_idx, test_idx in gkf.split(X, y, groups=df['group']):
+    X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+    y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
+"""
+    result = analyzer.analyze_code(code)
+    assert result["classification"] == "의심"
+    assert result["summary"]["의심"] >= 1
