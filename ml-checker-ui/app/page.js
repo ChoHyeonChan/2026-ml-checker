@@ -276,6 +276,29 @@ function SectionContainer({ title, count, children, defaultCollapsed = false }) 
   );
 }
 
+function LlmExplanation({ llmExplanation }) {
+  if (!llmExplanation) return null;
+  const { summary_text, item_explanations } = llmExplanation;
+  return (
+    <div className={styles.llmExplanation}>
+      <div className={styles.llmSummary}>
+        <h3 className={styles.llmSummaryTitle}>AI 설명</h3>
+        <p className={styles.llmSummaryText}>{summary_text}</p>
+      </div>
+      {item_explanations && item_explanations.length > 0 && (
+        <div className={styles.llmItemExplanations}>
+          {item_explanations.map((item, i) => (
+            <div key={i} className={styles.llmItemExplanation}>
+              <span className={styles.llmItemLine}>{item.line}줄</span>
+              <p className={styles.llmItemExplanationText}>{item.explanation}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState(null);
@@ -578,6 +601,8 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                 text={banner.text}
               />
             )}
+
+            <LlmExplanation llmExplanation={result.llm_explanation} />
 
             {result.type === "empty" && (
               <div className={styles.feedbackCard}>
