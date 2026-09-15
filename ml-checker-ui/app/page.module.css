@@ -26,6 +26,12 @@
   flex-wrap: wrap;
 }
 
+.headerButtons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -83,6 +89,42 @@
 
 .exampleLoadButton:hover {
   background: #e5e7eb;
+}
+
+.firstTimeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  background: #fff;
+  border: 1px solid #e2e6ee;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.firstTimeButton:hover {
+  background: #f3f4f6;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.firstTimeButton .bubble {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #b91c1c;
+  border-radius: 50%;
+  animation: pulse-bubble 2s infinite;
+}
+
+@keyframes pulse-bubble {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.15); }
 }
 
 .exampleSelector {
@@ -409,7 +451,7 @@
   margin-bottom: 12px;
 }
 
-.notConnectedBannnerInner {
+.notConnectedBannerInner {
   display: flex;
   gap: 8px;
   align-items: flex-start;
