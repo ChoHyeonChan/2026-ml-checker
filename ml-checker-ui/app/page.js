@@ -192,6 +192,25 @@ const BANNER_MAP = {
   안내필요: "/characters/character-attention-v3.png",
 };
 
+// 가치 제안 카드 데이터
+const VALUE_PROPS = [
+  {
+    icon: "🔍",
+    title: "줄 번호 + 수정 방향만",
+    desc: "긴 설명 대신 의심되는 줄과 고칠 방향만 짧게 보여줘서, 바로 옆에 두고 고치기 편해요.",
+  },
+  {
+    icon: "⚡",
+    title: "붙여넣기만 하면 끝",
+    desc: "pandas/sklearn 쓰는 전처리 코드를 붙여넣거나 .py/.ipynb 파일을 올리면 바로 검사해요. 별도 설정 없이 쓸 수 있어요.",
+  },
+  {
+    icon: "🔒",
+    title: "확정위반·의심·이상없음 3분류",
+    desc: "코드만 보고 확실히 문제인 부분, 한 번 확인해볼 부분, 문제 없는 부분을 나눠서 보여줘서 과잉 판정 없이 점검해요.",
+  },
+];
+
 function CharacterBanner({ src, title, text }) {
   return (
     <div className={styles.characterBanner}>
@@ -202,6 +221,16 @@ function CharacterBanner({ src, title, text }) {
         <p className={styles.characterBannerTitle}>{title}</p>
         <p>{text}</p>
       </div>
+    </div>
+  );
+}
+
+function ValuePropCard({ icon, title, desc }) {
+  return (
+    <div className={styles.valuePropCard}>
+      <div className={styles.valuePropIcon}>{icon}</div>
+      <h3 className={styles.valuePropTitle}>{title}</h3>
+      <p className={styles.valuePropDesc}>{desc}</p>
     </div>
   );
 }
@@ -244,7 +273,6 @@ function VerdictBadge({ verdict }) {
 }
 
 function SummaryTop({ summary }) {
-  // 신호 3가지(확정위반, 의심, 이상없음) 모두 항상 출력
   const parts = [
     `확정위반 ${summary.확정위반}건`,
     `의심 ${summary.의심}건`,
@@ -319,7 +347,7 @@ export default function Home() {
   const [sectionCollapsed, setSectionCollapsed] = useState(() => ({
     확정위반: false,
     의심: true,
-    이상없음: true,
+    이상있음: true,
   }));
   const [showExamplePopup, setShowExamplePopup] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -465,9 +493,11 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.heroBg} />
       <Onboarding onDismiss={handleOnboardingDismiss} forceShow={showOnboarding} />
       <main className={styles.main}>
-        <div className={styles.header}>
+        {/* Hero 섹션 */}
+        <div className={styles.hero}>
           <div className={styles.brand}>
             <img className={styles.brandLogo} src="/logo-leakage-check.png" alt="Leakage Check 로고" />
             <div className={styles.brandText}>
@@ -480,9 +510,16 @@ export default function Home() {
               예시로 테스트하기
             </button>
             <button className={styles.firstTimeButton} onClick={() => setShowOnboarding(true)}>
-              처음이에요?
+              <span className={styles.bubble} /> 처음이에요?
             </button>
           </div>
+        </div>
+
+        {/* 가치 제안 카드 */}
+        <div className={styles.valueProps}>
+          {VALUE_PROPS.map((vp, i) => (
+            <ValuePropCard key={i} {...vp} />
+          ))}
         </div>
 
         {showExamplePopup && (
@@ -497,7 +534,7 @@ export default function Home() {
                   <button
                     key={i}
                     className={styles.examplePopupOption}
-                    style={{ borderLeftColor: ex.color, borderLeftWidth: "4px" }}
+                    style={{ borderLeftColor: ex.color, borderLeftWidth: "3px" }}
                     onClick={() => loadExample(ex.code)}
                   >
                     <span className={styles.examplePopupOptionName}>{ex.name}</span>
