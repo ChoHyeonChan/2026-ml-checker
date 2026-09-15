@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import JSONResponse
+import logging
 
 from app.schemas import (
     AnalyzeRequest,
@@ -11,11 +12,17 @@ from app.schemas import (
     JudgmentResult,
 )
 from app.services.analyzer import AnalyzerService
+from app.services.solar_service import SolarService
 
 router = APIRouter()
 
 # 단일 analyzer 인스턴스 (MVP P0)
 analyzer = AnalyzerService()
+
+# SolarService 인스턴스 (API 키 설정 시 LLM 설명 생성)
+solar = SolarService()
+
+logger = logging.getLogger(__name__)
 
 
 def _to_ui_result(item) -> dict:
@@ -73,7 +80,31 @@ def _build_ui_response(resp: AnalyzeResponse | AnalyzeFileResponse) -> dict:
 @router.post("/analyze", response_model=AnalyzeResponse)
 async def analyze_code(body: AnalyzeRequest) -> AnalyzeResponse:
     result = analyzer.analyze_code(body.code)
-    return AnalyzeResponse(**result)
+
+    # LLM 설명 추가 (API 키 설정 시)
+    llm_explanation = None
+    try:
+        llm = solar.generate_result_explanation(
+            classification=result.get("classification", "이상없음"),
+            summary=result.get("summary", {}),
+            results=result.get("results", []),
+            code_preview=body.code[:500],
+        )
+        if "content" in llm:
+            llm_explanation = llm["content"]
+    except Exception as e:
+        logger.error(f"SolarService error: {e}")
+
+    return AnalyzeResponse(
+        classification=result.get("classification", "이상없음"),
+        summary=result.get("summary", {}),
+        results=[_to_judgment_result(r) for r in result.get("results", [])],
+        message=result.get("message", ""),
+        warnings=result.get("warnings", []),
+        errors=result.get("errors", []),
+        not_preprocessing=result.get("not_preprocessing", False),
+        llm_explanation=llm_explanation,
+    )
 
 
 @router.post("/analyze/file", response_model=AnalyzeFileResponse)
@@ -91,6 +122,8 @@ async def analyze_file(file: UploadFile = File(...)) -> AnalyzeFileResponse:
                 "message": "지원하지 않는 파일 형식입니다.",
                 "warnings": [],
                 "errors": [f"지원 형식: {', '.join(sorted(allowed))}."],
+                "file_name": name,
+                "total_lines": None,
                 "not_preprocessing": False,
             },
         )
