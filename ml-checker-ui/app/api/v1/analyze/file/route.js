@@ -77,13 +77,22 @@ function classifyFromBackend(resp) {
 
   const backendNotPreprocessing = Boolean(resp.not_preprocessing);
 
+  let llm_explanation = resp.llm_explanation;
+  if (typeof llm_explanation === "string") {
+    try {
+      llm_explanation = JSON.parse(llm_explanation);
+    } catch {
+      llm_explanation = null;
+    }
+  }
+
   return {
     type: backendNotPreprocessing ? "not-preprocessing" : classification === "이상없음" ? "ok" : "judgment",
     badge,
     items,
     note: note.join("\n ") || null,
     summary,
-    llm_explanation: resp.llm_explanation,
+    llm_explanation,
   };
 }
 
