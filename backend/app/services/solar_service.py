@@ -4,7 +4,7 @@ from typing import Any
 
 SOLAR_API_URL = os.getenv("SOLAR_API_URL", "https://api.upstage.ai/v1/chat/completions")
 SOLAR_API_KEY = os.getenv("SOLAR_API_KEY", "")
-SOLAR_MODEL = os.getenv("SOLAR_MODEL", "solar-pro-4")
+SOLAR_MODEL = os.getenv("SOLAR_MODEL", "solar-pro4")
 
 
 class SolarService:
