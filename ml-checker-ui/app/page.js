@@ -6,19 +6,155 @@ import Onboarding from "./components/Onboarding";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
-const EXAMPLE_CODE = `import pandas as pd
+const _rawExampleCodes = [
+  {
+    name: "이상없음 (정상)",
+    color: "#22c55e",
+    code: `import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+df = pd.read_csv("customer.csv")
+X = df.drop("churn", axis=1)
+y = df["churn"]
+
+# 분할 먼저
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# train에만 fit, test는 transform만
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train_scaled, y_train)
+
+train_acc = model.score(X_train_scaled, y_train)
+test_acc = model.score(X_test_scaled, y_test)
+print(f"train: {train_acc:.3f}, test: {test_acc:.3f}")`,
+    desc: "분할 후 전처리, test는 transform만 — 이상없음",
+  },
+  {
+    name: "확정위반 #1 (타겟 groupby)",
+    color: "#ef4444",
+    code: `import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+df = pd.read_csv("customer.csv")
+
+# 타겟 기준 groupby 연산 (타겟 정보 직접 사용)
+df["age_enc"] = df.groupby("churn")["age"].transform("mean")
+
+# 분할 전 정제 (테스트 정보 영향)
+df = df.dropna()
+
+X = df.drop("churn", axis=1)
+y = df["churn"]
+
+# 전체 데이터로 fit_transform (분할 전 스케일링)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2, random_state=42
+)
+
+model = LogisticRegression()
+model.fit(X_train, y_train)`,
+    desc: "타겟 groupby + 분할 전 정제 + 전체 fit_transform — 확정위반",
+  },
+  {
+    name: "확정위반 #2 (test 데이터로 fit)",
+    color: "#ef4444",
+    code: `from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+model = LogisticRegression()
+# test 데이터로 모델 fit — 명백한 누수
+model.fit(X_test, y_test)`,
+    desc: "test 데이터로 모델 fit — 확정위반",
+  },
+  {
+    name: "의심 #1 (시계열 shuffle)",
+    color: "#f59e0b",
+    code: `import pandas as pd
+from sklearn.model_selection import train_test_split
+
+df = pd.read_csv("sales.csv")
+df = df.sample(frac=1)  # 시계열 데이터 shuffle
+df["date"] = pd.to_datetime(df["date"])
+
+X = df.drop("sales", axis=1)
+y = df["sales"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)`,
+    desc: "시계열 데이터 shuffle 후 무작위 split - 의심",
+  },
+  {
+    name: "확정위반+의심 (전체 fit + 정제)",
+    color: "#ef4444",
+    code: `import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 df = pd.read_csv("data.csv")
+
+# 분할 전 정제
+df = df.dropna()
+
 X = df.drop("target", axis=1)
 y = df["target"]
 
-# 분할 전에 스케일링을 해버린 예
+# 전체 데이터로 fit_transform (분할 전 스케일링)
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)`;
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2
+)
+
+model = LogisticRegression()
+model.fit(X_train, y_train)`,
+    desc: "분할 전 정제 + 전체 fit_transform - 확정위반 + 의심",
+  },
+  {
+    name: "의심 #2 (CV 외부 전처리)",
+    color: "#f59e0b",
+    code: `from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+# 외부 전처리 (CV 바깥에서 fit_transform)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# CV 실행 (전처리가 CV 내부에 없음)
+scores = cross_val_score(
+    LogisticRegression(), X_scaled, y, cv=5
+)`,
+    desc: "CV 외부 전처리 + cross_val_score - 의심",
+  },
+];
+
+// 색상 우선순위: 초록(1) > 노랑(2) > 빨강(3)
+const _colorRank = {
+  "#22c55e": 1,
+  "#f59e0b": 2,
+  "#ef4444": 3,
+};
+
+const EXAMPLE_CODES = _rawExampleCodes
+  .slice()
+  .sort((a, b) => (_colorRank[a.color] ?? 99) - (_colorRank[b.color] ?? 99));
+
+const EXAMPLE_CODE = EXAMPLE_CODES[0].code;
 
 const LEAKAGE_EXAMPLE = "예시: df['x_enc'] = df.groupby('y')['x'].transform('mean')";
 
@@ -56,6 +192,25 @@ const BANNER_MAP = {
   안내필요: "/characters/character-attention-v3.png",
 };
 
+// 가치 제안 카드 데이터
+const VALUE_PROPS = [
+  {
+    icon: "🔍",
+    title: "줄 번호 + 수정 방향만",
+    desc: "긴 설명 대신 의심되는 줄과 고칠 방향만 짧게 보여줘서, 바로 옆에 두고 고치기 편해요.",
+  },
+  {
+    icon: "⚡",
+    title: "붙여넣기만 하면 끝",
+    desc: "pandas/sklearn 쓰는 전처리 코드를 붙여넣거나 .py/.ipynb 파일을 올리면 바로 검사해요. 별도 설정 없이 쓸 수 있어요.",
+  },
+  {
+    icon: "🔒",
+    title: "확정위반·의심·이상없음 3분류",
+    desc: "코드만 보고 확실히 문제인 부분, 한 번 확인해볼 부분, 문제 없는 부분을 나눠서 보여줘서 과잉 판정 없이 점검해요.",
+  },
+];
+
 function CharacterBanner({ src, title, text }) {
   return (
     <div className={styles.characterBanner}>
@@ -70,9 +225,18 @@ function CharacterBanner({ src, title, text }) {
   );
 }
 
-function CharacterSection({ verdict, line, desc, fix }) {
+function ValuePropCard({ icon, title, desc }) {
+  return (
+    <div className={styles.valuePropCard}>
+      <div className={styles.valuePropIcon}>{icon}</div>
+      <h3 className={styles.valuePropTitle}>{title}</h3>
+      <p className={styles.valuePropDesc}>{desc}</p>
+    </div>
+  );
+}
+
+function CharacterSection({ verdict, line, desc, fix, onLineClick }) {
   const src = CHARACTER_MAP[verdict] ?? "/characters/character-attention-v3.png";
-  const color = VERDICT_COLORS[verdict] ?? VERDICT_COLORS.의심;
   return (
     <div className={styles.characterSection}>
       <div className={styles.characterSectionImage}>
@@ -81,6 +245,15 @@ function CharacterSection({ verdict, line, desc, fix }) {
       <div className={styles.characterSectionBody}>
         <p className={styles.characterSectionLabel}>{verdict}</p>
         <p className={styles.characterSectionDesc}>{desc}</p>
+        {line && (
+          <button
+            type="button"
+            className={styles.lineLink}
+            onClick={() => onLineClick?.(line)}
+          >
+            {line}번째 줄 보기
+          </button>
+        )}
         {fix && <p className={styles.itemFix}>{fix}</p>}
       </div>
     </div>
@@ -92,11 +265,7 @@ function VerdictBadge({ verdict }) {
   return (
     <span
       className={styles.verdictBadge}
-      style={{
-        backgroundColor: color.badgeBg,
-        color: color.text,
-        borderColor: color.badge,
-      }}
+      style={{ backgroundColor: color.badgeBg, color: color.text, borderColor: color.badge }}
     >
       {verdict}
     </span>
@@ -104,15 +273,14 @@ function VerdictBadge({ verdict }) {
 }
 
 function SummaryTop({ summary }) {
-  const total = summary.확정위반 + summary.의심 + summary.이상없음;
-  if (total === 0) return null;
-  const parts = [];
-  if (summary.확정위반 > 0) parts.push(`확정위반 ${summary.확정위반}건`);
-  if (summary.의심 > 0) parts.push(`의심 ${summary.의심}건`);
-  if (summary.이상없음 > 0) parts.push(`이상없음 ${summary.이상없음}건`);
+  const parts = [
+    `확정위반 ${summary.확정위반}건`,
+    `의심 ${summary.의심}건`,
+    `이상없음 ${summary.이상없음}건`,
+  ];
   return (
     <div className={styles.summaryTop}>
-      <span className={styles.summaryTopLabel}>전체 요약</span>
+      <span className={styles.summaryTopLabel}>전체 신호</span>
       <span className={styles.summaryTopText}>{parts.join(" · ")}</span>
     </div>
   );
@@ -124,10 +292,7 @@ function SectionContainer({ title, count, children, defaultCollapsed = false }) 
     <div className={styles.sectionContainer}>
       <div
         className={styles.sectionHead}
-        style={{
-          borderBottomColor: VERDICT_COLORS[title]?.badge ?? "#ccc",
-          borderBottomWidth: "2px",
-        }}
+        style={{ borderBottomColor: VERDICT_COLORS[title]?.badge ?? "#ccc", borderBottomWidth: "2px" }}
       >
         <div className={styles.sectionHeadInner}>
           <VerdictBadge verdict={title} />
@@ -147,6 +312,29 @@ function SectionContainer({ title, count, children, defaultCollapsed = false }) 
   );
 }
 
+function LlmExplanation({ llmExplanation }) {
+  if (!llmExplanation) return null;
+  const { summary_text, item_explanations } = llmExplanation;
+  return (
+    <div className={styles.llmExplanation}>
+      <div className={styles.llmSummary}>
+        <h3 className={styles.llmSummaryTitle}>AI 설명</h3>
+        <p className={styles.llmSummaryText}>{summary_text}</p>
+      </div>
+      {item_explanations && item_explanations.length > 0 && (
+        <div className={styles.llmItemExplanations}>
+          {item_explanations.map((item, i) => (
+            <div key={i} className={styles.llmItemExplanation}>
+              <span className={styles.llmItemLine}>{item.line}줄</span>
+              <p className={styles.llmItemExplanationText}>{item.explanation}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState(null);
@@ -159,21 +347,27 @@ export default function Home() {
   const [sectionCollapsed, setSectionCollapsed] = useState(() => ({
     확정위반: false,
     의심: true,
-    이상없음: true,
+    이상있음: true,
   }));
+  const [showExamplePopup, setShowExamplePopup] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const codeRef = useRef(null);
   const lineRefs = useRef([]);
 
   const handleOnboardingDismiss = (payload) => {
+    setShowOnboarding(false);
     if (payload && payload.example) {
       setCode(payload.example);
     }
   };
 
-  const loadExample = () => {
-    setCode(EXAMPLE_CODE);
+  const openExamplePopup = () => setShowExamplePopup(true);
+  const closeExamplePopup = () => setShowExamplePopup(false);
+  const loadExample = (codeStr) => {
+    setCode(codeStr);
     setCollapsed(false);
+    setShowExamplePopup(false);
   };
 
   const scrollToLine = (lineNumber) => {
@@ -211,7 +405,7 @@ export default function Home() {
       const formData = new FormData();
       formData.append("file", file);
       try {
-        const res = await fetch("/api/check", {
+        const res = await fetch("/api/v1/analyze/file", {
           method: "POST",
           body: formData,
         });
@@ -232,7 +426,7 @@ export default function Home() {
     }
 
     try {
-      const res = await fetch("/api/check", {
+      const res = await fetch("/api/v1/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
@@ -299,21 +493,58 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      <Onboarding onDismiss={handleOnboardingDismiss} />
+      <div className={styles.heroBg} />
+      <Onboarding onDismiss={handleOnboardingDismiss} forceShow={showOnboarding} />
       <main className={styles.main}>
-        <div className={styles.header}>
-          <div className={styles.headerText}>
-            <h1 className={styles.title} style={{ color: "var(--color-ink)" }}>
-              ML Data Leakage Checker
-            </h1>
-            <p className={styles.subtitle} style={{ color: "var(--color-ink-secondary)" }}>
-              전처리 코드를 붙여넣거나 .py/.ipynb 파일을 올리면 데이터 누수 의심 패턴을 줄 번호와 수정 방향만 짧게 보여줍니다.
-            </p>
+        {/* Hero 섹션 */}
+        <div className={styles.hero}>
+          <div className={styles.brand}>
+            <img className={styles.brandLogo} src="/logo-leakage-check.png" alt="Leakage Check 로고" />
+            <div className={styles.brandText}>
+              <h1 className={styles.title}>Leakage Check</h1>
+              <p className={styles.subtitle}>전처리·학습 코드에서 데이터 누수 의심 패턴을 줄 번호와 수정 방향 위주로 확인합니다.</p>
+            </div>
           </div>
-          <button className={styles.exampleLoadButton} onClick={loadExample}>
-            예시 불러오기
-          </button>
+          <div className={styles.headerButtons}>
+            <button className={styles.exampleLoadButton} onClick={openExamplePopup}>
+              예시로 테스트하기
+            </button>
+            <button className={styles.firstTimeButton} onClick={() => setShowOnboarding(true)}>
+              <span className={styles.bubble} /> 처음이에요?
+            </button>
+          </div>
         </div>
+
+        {/* 가치 제안 카드 */}
+        <div className={styles.valueProps}>
+          {VALUE_PROPS.map((vp, i) => (
+            <ValuePropCard key={i} {...vp} />
+          ))}
+        </div>
+
+        {showExamplePopup && (
+          <div className={styles.examplePopupOverlay} onClick={closeExamplePopup}>
+            <div className={styles.examplePopup} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.examplePopupHeader}>
+                <h3 className={styles.examplePopupTitle}>예시 코드 선택</h3>
+                <button className={styles.examplePopupClose} onClick={closeExamplePopup}>닫기</button>
+              </div>
+              <div className={styles.examplePopupList}>
+                {EXAMPLE_CODES.map((ex, i) => (
+                  <button
+                    key={i}
+                    className={styles.examplePopupOption}
+                    style={{ borderLeftColor: ex.color, borderLeftWidth: "3px" }}
+                    onClick={() => loadExample(ex.code)}
+                  >
+                    <span className={styles.examplePopupOptionName}>{ex.name}</span>
+                    <span className={styles.examplePopupOptionDesc}>{ex.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className={styles.card} style={{ borderColor: "var(--color-hairline)", backgroundColor: "var(--color-canvas)" }}>
           <div className={styles.cardHeader}>
@@ -326,7 +557,7 @@ export default function Home() {
                 onChange={handleFileChange}
                 className={styles.fileInput}
               />
-              <span className={styles.fileButton} style={{ color: "var(--color-primary)" }}>파일 선택</span>
+              <span className={styles.fileButton}>파일 선택</span>
             </label>
           </div>
 
@@ -376,9 +607,13 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
             disabled={status === "loading"}
           >
             {status === "loading" ? (
-              <span className="spinner" />
-            ) : "누수 검사하기"}
-            <span className="loading-text">검사 중…</span>
+              <>
+                <span className="spinner" />
+                <span className="loading-text">검사 중…</span>
+              </>
+            ) : (
+              "누수 검사하기"
+            )}
           </button>
           <button
             className="btn-secondary"
@@ -412,12 +647,14 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
               />
             )}
 
+            <LlmExplanation llmExplanation={result.llm_explanation} />
+
             {result.type === "empty" && (
               <div className={styles.feedbackCard}>
                 <p className={styles.feedbackTitle}>빈 입력 상태예요</p>
                 <p className={styles.feedbackDesc}>코드를 붙여넣거나 파일을 올려주세요.</p>
                 <div className={styles.feedbackActions}>
-                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                  <button className={styles.feedbackActionButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
                     예시 불러오기
                   </button>
                   <button className={styles.feedbackSecondaryButton} onClick={clearContent}>
@@ -440,7 +677,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                   <strong>이렇게 바꿔보세요</strong>: pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣거나 .py/.ipynb 파일을 선택해 주세요.
                 </p>
                 <div className={styles.feedbackActions}>
-                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                  <button className={styles.feedbackActionButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
                     예시 불러오기
                   </button>
                 </div>
@@ -460,7 +697,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                   <strong>이렇게 바꿔보세요</strong>: 전처리·학습 코드를 더 넣어 다시 검사해 보세요.
                 </p>
                 <div className={styles.feedbackActions}>
-                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                  <button className={styles.feedbackActionButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
                     예시 불러오기
                   </button>
                 </div>
@@ -472,7 +709,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                 <p className={styles.feedbackTitle}>명확하게 의심되는 패턴이 보이지 않아요</p>
                 <p className={styles.feedbackDesc}>전처리·학습 코드를 더 넣어도 좋고, 지금 상태로도 일단 괜찮아 보여요.</p>
                 <div className={styles.feedbackActions}>
-                  <button className={styles.feedbackActionButton} onClick={loadExample}>
+                  <button className={styles.feedbackActionButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
                     예시 불러오기
                   </button>
                   <button className={styles.feedbackSecondaryButton} onClick={clearContent}>
@@ -493,7 +730,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                   <button className={styles.feedbackActionButton} onClick={() => { setResult(null); setStatus("idle"); }}>
                     다시 시도
                   </button>
-                  <button className={styles.feedbackSecondaryButton} onClick={loadExample}>
+                  <button className={styles.feedbackSecondaryButton} onClick={() => loadExample(EXAMPLE_CODES[0].code)}>
                     예시 불러오기
                   </button>
                 </div>
@@ -520,10 +757,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                     <div
                       key={verdict}
                       className={styles.summaryBlock}
-                      style={{
-                        background: VERDICT_COLORS[verdict]?.badgeBg ?? "#f7f8fa",
-                        borderColor: VERDICT_COLORS[verdict]?.badge ?? "#e2e6ee",
-                      }}
+                      style={{ background: VERDICT_COLORS[verdict]?.badgeBg ?? "#f7f8fa", borderColor: VERDICT_COLORS[verdict]?.badge ?? "#e2e6ee" }}
                     >
                       <span className={styles.summaryLabel}>{verdict}</span>
                       <span className={styles.summaryCount}>{summary[verdict]}건</span>
@@ -542,6 +776,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                           line={item.line}
                           desc={item.desc}
                           fix={item.fix}
+                          onLineClick={handleLineClick}
                         />
                       ))}
                   </SectionContainer>
@@ -558,6 +793,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                           line={item.line}
                           desc={item.desc}
                           fix={item.fix}
+                          onLineClick={handleLineClick}
                         />
                       ))}
                   </SectionContainer>
@@ -574,6 +810,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                           line={item.line}
                           desc={item.desc}
                           fix={item.fix}
+                          onLineClick={handleLineClick}
                         />
                       ))}
                   </SectionContainer>
@@ -597,7 +834,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
               <div className={styles.resultActions}>
                 <button
                   className={styles.resultActionButton}
-                  onClick={() => { setResult(null); setCode(EXAMPLE_CODE); setCollapsed(false); }}
+                  onClick={() => { setResult(null); setCode(EXAMPLE_CODES[1].code); setCollapsed(false); }}
                 >
                   예시 코드로 다시 검사
                 </button>
@@ -609,7 +846,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                 </button>
                 <button
                   className={styles.resultActionButtonTertiary}
-                  onClick={loadExample}
+                  onClick={() => loadExample(EXAMPLE_CODES[0].code)}
                 >
                   예시 불러오기
                 </button>
