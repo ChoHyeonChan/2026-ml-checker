@@ -2,16 +2,17 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
-  padding: 28px 20px;
+  padding: 24px 24px;
   background: #f7f8fa;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .main {
   width: 100%;
-  max-width: min(92vw, 1100px);
+  max-width: 1400px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -33,18 +34,27 @@
 .header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 16px;
-  text-align: center;
+  text-align: left;
   width: 100%;
   position: relative;
   z-index: 1;
+  flex-wrap: wrap;
 }
 
-.headerButtons {
+.headerLeft {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex-shrink: 0;
 }
 
@@ -59,6 +69,7 @@
   height: 36px;
   border-radius: 8px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .brandText {
@@ -76,6 +87,7 @@
   font-size: 14px;
   color: #555;
   margin-top: 8px;
+  max-width: 640px;
 }
 
 .bubble {
