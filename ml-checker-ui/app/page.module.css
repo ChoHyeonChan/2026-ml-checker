@@ -17,6 +17,7 @@
   gap: 20px;
 }
 
+/* Hero 배경 */
 .heroBg {
   position: fixed;
   top: 0;
@@ -28,6 +29,7 @@
   pointer-events: none;
 }
 
+/* Header */
 .header {
   display: flex;
   align-items: center;
@@ -98,7 +100,8 @@
   transform: rotate(45deg);
 }
 
-exampleLoadButton {
+/* 버튼들 */
+.exampleLoadButton {
   padding: 8px 14px;
   font-size: 12px;
   font-weight: 600;
@@ -135,6 +138,7 @@ exampleLoadButton {
   border-color: #93c5fd;
 }
 
+/* 카드 */
 .card {
   background: #fff;
   border: 1px solid #e2e6ee;
@@ -165,6 +169,7 @@ exampleLoadButton {
   margin-left: 12px;
 }
 
+/* 코드 영역 */
 .codeArea {
   width: 100%;
   min-height: 220px;
@@ -207,6 +212,7 @@ exampleLoadButton {
   padding: 0;
 }
 
+/* 액션 버튼 영역 */
 .actions {
   display: flex;
   justify-content: flex-start;
@@ -214,6 +220,7 @@ exampleLoadButton {
   flex-wrap: wrap;
 }
 
+/* 파일 관련 */
 .fileLabel {
   display: inline-flex;
   align-items: center;
@@ -291,6 +298,7 @@ exampleLoadButton {
   line-height: 1.5;
 }
 
+/* 결과 영역 */
 .result {
   background: #fff;
   border: 1px solid #e2e6ee;
@@ -377,6 +385,7 @@ exampleLoadButton {
   border-color: #9ca3af;
 }
 
+/* 피드백 카드 */
 .feedbackCard {
   padding: 14px 16px;
   border-radius: 10px;
@@ -450,6 +459,7 @@ exampleLoadButton {
   background: #e5e7eb;
 }
 
+/* 백엔드 미연결 배너 */
 .notConnectedBanner {
   padding: 10px 12px;
   border-radius: 8px;
@@ -474,5 +484,431 @@ exampleLoadButton {
 .notConnectedBannerDesc {
   font-size: 12px;
   color: #b45309;
+  margin: 0;
+}
+
+/* 예시 팝업 */
+.examplePopupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.examplePopup {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.examplePopupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e6ee;
+}
+
+.examplePopupTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+.examplePopupClose {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  background: #f3f4f6;
+  border: 1px solid #e2e6ee;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.examplePopupList {
+  padding: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.examplePopupOption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid #e2e6ee;
+  border-left-width: 3px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.examplePopupOption:hover {
+  background: #f9fafb;
+}
+
+.examplePopupOptionName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+}
+
+.examplePopupOptionDesc {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 가치 제안 카드 */
+.valueProps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.valuePropCard {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e2e6ee;
+  border-radius: 12px;
+}
+
+.valuePropIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.valuePropTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin: 0 0 4px 0;
+}
+
+.valuePropDesc {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* 요약 상단 */
+.summaryTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #052e16 0%, #064e3b 100%);
+  color: #fff;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.summaryTopLabel {
+  font-weight: 600;
+}
+
+.summaryTopText {
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+/* 요약 블록 */
+.summary {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.summaryBlock {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f7f8fa;
+  border: 1px solid #e2e6ee;
+}
+
+.summaryLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+}
+
+.summaryCount {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111;
+}
+
+/* 섹션 컨테이너 */
+.sectionContainer {
+  margin-bottom: 20px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.sectionHeadInner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sectionLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+}
+
+.sectionCount {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  background: #f1f3f6;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.sectionToggle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3b82f6;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.sectionToggle:hover {
+  background: #eef4ff;
+}
+
+/* 배지 */
+.verdictBadge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 아이템 */
+.item {
+  border-left: 3px solid #3b82f6;
+  padding-left: 12px;
+}
+
+.itemDesc {
+  font-size: 13px;
+  color: #222;
+  margin: 0;
+}
+
+.itemFix {
+  font-size: 12px;
+  color: #555;
+  margin: 2px 0 0 0;
+}
+
+.lineLink {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #3b82f6;
+  background: #eef4ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.lineLink:hover {
+  background: #dbeafe;
+}
+
+/* 노트 */
+.note {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e6ee;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* 캐릭터 배너 */
+.characterBanner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f7f8fa;
+  border: 1px solid #e5e7eb;
+}
+
+.characterBannerImage {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.characterBannerImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.characterBannerText {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.characterBannerTitle {
+  font-weight: 600;
+  color: #171717;
+  margin-bottom: 2px;
+}
+
+/* 캐릭터 섹션 */
+.characterSection {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f7f8fa;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 12px;
+}
+
+.characterSectionImage {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.characterSectionImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.characterSectionBody {
+  flex: 1;
+}
+
+.characterSectionLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.characterSectionDesc {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* LLM 설명 */
+.llmExplanation {
+  background: #f0f4ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.llmSummary {
+  margin-bottom: 12px;
+}
+
+.llmSummaryTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e40af;
+  margin: 0 0 6px 0;
+}
+
+.llmSummaryText {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.llmItemExplanations {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #bfdbfe;
+}
+
+.llmItemExplanation {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.llmItemLine {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e40af;
+  background: #dbeafe;
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.llmItemExplanationText {
+  font-size: 12px;
+  color: #444;
+  line-height: 1.5;
   margin: 0;
 }
