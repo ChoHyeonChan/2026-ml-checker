@@ -598,12 +598,15 @@ class AnalyzerService:
         context: dict[str, Any],
     ) -> bool:
         low = line.lower()
-        if "stratify" not in low:
+
+        has_stratify_anywhere = len(context["stratify_lines"]) > 0
+        if not has_stratify_anywhere:
             return False
 
-        has_split_anywhere = len(context["split_lines"]) > 0
-        if not has_split_anywhere:
-            return True
+        # 현재 라인이 타겟 인코딩/매핑이면 체크
+        has_target_encoding = self._has_encoder_fit(low) or (self._has_target_reference(low) and any(k in low for k in ["map(", "apply(", "="]))
+        if not has_target_encoding:
+            return False
 
         # stratify 라인 이전에서 타겟 인코딩/매핑이 있었는지 확인
         for i in range(1, idx):
@@ -611,6 +614,14 @@ class AnalyzerService:
             if self._has_encoder_fit(prev_low) or self._has_target_reference(prev_low):
                 if any(k in prev_low for k in ["fit(", "transform(", "fit_transform(", "map(", "apply(", "="]):
                     return True
+
+        # 현재 라인이 stratify이고 이전에 타겟 인코딩/매핑이 있었는지 확인
+        for i in range(idx - 1, 0, -1):
+            prev_low = lines[i-1].lower()
+            if self._has_encoder_fit(prev_low) or self._has_target_reference(prev_low):
+                if any(k in prev_low for k in ["fit(", "transform(", "fit_transform(", "map(", "apply(", "="]):
+                    return True
+
         return False
 
     def _has_preprocess_fit_before_split(
