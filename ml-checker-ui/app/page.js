@@ -192,6 +192,174 @@ const BANNER_MAP = {
   안내필요: "/characters/character-attention-v3.png",
 };
 
+// ===== CodeEditor Component =====
+function highlightPythonCode(code, highlightedLine) {
+  // 간단한 파이썬 구문 강조 (VSCode 다크 테마 스타일)
+  const lines = code.split("\n");
+  return lines.map((line, idx) => {
+    const lineNum = idx + 1;
+    const isHighlighted = highlightedLine === lineNum;
+    let highlighted = "";
+
+    if (line.trim().startsWith("#")) {
+      // 주석
+      highlighted = `<span class="token-comment">${escapeHtml(line)}</span>`;
+    } else {
+      // 여러 토큰 순차 처리
+      let processed = escapeHtml(line);
+
+      // 데코레이터 (@xxx)
+      processed = processed.replace(/@\w+/g, '<span class="token-decorator">$&</span>');
+
+      // 키워드 (def, class, import, from, return, if, elif, else, for, while,
+      //     try, except, finally, with, as, raise, pass, break, continue, yield,
+      //     lambda, and, or, not, in, is, True, False, None)
+      processed = processed.replace(/\b(def|class|import|from|return|if|elif|else|for|while|try|except|finally|with|as|raise|pass|break|continue|yield|lambda|and|or|not|in|is|True|False|None|print|assert)\b/g, '<span class="token-keyword">$&</span>');
+
+      // 문자열 (단일, 이중, 삼중 따옴표)
+      processed = processed.replace(/(&quot;[^&]*&quot;|&#39;[^&]*&#39;|f"[^"]*"|f'[^']*')/g, '<span class="token-string">$&</span>');
+
+      // 숫자 (정수, 실수)
+      processed = processed.replace(/(\b\d+\.\d+\b|\b\d+\b)/g, '<span class="token-number">$&</span>');
+
+      // 내장 함수/객체 (pd.read_csv, df.drop, train_test_split 등)
+      processed = processed.replace(/\b(pd\.\w+|df\.\w+|train_test_split|StandardScaler|MinMaxScaler|RobustScaler|LogisticRegression|cross_val_score|model\.\w+)\b/g, '<span class="token-builtin">$&</span>');
+
+      // 함수 호출 (식별자 뒤에 괄호)
+      processed = processed.replace(/\b([a-zA-Z_]\w*)(?=\s*\()/g, '<span class="token-function">$&</span>');
+    }
+
+    if (isHighlighted) {
+      return `<span class="line-highlight">${highlighted}</span>`;
+    }
+    return highlighted;
+  }).join("");
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function CodeEditor({ value, onChange, placeholder, highlightedLine, onLineClick }) {
+  const textareaRef = useRef(null);
+  const [lineCount, setLineCount] = useState(() => value.split("\n").length);
+
+  useEffect(() => {
+    setLineCount(value.split("\n").length);
+  }, [value]);
+
+  const scrollToLine = (lineNumber) => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+      const lines = textareaRef.current.value.split("\n");
+      const targetLine = lineNumber - 1;
+      if (targetLine >= 0 && targetLine < lines.length) {
+        let position = 0;
+        for (let i = 0; i < targetLine; i++) {
+          position += lines[i].length + 1;
+        }
+        textareaRef.current.setSelectionRange(position, position);
+        textareaRef.current.scrollTop =
+          (targetLine / lines.length) * textareaRef.current.scrollHeight -
+          textareaRef.current.clientHeight / 2;
+      }
+    }
+    onLineClick?.(lineNumber);
+  };
+
+  const handleOverlayClick = (e) => {
+    // 줄 번호 영역 클릭 처리
+    const target = e.target.closest(".codeEditorLineNumber");
+    if (target) {
+      const lineNum = parseInt(target.dataset.line, 10);
+      if (!isNaN(lineNum)) {
+        scrollToLine(lineNum);
+      }
+    }
+  };
+
+  const lines = value.split("\n");
+  const lineNumbersHtml = lines.map((_, idx) => {
+    const lineNum = idx + 1;
+    const activeClass = highlightedLine === lineNum ? " active" : "";
+    return `<span class="codeEditorLineNumber${activeClass}" data-line="${lineNum}">${lineNum}</span>`;
+  }).join("");
+
+  const highlightedContent = highlightPythonCode(value, highlightedLine);
+
+  if (value === "") {
+    return (
+      <div className={styles.codeEditor}>
+        <div className={styles.codeEditorHeader}>
+          <div className={styles.codeEditorDots}>
+            <span className={`${styles.codeEditorDot} ${styles.red}`}></span>
+            <span className={`${styles.codeEditorDot} ${styles.yellow}`}></span>
+            <span className={`${styles.codeEditorDot} ${styles.green}`}></span>
+          </div>
+          <span className={styles.codeEditorTitle}>code.py</span>
+        </div>
+        <div className={styles.codeEditorBody}>
+          <div className={styles.codeEditorLineNumbers}>
+            <div className={styles.codeEditorLineNumber} data-line="1">1</div>
+          </div>
+          <div className={styles.codeEditorContent}>
+            <textarea
+              ref={textareaRef}
+              className={styles.codeEditorTextarea}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={placeholder}
+              onScroll={(e) => {
+                // 줄 번호 영역 스크롤 동기화 필요 시 추가
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.codeEditor}>
+      <div className={styles.codeEditorHeader}>
+        <div className={styles.codeEditorDots}>
+          <span className={`${styles.codeEditorDot} ${styles.red}`}></span>
+          <span className={`${styles.codeEditorDot} ${styles.yellow}`}></span>
+          <span className={`${styles.codeEditorDot} ${styles.green}`}></span>
+        </div>
+        <span className={styles.codeEditorTitle}>code.py</span>
+      </div>
+      <div className={styles.codeEditorBody}>
+        <div className={styles.codeEditorLineNumbers}>
+          {lineNumbersHtml}
+        </div>
+        <div className={styles.codeEditorContent}>
+          <div
+            className={styles.codeEditorOverlay}
+            dangerouslySetInnerHTML={{ __html: highlightedContent }}
+            onClick={handleOverlayClick}
+          />
+          <textarea
+            ref={textareaRef}
+            className={styles.codeEditorTextarea}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            spellCheck={false}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== 기존 컴포넌트들 =====
+
 function CharacterBanner({ src, title, text }) {
   return (
     <div className={styles.characterBanner}>
@@ -550,15 +718,16 @@ export default function Home() {
               </button>
             </div>
           ) : (
-            <textarea
-              ref={codeRef}
-              className={`${styles.codeArea} ${highlightedLine !== null ? styles.codeAreaHighlighted : ""}`}
-              style={highlightedLine !== null ? { backgroundImage: `linear-gradient(to bottom, transparent ${Math.max(0, (highlightedLine - 1) * 22)}px, #fef08a ${Math.max(0, (highlightedLine - 1) * 22)}px, #fef08a ${(highlightedLine) * 22}px, transparent ${(highlightedLine) * 22}px)`, backgroundSize: "100% 22px" } : {}}
+            <CodeEditor
               value={code}
-              onChange={(e) => setCode(e.target.value)}
+              onChange={(newCode) => {
+                setCode(newCode);
+              }}
               placeholder={`${LEAKAGE_EXAMPLE}
 
 pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
+              highlightedLine={highlightedLine}
+              onLineClick={handleLineClick}
             />
           )}
         </div>
