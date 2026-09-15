@@ -182,7 +182,7 @@ export async function POST(req) {
     ...basic,
     type: "judgment",
     badge: basic.badge,
-    note: "백엔드 URL이 설정되지 않아 프론트 기본 패턴 점검 결과만 표시합니다.",
+    note: "백엔드 URL이 설정되지 않아 프론트 기본 패턴 점검 결과만 표시합니다. [VERIFY_7caba95]",
     backend_url: BACKEND_URL,
   });
 }
