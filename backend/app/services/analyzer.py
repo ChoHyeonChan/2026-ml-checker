@@ -617,26 +617,14 @@ class AnalyzerService:
         if not has_target_party:
             return False
 
-        has_pre_split_hint = any(k in low for k in ["X_test", "y_test", "test"])
-        if has_pre_split_hint:
+        if self._nearby_split_context(lines, idx, context):
+            if any(k in low for k in ["X_train", "train", "y_train", "y_test"]):
+                return True
+
+        if any(k in low for k in ["X_train", "train"]) and any(k in low for k in ["y_train", "y_test"]):
             return True
 
-        if any(k in low for k in ["X_train", "train"]):
-            post_split_hint = self._split_partitioned_call(lines, idx, low, context)
-            if post_split_hint:
-                return False
-
-            near_split = self._nearby_split_context(lines, idx, context)
-            if near_split:
-                return False
-
-            return True
-
-        near_split = self._nearby_split_context(lines, idx, context)
-        if near_split:
-            return False
-
-        return True
+        return False
 
     def _nearby_split_context(self, lines: list[str], idx: int, context: dict[str, Any]) -> bool:
         if not context["split_lines"]:
