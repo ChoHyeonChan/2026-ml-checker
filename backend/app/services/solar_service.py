@@ -75,7 +75,7 @@ class SolarService:
         self,
         classification: str,
         summary: dict[str, int],
-        results: list[dict[str, Any]],
+        results: list[Any],
         code_preview: str,
     ) -> dict[str, Any]:
         """검사 결과를 보고 설명과 수정 조언을 생성한다.
@@ -83,11 +83,17 @@ class SolarService:
         반환값:
             - {"content": {"summary_text": ..., "item_explanations": [...]}} 성공
             - {"error": "..."} 실패/API 키 없음
+
+        results 파라미터는 dict 또는 Pydantic 모델 모두 허용한다.
         """
         system = "너는 ML 데이터 누수 검사 결과의 해석과 수정 조언을 제공하는 도우미야. 출력은 JSON만 해줘."
         items_text = ""
         for r in results:
-            items_text += f"\n- {r.get('line')}줄: {r.get('type')} - {r.get('fix_suggestion')} - {r.get('reason')}\n"
+            line = getattr(r, 'line', None) if hasattr(r, 'line') else r.get('line', 0)
+            type_ = getattr(r, 'type', None) if hasattr(r, 'type') else r.get('type', '의심')
+            fix_suggestion = getattr(r, 'fix_suggestion', None) if hasattr(r, 'fix_suggestion') else r.get('fix_suggestion', '')
+            reason = getattr(r, 'reason', None) if hasattr(r, 'reason') else r.get('reason', '')
+            items_text += f"\n- {line}줄: {type_} - {fix_suggestion} - {reason}\n"
         prompt = (
             "다음 ML 전처리 코드 검사 결과를 보고 설명과 조언을 생성해줘.\n"
             f"분류: {classification}\n"
