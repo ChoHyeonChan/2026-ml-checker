@@ -17,6 +17,7 @@
   gap: 20px;
 }
 
+/* Hero 배경 */
 .heroBg {
   position: fixed;
   top: 0;
@@ -28,6 +29,7 @@
   pointer-events: none;
 }
 
+/* Header */
 .header {
   display: flex;
   align-items: center;
@@ -98,7 +100,8 @@
   transform: rotate(45deg);
 }
 
-exampleLoadButton {
+/* 버튼들 */
+.exampleLoadButton {
   padding: 8px 14px;
   font-size: 12px;
   font-weight: 600;
@@ -135,11 +138,12 @@ exampleLoadButton {
   border-color: #93c5fd;
 }
 
+/* 카드 */
 .card {
   background: #fff;
   border: 1px solid #e2e6ee;
   border-radius: 12px;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .cardHeader {
@@ -165,6 +169,7 @@ exampleLoadButton {
   margin-left: 12px;
 }
 
+/* 코드 영역 */
 .codeArea {
   width: 100%;
   min-height: 220px;
@@ -207,6 +212,7 @@ exampleLoadButton {
   padding: 0;
 }
 
+/* 액션 버튼 영역 */
 .actions {
   display: flex;
   justify-content: flex-start;
@@ -214,6 +220,7 @@ exampleLoadButton {
   flex-wrap: wrap;
 }
 
+/* 파일 관련 */
 .fileLabel {
   display: inline-flex;
   align-items: center;
@@ -291,6 +298,7 @@ exampleLoadButton {
   line-height: 1.5;
 }
 
+/* 결과 영역 */
 .result {
   background: #fff;
   border: 1px solid #e2e6ee;
@@ -377,6 +385,7 @@ exampleLoadButton {
   border-color: #9ca3af;
 }
 
+/* 피드백 카드 */
 .feedbackCard {
   padding: 14px 16px;
   border-radius: 10px;
@@ -450,6 +459,7 @@ exampleLoadButton {
   background: #e5e7eb;
 }
 
+/* 백엔드 미연결 배너 */
 .notConnectedBanner {
   padding: 10px 12px;
   border-radius: 8px;
@@ -477,7 +487,8 @@ exampleLoadButton {
   margin: 0;
 }
 
-examplePopupOverlay {
+/* 예시 팝업 */
+..examplePopupOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -490,13 +501,13 @@ examplePopupOverlay {
   z-index: 100;
 }
 
-.examplePopup {
+..examplePopup {
   background: #fff;
   border-radius: 12px;
   width: 100%;
   max-width: 480px;
   max-height: 80vh;
-  overflow: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -563,11 +574,11 @@ examplePopupOverlay {
   color: #666;
 }
 
+/* 가치 제안 카드 */
 .valueProps {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 100%;
 }
 
 .valuePropCard {
@@ -577,7 +588,6 @@ examplePopupOverlay {
   background: #fff;
   border: 1px solid #e2e6ee;
   border-radius: 12px;
-  width: 100%;
 }
 
 .valuePropIcon {
@@ -599,6 +609,7 @@ examplePopupOverlay {
   margin: 0;
 }
 
+/* 요약 상단 */
 .summaryTop {
   display: flex;
   justify-content: space-between;
@@ -620,6 +631,7 @@ examplePopupOverlay {
   opacity: 0.9;
 }
 
+/* 요약 블록 */
 .summary {
   display: flex;
   gap: 12px;
@@ -649,6 +661,7 @@ examplePopupOverlay {
   color: #111;
 }
 
+/* 섹션 컨테이너 */
 .sectionContainer {
   margin-bottom: 20px;
 }
@@ -699,6 +712,7 @@ examplePopupOverlay {
   background: #eef4ff;
 }
 
+/* 배지 */
 .verdictBadge {
   font-size: 11px;
   font-weight: 700;
@@ -709,6 +723,7 @@ examplePopupOverlay {
   letter-spacing: 0.5px;
 }
 
+/* 아이템 */
 .item {
   border-left: 3px solid #3b82f6;
   padding-left: 12px;
@@ -742,6 +757,7 @@ examplePopupOverlay {
   background: #dbeafe;
 }
 
+/* 노트 */
 .note {
   margin-top: 14px;
   padding-top: 12px;
@@ -751,6 +767,7 @@ examplePopupOverlay {
   line-height: 1.5;
 }
 
+/* 캐릭터 배너 */
 .characterBanner {
   display: flex;
   align-items: center;
@@ -791,6 +808,7 @@ examplePopupOverlay {
   margin-bottom: 2px;
 }
 
+/* 캐릭터 섹션 */
 .characterSection {
   display: flex;
   align-items: flex-start;
@@ -836,6 +854,7 @@ examplePopupOverlay {
   line-height: 1.5;
 }
 
+/* LLM 설명 */
 .llmExplanation {
   background: #f0f4ff;
   border: 1px solid #bfdbfe;
