@@ -578,6 +578,10 @@ class AnalyzerService:
         low = line.lower()
         if not self._has_preprocess_keywords(low):
             return False
+
+        if self._looks_like_target_encoder_fit_with_target_party(lines, idx, line, ctx_before, ctx_after, context):
+            return False
+
         target_vars = self._extract_tokens(ctx_before + [line] + ctx_after, ["y", "target", "label"])
         if not target_vars:
             return False
@@ -593,6 +597,55 @@ class AnalyzerService:
         if "drop(" in low and any(t in low for t in target_vars):
             return False
         return any(t in low for t in target_vars)
+
+    def _looks_like_target_encoder_fit_with_target_party(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+        context: dict[str, Any],
+    ) -> bool:
+        low = line.lower()
+        if not self._has_encoder_fit(low):
+            return False
+        if "fit(" not in low and "fit_transform(" not in low and "transform(" not in low:
+            return False
+
+        has_target_party = any(k in low for k in ["y_train", "y_test"])
+        if not has_target_party:
+            return False
+
+        has_pre_split_hint = any(k in low for k in ["X_test", "y_test", "test"])
+        if has_pre_split_hint:
+            return True
+
+        if any(k in low for k in ["X_train", "train"]):
+            post_split_hint = self._split_partitioned_call(lines, idx, low, context)
+            if post_split_hint:
+                return False
+
+            near_split = self._nearby_split_context(lines, idx, context)
+            if near_split:
+                return False
+
+            return True
+
+        near_split = self._nearby_split_context(lines, idx, context)
+        if near_split:
+            return False
+
+        return True
+
+    def _nearby_split_context(self, lines: list[str], idx: int, context: dict[str, Any]) -> bool:
+        if not context["split_lines"]:
+            return False
+        start = max(0, idx - 5)
+        end = min(len(lines), idx + 5)
+        window = lines[start:end]
+        split_kw = ["train_test_split", "split(", "kfold", "stratify", "cross_val", "partition"]
+        return any(any(k in ln.lower() for k in split_kw) for ln in window)
 
     def _has_target_leakage_via_groupby(
         self,
@@ -611,13 +664,6 @@ class AnalyzerService:
         if has_groupby and has_target_op:
             return True
         return False
-
-    def _target_encoder_call_via_y_train_or_y_test(self, low: str) -> bool:
-        if not self._has_encoder_fit(low):
-            return False
-        if "fit(" not in low and "fit_transform(" not in low and "transform(" not in low:
-            return False
-        return "y_train" in low or "y_test" in low
 
     def _has_target_encoder_fit_before_split(
         self,
@@ -657,6 +703,13 @@ class AnalyzerService:
             return True
 
         return False
+
+    def _target_encoder_call_via_y_train_or_y_test(self, low: str) -> bool:
+        if not self._has_encoder_fit(low):
+            return False
+        if "fit(" not in low and "fit_transform(" not in low and "transform(" not in low:
+            return False
+        return "y_train" in low or "y_test" in low
 
     def _has_stratify_target_encoding_leakage(
         self,
