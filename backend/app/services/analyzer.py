@@ -394,7 +394,7 @@ class AnalyzerService:
         if self._check_filter_before_split(lines, idx, line, ctx_before, ctx_after, context):
             return {
                 "type": "의심",
-                "fix": "train/test 분할 전에 데이터 필터링이나 정제를 수행하지 않도록 순서를 조정하세요. 분할 후 각 세트에서 따로 정제하세요.",
+                "fix": "train/test 분할 전에 데이터 필터링이나 정제를 수행하지 않도록 순서를 조정하세요. 분할 후 각 세트에서 따로 정제세요.",
                 "reason": "분할 전 데이터 정제/필터링으로 테스트 정보가 train에 영향 줄 수 있습니다.",
             }
 
@@ -617,11 +617,13 @@ class AnalyzerService:
         if not has_target_party:
             return False
 
-        if self._nearby_split_context(lines, idx, context):
-            if any(k in low for k in ["X_train", "train", "y_train", "y_test"]):
-                return True
+        if not self._nearby_split_context(lines, idx, context):
+            return False
 
-        if any(k in low for k in ["X_train", "train"]) and any(k in low for k in ["y_train", "y_test"]):
+        if any(k in low for k in ["X_train", "X_test", "test"]):
+            return True
+
+        if any(k in low for k in ["X_train", "X_test"]):
             return True
 
         return False
@@ -629,6 +631,11 @@ class AnalyzerService:
     def _nearby_split_context(self, lines: list[str], idx: int, context: dict[str, Any]) -> bool:
         if not context["split_lines"]:
             return False
+
+        on_or_after_split = self._split_partitioned_call(lines, idx, "", context)
+        if on_or_after_split:
+            return True
+
         start = max(0, idx - 5)
         end = min(len(lines), idx + 5)
         window = lines[start:end]
