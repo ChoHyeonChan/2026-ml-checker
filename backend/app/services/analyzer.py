@@ -84,6 +84,8 @@ class AnalyzerService:
         test_fit_lines: list[int] = []
         shuffle_lines: list[int] = []
         time_related_lines: list[int] = []
+        encoder_fit_lines: list[int] = []
+        time_feature_lines: list[int] = []
 
         for idx, line in enumerate(lines, start=1):
             low = line.lower()
@@ -108,6 +110,8 @@ class AnalyzerService:
                 transform_lines.append(idx)
                 if self._has_test_data_fit_line(low):
                     test_fit_lines.append(idx)
+                if self._has_encoder_fit(low):
+                    encoder_fit_lines.append(idx)
                 continue
 
             if "fit(" in low:
@@ -117,6 +121,8 @@ class AnalyzerService:
                     preprocess_objs.setdefault(name, []).append(idx)
                 if self._has_test_data_fit_line(low):
                     test_fit_lines.append(idx)
+                if self._has_encoder_fit(low):
+                    encoder_fit_lines.append(idx)
                 continue
 
             if "transform(" in low:
@@ -141,6 +147,9 @@ class AnalyzerService:
             if self._has_time_related_keywords(low):
                 time_related_lines.append(idx)
 
+            if self._has_time_feature_gen(low):
+                time_feature_lines.append(idx)
+
         return {
             "lines": lines,
             "preprocess_objs": preprocess_objs,
@@ -155,6 +164,8 @@ class AnalyzerService:
             "test_fit_lines": test_fit_lines,
             "shuffle_lines": shuffle_lines,
             "time_related_lines": time_related_lines,
+            "encoder_fit_lines": encoder_fit_lines,
+            "time_feature_lines": time_feature_lines,
         }
 
     def _looks_like_preprocess_declaration(self, stripped: str) -> bool:
@@ -205,6 +216,12 @@ class AnalyzerService:
     def _has_time_related_keywords(self, low: str) -> bool:
         time_kw = ["date", "time", "timestamp", "datetime", "sort_values", "shift", "lag", "rolling", "before", "after"]
         return any(k in low for k in time_kw)
+
+    def _has_time_feature_gen(self, low: str) -> bool:
+        return any(k in low for k in ["shift(", "lag(", "rolling("])
+
+    def _has_encoder_fit(self, low: str) -> bool:
+        return any(k in low for k in ["encoder", "target", "label", "onehot", "get_dummies", "le"])
 
     def _judge_with_context(self, lines: list[str], context: dict[str, Any]) -> list[JudgmentResult]:
         results: list[JudgmentResult] = []
@@ -276,6 +293,14 @@ class AnalyzerService:
                 "reason": "타겟 정보를 groupby/transform 등으로 전처리에 직접 사용한 것으로 보입니다.",
             }
 
+        # 1c) 타겟 기반 인코더 fit이 split 전이면 누수 -> 확정위반
+        if self._has_target_encoder_fit_before_split(lines, idx, line, ctx_before, ctx_after, context):
+            return {
+                "type": "확정위반",
+                "fix": "타겟 기반 인코더(fit/transform)는 train/test 분할 후에만 적용하세요. 분할 전에 fit하면 테스트 타겟 정보가 전처리에 새어 나갑니다.",
+                "reason": "타겟 기반 인코더(TargetEncoder, LabelEncoder 등) fit이 split 전에 호출된 것으로 보입니다.",
+            }
+
         # 2b) 분할 전 데이터 필터링/정제 -> 의심 (fit/transform 검사 전에 먼저 체크)
         if self._check_filter_before_split(lines, idx, line, ctx_before, ctx_after, context):
             return {
@@ -320,6 +345,14 @@ class AnalyzerService:
                 "type": "의심",
                 "fix": "train/test 분할 전에 fit한 전처리 객체를 분할 후에 transform하지 않도록 순서를 점검하세요.",
                 "reason": "분할 전에 fit한 전처리 객체가 분할 후 transform에 재사용된 것으로 의심됩니다.",
+            }
+
+        # 4b) 시계열 lag/shift 피처 생성 후 무작위 split -> 의심
+        if self._has_time_feature_gen_then_random_split(lines, idx, line, ctx_before, ctx_after, context):
+            return {
+                "type": "의심",
+                "fix": "시계열 데이터는 시간순 정렬 후 lag/shift 피처를 생성하고, 분할은 시간순으로 하세요. 무작위 split은 미래 정보 누수를 유발할 수 있습니다.",
+                "reason": "시계열 데이터에 lag/shift 피처 생성 후 무작위 split한 것으로 보입니다.",
             }
 
         # 5) 시계열/순서 관련 전처리 후 fit -> 의심
@@ -463,6 +496,31 @@ class AnalyzerService:
         has_groupby = any(k in low for k in ["groupby", "group_by", "grouped"])
         has_target_op = any(t in low for t in ["target", "y", "label"]) and any(k in low for k in ["transform", "apply", "map", "mean", "sum", "count"])
         if has_groupby and has_target_op:
+            return True
+        return False
+
+    def _has_target_encoder_fit_before_split(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+        context: dict[str, Any],
+    ) -> bool:
+        low = line.lower()
+        if not self._has_preprocess_keywords(low):
+            return False
+        if "fit(" not in low and "fit_transform(" not in low:
+            return False
+        has_encoder = self._has_encoder_fit(low)
+        if not has_encoder:
+            return False
+        has_split_anywhere = len(context["split_lines"]) > 0
+        if not has_split_anywhere:
+            return True
+        earliest_split = min(context["split_lines"])
+        if idx < earliest_split:
             return True
         return False
 
@@ -641,6 +699,34 @@ class AnalyzerService:
         time_kw = ["shift", "lag", "rolling", "sort_values", "sort", "date", "time", "timestamp", "before", "after"]
         window = " ".join(lines[max(0, idx - 3):idx + 4]).lower()
         return any(k in window for k in time_kw)
+
+    def _has_time_feature_gen_then_random_split(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+        context: dict[str, Any],
+    ) -> bool:
+        low = line.lower()
+        has_shift_lag = self._has_time_feature_gen(low)
+        if not has_shift_lag:
+            return False
+
+        has_random_split = any(k in low for k in ["train_test_split", "shuffle", "sample(frac"])
+        if has_random_split:
+            return True
+
+        has_split_anywhere = len(context["split_lines"]) > 0
+        if not has_split_anywhere:
+            return False
+
+        earliest_split = min(context["split_lines"])
+        if idx < earliest_split:
+            return True
+
+        return False
 
     def _has_test_data_fit_line(self, low: str) -> bool:
         return ("fit(" in low or "fit_transform(" in low) and any(k in low for k in ["X_test", "y_test", "test"])
