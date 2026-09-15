@@ -3,5 +3,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "regions": ["icn1"]
+  "regions": [
+    "icn1"
+  ],
+  "rootDirectory": "ml-checker-ui"
 }
