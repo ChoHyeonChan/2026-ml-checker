@@ -92,6 +92,7 @@ class AnalyzerService:
         sampling_lines: list[int] = []
         func_decl_lines: list[int] = []
         class_decl_lines: list[int] = []
+        train_party_lines: list[int] = []
 
         for idx, line in enumerate(lines, start=1):
             low = line.lower()
@@ -175,6 +176,9 @@ class AnalyzerService:
             if self._has_time_feature_gen(low):
                 time_feature_lines.append(idx)
 
+            if self._looks_like_train_party(stripped):
+                train_party_lines.append(idx)
+
         return {
             "lines": lines,
             "preprocess_objs": preprocess_objs,
@@ -197,6 +201,7 @@ class AnalyzerService:
             "sampling_lines": sampling_lines,
             "func_decl_lines": func_decl_lines,
             "class_decl_lines": class_decl_lines,
+            "train_party_lines": train_party_lines,
         }
 
     def _looks_like_preprocess_declaration(self, stripped: str) -> bool:
@@ -274,6 +279,16 @@ class AnalyzerService:
         end = min(len(lines), idx + 4)
         window = lines[start:end]
         return any(self._looks_like_func_or_class_decl(ln.strip()) for ln in window)
+
+    def _looks_like_train_party(self, stripped: str) -> bool:
+        lowered = stripped.lower()
+        return any(k in lowered for k in ["X_train", "y_train", "train_df", "train_set", "train_data", "train_x", "train_y"])
+
+    def _nearby_train_party(self, lines: list[str], idx: int) -> bool:
+        start = max(0, idx - 4)
+        end = min(len(lines), idx + 4)
+        window = lines[start:end]
+        return any(self._looks_like_train_party(ln.strip()) for ln in window)
 
     def _split_partitioned_call(self, lines: list[str], idx: int, fit_low: str, context: dict[str, Any]) -> bool:
         if not self._has_split_call(fit_low):
@@ -619,6 +634,10 @@ class AnalyzerService:
         if candidate_split_after:
             return False
 
+        if self._nearby_train_party(lines, idx):
+            if any(k in low for k in ["X_train", "y_train", "train"]):
+                return False
+
         has_split_anywhere = len(context["split_lines"]) > 0
         if not has_split_anywhere:
             return True
@@ -626,10 +645,6 @@ class AnalyzerService:
         earliest_split = min(context["split_lines"])
         if idx < earliest_split:
             return True
-
-        if self._nearby_func_or_class_decl(lines, idx):
-            if any(k in low for k in ["X_train", "y_train", "train"]):
-                return False
 
         return False
 
@@ -678,8 +693,9 @@ class AnalyzerService:
                 return None
 
         if self._nearby_func_or_class_decl(lines, idx):
-            if any(k in low for k in ["X_train", "y_train", "train"]):
-                return None
+            if self._nearby_train_party(lines, idx):
+                if any(k in low for k in ["X_train", "y_train", "train"]):
+                    return None
 
         has_split_anywhere = len(context["split_lines"]) > 0
         if not has_split_anywhere:
@@ -714,8 +730,9 @@ class AnalyzerService:
                 return None
 
         if self._nearby_func_or_class_decl(lines, idx):
-            if any(k in low for k in ["X_train", "y_train", "train"]):
-                return None
+            if self._nearby_train_party(lines, idx):
+                if any(k in low for k in ["X_train", "y_train", "train"]):
+                    return None
 
         has_split_anywhere = len(context["split_lines"]) > 0
         if not has_split_anywhere:
