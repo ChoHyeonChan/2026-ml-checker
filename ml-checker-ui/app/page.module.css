@@ -978,3 +978,36 @@
   line-height: 1.4;
   margin: 0;
 }
+
+/* 페이지 하단 여유 */
+.main > :last-child {
+  margin-bottom: 6px;
+}
+
+/* 좁은 화면에서 헤더 버튼 줄바꿈 완화 */
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .headerLeft {
+    flex-wrap: wrap;
+  }
+
+  .headerRight {
+    justify-content: flex-start;
+  }
+
+  .guideCard {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .guideIcon {
+    width: 28px;
+    height: 28px;
+  }
+}
