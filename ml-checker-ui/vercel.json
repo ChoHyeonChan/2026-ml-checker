@@ -5,6 +5,5 @@
   "framework": "nextjs",
   "regions": [
     "icn1"
-  ],
-  "rootDirectory": "ml-checker-ui"
+  ]
 }
