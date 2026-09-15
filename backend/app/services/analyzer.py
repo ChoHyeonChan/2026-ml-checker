@@ -612,6 +612,13 @@ class AnalyzerService:
             return True
         return False
 
+    def _target_encoder_call_via_y_train_or_y_test(self, low: str) -> bool:
+        if not self._has_encoder_fit(low):
+            return False
+        if "fit(" not in low and "fit_transform(" not in low and "transform(" not in low:
+            return False
+        return "y_train" in low or "y_test" in low
+
     def _has_target_encoder_fit_before_split(
         self,
         lines: list[str],
@@ -637,6 +644,9 @@ class AnalyzerService:
         if self._nearby_train_party(lines, idx):
             if any(k in low for k in ["X_train", "y_train", "train"]):
                 return False
+
+        if self._target_encoder_call_via_y_train_or_y_test(low):
+            return False
 
         has_split_anywhere = len(context["split_lines"]) > 0
         if not has_split_anywhere:
