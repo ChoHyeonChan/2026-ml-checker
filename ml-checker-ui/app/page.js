@@ -95,7 +95,7 @@ X = df.drop("sales", axis=1)
 y = df["sales"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)`,
-    desc: "시계열 데이터 shuffle 후 무작위 split — 의심",
+    desc: "시계열 데이터 shuffle 후 무작위 split - 의심",
   },
   {
     name: "확정위반+의심 (전체 fit + 정제)",
@@ -122,7 +122,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 model = LogisticRegression()
 model.fit(X_train, y_train)`,
-    desc: "분할 전 정제 + 전체 fit_transform — 확정위반 + 의심",
+    desc: "분할 전 정제 + 전체 fit_transform - 확정위반 + 의심",
   },
   {
     name: "의심 #2 (CV 외부 전처리)",
@@ -139,11 +139,11 @@ X_scaled = scaler.fit_transform(X)
 scores = cross_val_score(
     LogisticRegression(), X_scaled, y, cv=5
 )`,
-    desc: "CV 외부 전처리 + cross_val_score — 의심",
+    desc: "CV 외부 전처리 + cross_val_score - 의심",
   },
 ];
 
-// 색상 우선순휘: 초록(1) > 노랑(2) > 빨강(3)
+// 색상 우선순위: 초록(1) > 노랑(2) > 빨강(3)
 const _colorRank = {
   "#22c55e": 1,
   "#f59e0b": 2,
@@ -206,9 +206,8 @@ function CharacterBanner({ src, title, text }) {
   );
 }
 
-function CharacterSection({ verdict, line, desc, fix }) {
+function CharacterSection({ verdict, line, desc, fix, onLineClick }) {
   const src = CHARACTER_MAP[verdict] ?? "/characters/character-attention-v3.png";
-  const color = VERDICT_COLORS[verdict] ?? VERDICT_COLORS.의심;
   return (
     <div className={styles.characterSection}>
       <div className={styles.characterSectionImage}>
@@ -217,6 +216,15 @@ function CharacterSection({ verdict, line, desc, fix }) {
       <div className={styles.characterSectionBody}>
         <p className={styles.characterSectionLabel}>{verdict}</p>
         <p className={styles.characterSectionDesc}>{desc}</p>
+        {line && (
+          <button
+            type="button"
+            className={styles.lineLink}
+            onClick={() => onLineClick?.(line)}
+          >
+            {line}번째 줄 보기
+          </button>
+        )}
         {fix && <p className={styles.itemFix}>{fix}</p>}
       </div>
     </div>
@@ -236,15 +244,15 @@ function VerdictBadge({ verdict }) {
 }
 
 function SummaryTop({ summary }) {
-  const total = summary.확정위반 + summary.의심 + summary.이상없음;
-  if (total === 0) return null;
-  const parts = [];
-  if (summary.확정위반 > 0) parts.push(`확정위반 ${summary.확정위반}건`);
-  if (summary.의심 > 0) parts.push(`의심 ${summary.의심}건`);
-  if (summary.이상없음 > 0) parts.push(`이상없음 ${summary.이상없음}건`);
+  // 신호 3가지(확정위반, 의심, 이상없음) 모두 항상 출력
+  const parts = [
+    `확정위반 ${summary.확정위반}건`,
+    `의심 ${summary.의심}건`,
+    `이상없음 ${summary.이상없음}건`,
+  ];
   return (
     <div className={styles.summaryTop}>
-      <span className={styles.summaryTopLabel}>전체 요약</span>
+      <span className={styles.summaryTopLabel}>전체 신호</span>
       <span className={styles.summaryTopText}>{parts.join(" · ")}</span>
     </div>
   );
@@ -731,6 +739,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                           line={item.line}
                           desc={item.desc}
                           fix={item.fix}
+                          onLineClick={handleLineClick}
                         />
                       ))}
                   </SectionContainer>
@@ -747,6 +756,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                           line={item.line}
                           desc={item.desc}
                           fix={item.fix}
+                          onLineClick={handleLineClick}
                         />
                       ))}
                   </SectionContainer>
@@ -763,6 +773,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                           line={item.line}
                           desc={item.desc}
                           fix={item.fix}
+                          onLineClick={handleLineClick}
                         />
                       ))}
                   </SectionContainer>
