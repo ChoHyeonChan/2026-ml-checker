@@ -86,6 +86,10 @@ class AnalyzerService:
         time_related_lines: list[int] = []
         encoder_fit_lines: list[int] = []
         time_feature_lines: list[int] = []
+        stratify_lines: list[int] = []
+        group_split_lines: list[int] = []
+        feature_sel_lines: list[int] = []
+        sampling_lines: list[int] = []
 
         for idx, line in enumerate(lines, start=1):
             low = line.lower()
@@ -135,6 +139,18 @@ class AnalyzerService:
             if self._has_split_call(low):
                 split_lines.append(idx)
 
+            if "stratify" in low:
+                stratify_lines.append(idx)
+
+            if self._has_group_split(low):
+                group_split_lines.append(idx)
+
+            if self._has_feature_selection(low):
+                feature_sel_lines.append(idx)
+
+            if self._has_sampling_operation(low):
+                sampling_lines.append(idx)
+
             if self._has_target_reference(low):
                 target_var_lines.append(idx)
 
@@ -166,6 +182,10 @@ class AnalyzerService:
             "time_related_lines": time_related_lines,
             "encoder_fit_lines": encoder_fit_lines,
             "time_feature_lines": time_feature_lines,
+            "stratify_lines": stratify_lines,
+            "group_split_lines": group_split_lines,
+            "feature_sel_lines": feature_sel_lines,
+            "sampling_lines": sampling_lines,
         }
 
     def _looks_like_preprocess_declaration(self, stripped: str) -> bool:
@@ -192,6 +212,18 @@ class AnalyzerService:
         if any(k in low for k in ["cross_val_score(", "cross_validate(", "cross_val_predict("]):
             return False
         return any(k in low for k in ["train_test_split", "split(", "kfold", "stratify", "cross_val", "partition"])
+
+    def _has_group_split(self, low: str) -> bool:
+        return any(k in low for k in ["GroupKFold", "GroupShuffleSplit", "group_kfold", "group_shuffle"])
+
+    def _has_feature_selection(self, low: str) -> bool:
+        return any(k in low for k in ["SelectKBest", "SelectPercentile", "SelectFromModel", "PCA",
+                                       "feature_selection", "Select", "RFE", "VarianceThreshold"])
+
+    def _has_sampling_operation(self, low: str) -> bool:
+        return any(k in low for k in ["SMOTE", "RandomOverSampler", "RandomUnderSampler",
+                                       "ADASYN", "BorderlineSMOTE", "SMOTENC", "over_sampling",
+                                       "under_sampling", "resample"])
 
     def _has_target_reference(self, low: str) -> bool:
         return any(t in low for t in ["y", "target", "label"])
@@ -301,6 +333,14 @@ class AnalyzerService:
                 "reason": "타겟 기반 인코더(TargetEncoder, LabelEncoder 등) fit이 split 전에 호출된 것으로 보입니다.",
             }
 
+        # 1d) stratify + 타겟 인코딩/매핑이 split 전이면 누수 의심
+        if self._has_stratify_target_encoding_leakage(lines, idx, line, ctx_before, ctx_after, context):
+            return {
+                "type": "의심",
+                "fix": "stratify 분할 전에 타겟 기반 인코딩/매핑을 수행하지 않도록 순서를 조정하세요. stratify는 타겟 분포 기준이므로 타겟 전처리가 split 전에 있으면 정보 누수 가능.",
+                "reason": "stratify 분할 전 타겟 인코딩/매핑이 수행된 것으로 보입니다.",
+            }
+
         # 2b) 분할 전 데이터 필터링/정제 -> 의심 (fit/transform 검사 전에 먼저 체크)
         if self._check_filter_before_split(lines, idx, line, ctx_before, ctx_after, context):
             return {
@@ -363,12 +403,36 @@ class AnalyzerService:
                 "reason": "시간 순서 관련 누수 가능성이 있는 패턴으로 보입니다.",
             }
 
+        # 5b) 피처 선택/생성(SelectKBest, PCA 등)이 split 전이면 누수 의심
+        if self._has_feature_selection_before_split(lines, idx, line, ctx_before, ctx_after, context):
+            return {
+                "type": "의심",
+                "fix": "피처 선택/생성(SelectKBest, PCA 등)은 train/test 분할 후에만 수행하세요. split 전 전체 데이터로 피처 선택을 하면 테스트 정보가 훈련에 새어 나갑니다.",
+                "reason": "피처 선택/생성(SelectKBest, PCA 등)이 split 전에 수행된 것으로 보입니다.",
+            }
+
+        # 5c) SMOTE 등 오버샘플링이 split 전이면 누수 확정위반
+        if self._has_sampling_before_split(lines, idx, line, ctx_before, ctx_after, context):
+            return {
+                "type": "확정위반",
+                "fix": "SMOTE 등 오버샘플링은 train/test 분할 후에만 수행하세요. split 전에 오버샘플링하면 테스트 정보가 훈련에 누됩니다.",
+                "reason": "SMOTE 등 오버샘플링/리샘플링이 split 전에 수행된 것으로 보입니다.",
+            }
+
         # 6) cross-validation + 외부 preprocess 결합
         if self._has_cross_val_preprocess_leakage_hint(lines, idx, line, ctx_before, ctx_after, context):
             return {
                 "type": "의심",
                 "fix": "cross-validation 내부에 전처리가 포함되도록 Pipeline을 구성하세요.",
                 "reason": "cross-validation과 외부 전처리가 결합되어 누수 가능성이 있는 패턴으로 보입니다.",
+            }
+
+        # 6b) GroupKFold/GroupShuffleSplit + 그룹 전처리가 split 전이면 누수 의심
+        if self._has_group_split_preprocess_leakage(lines, idx, line, ctx_before, ctx_after, context):
+            return {
+                "type": "의심",
+                "fix": "GroupKFold/GroupShuffleSplit 등 그룹 분할은 분할 전에 그룹 기반 전처리가 전체 데이터에 적용되지 않도록 하세요. 그룹별 또는 분할별로 전처리를 분리하세요.",
+                "reason": "그룹 분할(GroupKFold 등) 전 그룹 기반 전처리가 전체 데이터에 적용된 것으로 보입니다.",
             }
 
         # 7) groupby/분할 기준 전처리 순서
@@ -524,6 +588,31 @@ class AnalyzerService:
             return True
         return False
 
+    def _has_stratify_target_encoding_leakage(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+        context: dict[str, Any],
+    ) -> bool:
+        low = line.lower()
+        if "stratify" not in low:
+            return False
+
+        has_split_anywhere = len(context["split_lines"]) > 0
+        if not has_split_anywhere:
+            return True
+
+        # stratify 라인 이전에서 타겟 인코딩/매핑이 있었는지 확인
+        for i in range(1, idx):
+            prev_low = lines[i-1].lower()
+            if self._has_encoder_fit(prev_low) or self._has_target_reference(prev_low):
+                if any(k in prev_low for k in ["fit(", "transform(", "fit_transform(", "map(", "apply(", "="]):
+                    return True
+        return False
+
     def _has_preprocess_fit_before_split(
         self,
         lines: list[str],
@@ -619,6 +708,56 @@ class AnalyzerService:
         has_transform_after_split = any("transform(" in l.lower() for l in after_split)
         return has_transform_after_split
 
+    def _has_feature_selection_before_split(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+        context: dict[str, Any],
+    ) -> bool:
+        low = line.lower()
+        if not self._has_feature_selection(low):
+            return False
+        if "fit(" not in low and "fit_transform(" not in low:
+            return False
+
+        has_split_anywhere = len(context["split_lines"]) > 0
+        if not has_split_anywhere:
+            return True
+
+        earliest_split = min(context["split_lines"])
+        if idx < earliest_split:
+            return True
+
+        return False
+
+    def _has_sampling_before_split(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+        context: dict[str, Any],
+    ) -> bool:
+        low = line.lower()
+        if not self._has_sampling_operation(low):
+            return False
+        if "fit(" not in low and "fit_transform(" not in low and "sample(" not in low:
+            return False
+
+        has_split_anywhere = len(context["split_lines"]) > 0
+        if not has_split_anywhere:
+            return True
+
+        earliest_split = min(context["split_lines"])
+        if idx < earliest_split:
+            return True
+
+        return False
+
     def _has_cross_val_preprocess_leakage_hint(
         self,
         lines: list[str],
@@ -642,6 +781,31 @@ class AnalyzerService:
         ctx_all = " ".join(ctx_before + [line] + ctx_after).lower()
         has_preprocess = any(k in ctx_all for k in ["fit(", "transform(", "fit_transform(", "scaler", "encoder", "pipeline"])
         return has_preprocess
+
+    def _has_group_split_preprocess_leakage(
+        self,
+        lines: list[str],
+        idx: int,
+        line: str,
+        ctx_before: list[str],
+        ctx_after: list[str],
+        context: dict[str, Any],
+    ) -> bool:
+        low = line.lower()
+        if not self._has_group_split(low):
+            return False
+
+        has_split_anywhere = len(context["split_lines"]) > 0 or len(context["group_split_lines"]) > 0
+        if not has_split_anywhere:
+            return True
+
+        # 그룹 분할 라인 이전에서 그룹 기반 전처리가 있었는지 확인
+        for i in range(1, idx):
+            prev_low = lines[i-1].lower()
+            if self._has_groupby_split_preprocess_order_leakage_hint(lines, i, lines[i-1], lines[max(0,i-3):i-1], lines[i:idx], context):
+                if any(k in prev_low for k in ["fit(", "transform(", "fit_transform(", "groupby", "group_by"]):
+                    return True
+        return False
 
     def _has_groupby_split_preprocess_order_leakage_hint(
         self,
