@@ -83,6 +83,7 @@ function classifyFromBackend(resp) {
     items,
     note: note.join("\n ") || null,
     summary,
+    llm_explanation: resp.llm_explanation,
   };
 }
 

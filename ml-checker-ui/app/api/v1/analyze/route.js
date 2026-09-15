@@ -67,6 +67,7 @@ function classifyFromBackend(resp) {
     items,
     note: note.join("\n ") || null,
     summary,
+    llm_explanation: resp.llm_explanation,
   };
 }
 
@@ -182,7 +183,7 @@ export async function POST(req) {
     ...basic,
     type: "judgment",
     badge: basic.badge,
-    note: "백엔드 URL이 설정되지 않아 프론트 기본 패턴 점검 결과만 표시합니다. [VERIFY_7caba95]",
+    note: "백엔드 URL이 설정되지 않아 프론트 기본 패턴 점검 결과만 표시합니다.",
     backend_url: BACKEND_URL,
   });
 }
