@@ -488,7 +488,7 @@
 }
 
 /* 예시 팝업 */
-..examplePopupOverlay {
+.examplePopupOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -501,7 +501,7 @@
   z-index: 100;
 }
 
-..examplePopup {
+.examplePopup {
   background: #fff;
   border-radius: 12px;
   width: 100%;
