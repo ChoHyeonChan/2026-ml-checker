@@ -90,6 +90,8 @@ class AnalyzerService:
         group_split_lines: list[int] = []
         feature_sel_lines: list[int] = []
         sampling_lines: list[int] = []
+        func_decl_lines: list[int] = []
+        class_decl_lines: list[int] = []
 
         for idx, line in enumerate(lines, start=1):
             low = line.lower()
@@ -97,6 +99,13 @@ class AnalyzerService:
 
             if stripped.startswith("import ") or stripped.startswith("from "):
                 import_lines.append(idx)
+                continue
+
+            if self._looks_like_func_or_class_decl(stripped):
+                if stripped.startswith("def "):
+                    func_decl_lines.append(idx)
+                if stripped.startswith("class "):
+                    class_decl_lines.append(idx)
                 continue
 
             if self._looks_like_preprocess_declaration(stripped):
@@ -186,6 +195,8 @@ class AnalyzerService:
             "group_split_lines": group_split_lines,
             "feature_sel_lines": feature_sel_lines,
             "sampling_lines": sampling_lines,
+            "func_decl_lines": func_decl_lines,
+            "class_decl_lines": class_decl_lines,
         }
 
     def _looks_like_preprocess_declaration(self, stripped: str) -> bool:
@@ -254,6 +265,29 @@ class AnalyzerService:
 
     def _has_encoder_fit(self, low: str) -> bool:
         return any(k in low for k in ["encoder", "target", "label", "onehot", "get_dummies", "le"])
+
+    def _looks_like_func_or_class_decl(self, stripped: str) -> bool:
+        return stripped.startswith("def ") or stripped.startswith("class ")
+
+    def _nearby_func_or_class_decl(self, lines: list[str], idx: int) -> bool:
+        start = max(0, idx - 6)
+        end = min(len(lines), idx + 4)
+        window = lines[start:end]
+        return any(self._looks_like_func_or_class_decl(ln.strip()) for ln in window)
+
+    def _split_partitioned_call(self, lines: list[str], idx: int, fit_low: str, context: dict[str, Any]) -> bool:
+        if not self._has_split_call(fit_low):
+            return False
+
+        has_split_anywhere = len(context["split_lines"]) > 0
+        if not has_split_anywhere:
+            return False
+
+        earliest_split = min(context["split_lines"])
+        if idx >= earliest_split:
+            return True
+
+        return False
 
     def _judge_with_context(self, lines: list[str], context: dict[str, Any]) -> list[JudgmentResult]:
         results: list[JudgmentResult] = []
@@ -580,12 +614,23 @@ class AnalyzerService:
         has_encoder = self._has_encoder_fit(low)
         if not has_encoder:
             return False
+
+        candidate_split_after = self._split_partitioned_call(lines, idx, low, context)
+        if candidate_split_after:
+            return False
+
         has_split_anywhere = len(context["split_lines"]) > 0
         if not has_split_anywhere:
             return True
+
         earliest_split = min(context["split_lines"])
         if idx < earliest_split:
             return True
+
+        if self._nearby_func_or_class_decl(lines, idx):
+            if any(k in low for k in ["X_train", "y_train", "train"]):
+                return False
+
         return False
 
     def _has_stratify_target_encoding_leakage(
@@ -632,6 +677,10 @@ class AnalyzerService:
             if not self._has_active_preprocess_use(low):
                 return None
 
+        if self._nearby_func_or_class_decl(lines, idx):
+            if any(k in low for k in ["X_train", "y_train", "train"]):
+                return None
+
         has_split_anywhere = len(context["split_lines"]) > 0
         if not has_split_anywhere:
             # cross_val 패턴이 있으면 의심으로
@@ -662,6 +711,10 @@ class AnalyzerService:
             return None
         if idx in context["import_lines"] or idx in context["decl_lines"]:
             if not self._has_active_preprocess_use(low):
+                return None
+
+        if self._nearby_func_or_class_decl(lines, idx):
+            if any(k in low for k in ["X_train", "y_train", "train"]):
                 return None
 
         has_split_anywhere = len(context["split_lines"]) > 0
