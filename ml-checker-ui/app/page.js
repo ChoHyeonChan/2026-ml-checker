@@ -56,7 +56,7 @@ df = df.dropna()
 X = df.drop("churn", axis=1)
 y = df["churn"]
 
-# 전체 데이터로 fit_transform (분할 전 스케일링)
+# 전체 데이터로 fit_transform (분할 전 스크리닝)
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
@@ -112,7 +112,7 @@ df = df.dropna()
 X = df.drop("target", axis=1)
 y = df["target"]
 
-# 전체 데이터로 fit_transform (분할 전 스케일링)
+# 전체 데이터로 fit_transform (분할 전 스크리닝)
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
@@ -405,7 +405,7 @@ export default function Home() {
       const formData = new FormData();
       formData.append("file", file);
       try {
-        const res = await fetch("/api/v1/analyze/file", {
+        const res = await fetch("/api/check", {
           method: "POST",
           body: formData,
         });
@@ -426,7 +426,7 @@ export default function Home() {
     }
 
     try {
-      const res = await fetch("/api/v1/analyze", {
+      const res = await fetch("/api/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
@@ -476,7 +476,7 @@ export default function Home() {
     setHighlightedLine(null);
   };
 
-  const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상없음: 0 };
+  const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상있음: 0 };
   const isBackendConnected = Boolean(BACKEND_URL);
   const isUsingFile = Boolean(file);
 
