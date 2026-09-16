@@ -351,6 +351,7 @@ export default function Home() {
   }));
   const [showExamplePopup, setShowExamplePopup] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [highlightVersion, setHighlightVersion] = useState(0);
 
   const codeRef = useRef(null);
   const codeAreaWrapRef = useRef(null);
@@ -376,6 +377,7 @@ export default function Home() {
   const scrollToLine = (lineNumber) => {
     const ln = Number(lineNumber);
     setHighlightedLine(ln || 0);
+    setHighlightVersion((v) => v + 1);
     if (codeRef.current) {
       codeRef.current.focus();
       const lines = codeRef.current.value.split("\n");
@@ -605,7 +607,7 @@ export default function Home() {
 pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
               />
               <div
-                key={highlightedLine ?? '__none__'}
+                key={highlightVersion}
                 className={styles.codeLineOverlay}
                 style={{ transform: `translateY(${-textareaScrollTop}px)` }}
               >
