@@ -74,6 +74,7 @@ def _build_ui_response(resp: AnalyzeResponse | AnalyzeFileResponse) -> dict:
         "items": items,
         "note": " ".join(note) if note else None,
         "not_preprocessing": bool(resp.not_preprocessing),
+        "llm_explanation": resp.llm_explanation or None,
     }
 
 
@@ -130,6 +131,22 @@ async def analyze_file(file: UploadFile = File(...)) -> AnalyzeFileResponse:
 
     raw = await file.read()
     result = analyzer.analyze_file(raw, name)
+
+    # LLM 설명 추가 (API 키 설정 시)
+    llm_explanation = None
+    try:
+        code_preview = raw[:500].decode("utf-8", errors="replace") if isinstance(raw, bytes) else raw[:500]
+        llm = solar.generate_result_explanation(
+            classification=result.get("classification", "이상없음"),
+            summary=result.get("summary", {}),
+            results=result.get("results", []),
+            code_preview=code_preview,
+        )
+        if "content" in llm:
+            llm_explanation = llm["content"]
+    except Exception as e:
+        logger.error(f"SolarService error (file): {e}")
+
     return AnalyzeFileResponse(
         classification=result.get("classification", "이상없음"),
         summary=result.get("summary", {"확정위반": 0, "의심": 0, "이상없음": 0}),
@@ -140,4 +157,5 @@ async def analyze_file(file: UploadFile = File(...)) -> AnalyzeFileResponse:
         file_name=name,
         total_lines=result.get("total_lines"),
         not_preprocessing=result.get("not_preprocessing", False),
+        llm_explanation=llm_explanation,
     )
