@@ -11,7 +11,6 @@
 🌐 링크
 
 - 프론트엔드(Vercel): https://2026-ml-checker.vercel.app/
-- 백엔드(Render): https://two026-ml-checker.onrender.com/
 
 📁 저장소 구조
 
@@ -24,7 +23,7 @@
 
 - 프론트엔드는 Vercel `ml-checker-ui` 브랜치를 보고 있음
 - 백엔드는 Render `main` 브랜치를 보고 있음
-- 프론트 `page.js`에서 백엔드 CORS 허용 Origin을 통해 `/api/v1/analyze`, `/api/v1/analyze/file` 호출
+- 프론트 `page.js`에서 `/api/check`를 통해 백엔드 프록시 라우트로 요청 → 백엔드 `/api/v1/analyze`, `/api/v1/analyze/file` 호출
 - 백엔드 API 키(`SOLAR_API_KEY`) 설정 시 LLM 설명(`llm_explanation`) 응답 생성
 
 🧪 검사 결과 화면 수정
