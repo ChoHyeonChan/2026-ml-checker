@@ -374,11 +374,12 @@ export default function Home() {
   };
 
   const scrollToLine = (lineNumber) => {
-    setHighlightedLine(lineNumber);
+    const ln = Number(lineNumber);
+    setHighlightedLine(ln || 0);
     if (codeRef.current) {
       codeRef.current.focus();
       const lines = codeRef.current.value.split("\n");
-      const targetLine = lineNumber - 1;
+      const targetLine = ln - 1;
       if (targetLine >= 0 && targetLine < lines.length) {
         let position = 0;
         for (let i = 0; i < targetLine; i++) {
