@@ -1,48 +1,129 @@
-diff --git a/README.md b/README.md
-index 2284b11..NewPREVIEW 100644
---- a/README.md
-+++ b/README.md
-@@ -1,4 +1,9 @@
--# Rebuild trigger after CSS selector fix v2
-+# 2026-ml-checker
+📦 프로젝트
 
--## Leakage Check 레이아웃 수정 이력
-+ML 전처리 코드에서 데이터 누수(data leakage) 의심 패턴을 줄 번호 + 수정 방향 위주로 확인하는 서비스입니다.
+**ML 전처리/학습 코드에서 데이터 누수(data leakage) 의심 패턴을 줄 번호 + 수정 방향 위주로 확인하는 웹 서비스**
 
--- PR #35 머지: 전체화면 깨짐 수정
--- 이후 메인 브랜치에 여러 CSS 수정 커밋 반영
--- 좁은 화면 헤더 버튼 줄바꿈, 안내 카드 잘림, 과도한 공백 문제 대응
-+## 링크
+- 팀: 화이팅구리 (20)
+- 멤버: 조현찬, 남서연
+- 한 줄 정의: ML 전처리/학습 코드를 넣으면 데이터 누수 위험 패턴을 점검해 주는 웹 서비스
+- 타겟: 혼자 또는 소수정예로 ML을 하면서, 코드 실행 전에 “이 전처리가 누수 아닌지” 빠르게 확인하고 싶은 사람
+- 핵심 매핑: 본선 스킬 ml-data-leakage-checker 기반 분석기 + /api가 그 기능을 직접 호출
 
--## 현재 상태
-+- 프론트엔드(Vercel): https://2026-ml-checker.vercel.app/
-+- 백엔드(Render): https://two026-ml-checker.onrender.com/
+🌐 링크
 
--- 코드: main 브랜치 최신 반영됨
--- 배포: 최신 커밋 기준 재배포 필요
-+## 저장소 구조
+- 프론트엔드(Vercel): https://2026-ml-checker.vercel.app/
+- 백엔드(Render): https://two026-ml-checker.onrender.com/
 
-+- `/ml-checker-ui/`: Vite + Next.js 기반 프론트엔드
-+- `/backend/`: FastAPI 기반 백엔드
-+- 백엔드 `main` 브랜치 → Render 자동 배포
-+- 프론트엔드 `ml-checker-ui` 브랜치 → Vercel 자동 배포
+📁 저장소 구조
 
-+## 배포 흐름
+- `/ml-checker-ui/`: Vite + Next.js 기반 프론트엔드
+- `/backend/`: FastAPI 기반 백엔드
+- 백엔드 `main` 브랜치 → Render 자동 배포
+- 프론트엔드 `ml-checker-ui` 브랜치 → Vercel 자동 배포
 
-+- 프론트엔드는 Vercel `ml-checker-ui` 브랜치를 보고 있음
-+- 백엔드는 Render `main` 브랜치를 보고 있음
-+- 프론트 `page.js`에서 백엔드 CORS 허용 Origin을 통해 `/api/v1/analyze`, `/api/v1/analyze/file` 호출
-+- 백엔드 API 키(`SOLAR_API_KEY`) 설정 시 LLM 설명(`llm_explanation`) 응답 생성
+🔁 배포 흐름
 
-+## 검사 결과 화면 수정
+- 프론트엔드는 Vercel `ml-checker-ui` 브랜치를 보고 있음
+- 백엔드는 Render `main` 브랜치를 보고 있음
+- 프론트 `page.js`에서 백엔드 CORS 허용 Origin을 통해 `/api/v1/analyze`, `/api/v1/analyze/file` 호출
+- 백엔드 API 키(`SOLAR_API_KEY`) 설정 시 LLM 설명(`llm_explanation`) 응답 생성
 
-+- 검사 결과표 글씨가 흰색 배경에 묻히던 문제를 검은색/초록색 계열 글씨로 변경
-+- 검사 결과에서 "몇번째 줄 보기" 버튼 클릭 시 해당 줄로 이동하고, 여러 항목을 각각 눌렀을 때 각각 형광펜 표시되도록 적용
-+- 코드 영역 기본 글씨 색을 검은색, AI 설명/항목 라벨/설명 등 주요 텍스트 대비를 높여 가독성 개선
+🧪 검사 결과 화면 수정
 
-+## 브랜치
+- 검사 결과표 글씨가 흰색 배경에 묻히던 문제를 검은색/초록색 계열 글씨로 변경
+- 검사 결과에서 "몇번째 줄 보기" 버튼 클릭 시 해당 줄로 이동하고, 여러 항목을 각각 눌렀을 때 각각 형광펜 표시되도록 적용
+- 코드 영역 기본 글씨 색을 검은색, AI 설명/항목 라벨/설명 등 주요 텍스트 대비를 높여 가독성 개선
 
-+- `main`: 백엔드 기준, Render 배포 대상
-+- `ml-checker-ui` (또는 `feat/ml-checker-ui*`): 프론트엔드 기준, Vercel 배포 대상
-+- `feat/backend-mvp-p0`: 백엔드 MVP 초기 PR 브랜치
-+- `feat/backend-routes-and-vercel-setup`: 백엔드 Vercel 설정 PR 브랜치
+🔎 무엇을 검사하나
+
+- 타겟 기준 groupby/정제 등 타겟 정보를 전처리에 직접 사용하는 패턴
+- scaler/imputer 등의 fit/fit_transform이 split 전 전체 데이터에 적용되는 패턴
+- SMOTE 등 리샘플링이 split 전에 들어가는 패턴
+- 시계열 데이터에서 shuffle + 무작위 split
+- lag/shift/rolling 등 시간 피처 생성 후 무작위 split
+- 함수/클래스 안에 숨은 fit/transform
+- 분할 전 필터/정제 후 split
+
+✅ 현재 확인된 동작
+
+- 핵심 분석 기능: ml-data-leakage-checker 기반 analyzer.py
+- 백엔드 엔드포인트 존재 및 직접 호출 검증 완료
+- 프론트 히어로/브랜드 헤더 복원(#b91c1c, 로고 등)
+- 예시 케이스들에 대한 실제 판정 결과 확보
+  - 정상 코드(분할 후 fit_transform 등) → 이상없음
+  - 타겟 groupby + 분할 전 정제 + 분할 전 전체 fit_transform → 확정위반/의심 다수
+  - SMOTE split 전 → 확정위반
+  - 시간 컬럼 없는 shuffle+split → 이상없음
+  - 시간 컬럼 포함 shuffle+split → 시계열 의심
+  - 함수 안에 숨은 타겟 groupby + 분할 전 scaler fit_transform → 확정위반/의심
+
+📥 입력
+
+- 파이썬 전처리/학습 코드 텍스트 붙여넣기
+- 실행 버튼(분석하기/검사하기)
+- (선택) 예시 코드 불러오기
+- 지원 형식: .py, .ipynb 파일 업로드
+
+📤 출력
+
+- 분류 결과: 확정위반 / 의심 / 이상없음 등
+- 요약: 확정위반 건수, 의심 건수, 이상없음 건수
+- 줄 단위 결과: 줄 번호, 유형, 수정 제안, 이유
+- 설명/요약: 전체 요약 문장, 항목별 설명(줄+설명)
+- 특수 입력 처리 결과: 빈 입력, 파이썬 코드로 보기 어려운 입력, ML 전처리 코드로 보기 어려운 입력, 분할 경계가 확인되지 않는 코드
+
+🚫 제외 범위 (MVP)
+
+- 계정 가입/로그인
+- 검사 이력 저장/관리
+- 알림/예약/자동 재실행
+- 외부 데이터/API 연동 확장
+- 원본 코드의 자동 수정 적용
+- 완전 리팩터링/다른 고급 자동화
+
+⚙️ 사용 설정 (값 비노출)
+
+- Vercel: 프론트 배포 연결용
+- Render: 백엔드 서비스 호스팅용
+- solar-pro4: 분석 설명/요약 생성용
+- 키/환경변수 값은 README에 적지 않으며, 클라이언트 소스에는 노출되지 않음
+- 환경변수/키는 서버(/api) 쪽에서만 사용하고, 응답 JSON에 값이 섞여 나오지 않게 함
+
+📌 아직 확인/정리 필요한 것
+
+- 프론트가 실제 어떤 엔드포인트 URL/경로로 연결되어 있는지
+- Render / Vercel 배포 동기화 상태
+- 모바일/반응형에서의 헤더, 입력창, 결과 카드 레이아웃 안정성
+- 예시 코드, 결과 내보내기 같은 P1 기능의 존재 여부
+
+🧭 P0 / P1 구분
+
+P0 (핵심 흐름, 최대 4개)
+
+1. 코드 입력 화면
+2. 분석 실행
+3. 판정 결과 화면(분류/요약/줄 단위 결과)
+4. LLM/설명 화면(요약 문장 + 항목별 설명)
+
+P1 (있으면 좋지만 핵심 흐름 이후)
+
+- 예시 코드 불러오기
+- 결과 복사/내보내기
+- 빈 입력/비코드 입력/전처리 코드로 보기 어려운 입력에 대한 친절한 안내
+- 서비스 소개/사용 방법 안내 문구
+- 경계 케이스 안내(함수 안 전처리, 타겟 인코딩, 시계열 등)
+
+🤝 기여/점검 원칙
+
+- LLM은 Solar Pro 4만 사용
+- 개발 도구는 Timely, Hermes만 사용(규정 준수)
+- 타인 스킬/아이디어/에이전트 무단 사용 금지
+- 독립 배포 공개 URL 사용, 로컬/타임리 공유 링크 불가
+- Public GitHub, 제출 이후 배포 코드 수정 불가
+- API 키·토큰 노출 금지(.gitignore, 환경변수, 커밋 이력 점검)
+
+📝 브랜치
+
+- `main`: 백엔드 기준, Render 배포 대상
+- `ml-checker-ui` (또는 `feat/ml-checker-ui*`): 프론트엔드 기준, Vercel 배포 대상
+- `feat/backend-mvp-p0`: 백엔드 MVP 초기 PR 브랜치
+- `feat/backend-routes-and-vercel-setup`: 백엔드 Vercel 설정 PR 브랜치
