@@ -622,10 +622,10 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
                         left: "12px",
                         right: "12px",
                         backgroundColor: isHighlighted ? color : "transparent",
-                        opacity: isHighlighted ? 0.34 : (verdict ? 0.06 : 0),
-                        borderBottomColor: color,
+                        opacity: isHighlighted ? 0.40 : (verdict ? 0.07 : 0.020),
+                        borderBottomColor: isHighlighted ? color : (verdict ? color : "rgba(255,255,255,0.04)"),
                         borderBottomWidth: isHighlighted ? "2px" : "1px",
-                        borderLeftColor: color,
+                        borderLeftColor: isHighlighted ? color : "transparent",
                         borderLeftWidth: isHighlighted ? "2px" : "0px",
                       }}
                     />
