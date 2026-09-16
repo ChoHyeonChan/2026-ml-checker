@@ -607,7 +607,7 @@ export default function Home() {
 pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
               />
               <div
-                key={highlightVersion}
+                key={`${highlightVersion}-${highlightedLine}`}
                 className={styles.codeLineOverlay}
                 style={{ transform: `translateY(${-textareaScrollTop}px)` }}
               >
