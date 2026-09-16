@@ -55,6 +55,7 @@ function classifyFromBackend(resp) {
       badge,
       items: [],
       note: (resp.errors || []).join("\n ") + (resp.message ? "\n " + resp.message : ""),
+      llm_explanation: resp.llm_explanation || null,
     };
   }
 
@@ -84,6 +85,7 @@ function classifyFromBackend(resp) {
     items,
     note: note.join("\n ") || null,
     summary,
+    llm_explanation: resp.llm_explanation || null,
   };
 }
 
@@ -208,6 +210,7 @@ export async function POST(req) {
               : data.message
               ? data.message + (data.detail ? "\n " + data.detail : "")
               : "백엔드 검사 중 오류가 발생했습니다.",
+            llm_explanation: data.llm_explanation || null,
           });
         }
         return NextResponse.json(classifyFromBackend(data));
@@ -265,6 +268,7 @@ export async function POST(req) {
             : data.message
             ? data.message + (data.detail ? "\n " + data.detail : "")
             : "백엔드 검사 중 오류가 발생했습니다.",
+          llm_explanation: data.llm_explanation || null,
         });
       }
       return NextResponse.json(classifyFromBackend(data));
