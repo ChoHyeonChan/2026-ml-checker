@@ -477,6 +477,9 @@ export default function Home() {
   };
 
   const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상있음: 0 };
+  const llmData = typeof result.llm_explanation === 'string'
+    ? (() => { try { return JSON.parse(result.llm_explanation); } catch { return null; } })()
+    : result.llm_explanation || null;
   const isBackendConnected = Boolean(BACKEND_URL);
   const isUsingFile = Boolean(file);
 
@@ -646,7 +649,7 @@ pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
               />
             )}
 
-            <LlmExplanation llmExplanation={result.llm_explanation} />
+            <LlmExplanation llmExplanation={llmData} />
 
             {result.type === "empty" && (
               <div className={styles.feedbackCard}>
