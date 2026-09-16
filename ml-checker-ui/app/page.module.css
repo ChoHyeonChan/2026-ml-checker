@@ -425,6 +425,41 @@
 .codeLine {
   position: absolute;
   pointer-events: none;
+  /* 형광펜 오버레이 기본: 투명 배경, JS에서 색상 지정 */
+  background: transparent;
+  transition: opacity 0.12s ease, background 0.12s ease;
+}
+
+/* 클릭한 줄 강조 (높은 opacity + 배경 + 좌측 띠 2px) */
+.codeLine.active {
+  opacity: 1;
+  background: rgba(129, 140, 248, 0.18);
+  border-left: 2px solid #818cf8;
+  box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.15);
+}
+
+/* 수동 형광펜: 확정위반(빨강) */
+.codeLine.highlight-violation {
+  opacity: 1;
+  background: rgba(239, 68, 68, 0.22);
+  border-left: 2px solid rgba(239, 68, 68, 0.85);
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.12);
+}
+
+/* 수동 형광펜: 의심(노랑) */
+.codeLine.highlight-suspicious {
+  opacity: 1;
+  background: rgba(245, 158, 11, 0.20);
+  border-left: 2px solid rgba(245, 158, 11, 0.85);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.12);
+}
+
+/* 수동 형광펜: 일반 하이라이트(노랑 연한) */
+.codeLine.highlight {
+  opacity: 1;
+  background: rgba(250, 204, 21, 0.16);
+  border-left: 2px solid rgba(250, 204, 21, 0.8);
+  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.1);
 }
 
 .foldToggle {
