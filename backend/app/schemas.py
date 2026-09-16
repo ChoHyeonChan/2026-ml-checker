@@ -42,6 +42,7 @@ class AnalyzeFileResponse(BaseModel):
     file_name: str | None = None
     total_lines: int | None = None
     not_preprocessing: bool = False
+    llm_explanation: Any = None
 
 
 class ErrorResponse(BaseModel):
