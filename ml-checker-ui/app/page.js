@@ -373,17 +373,6 @@ export default function Home() {
     setShowExamplePopup(false);
   };
 
-  const codeLines = code.split("\n");
-  const lineVerdictMap = new Map();
-  if (result?.items) {
-    for (const it of result.items) {
-      const ln = Number(it.line);
-      if (ln > 0) lineVerdictMap.set(ln, it.verdict);
-    }
-  }
-
-  const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상없음: 0 };
-
   const scrollToLine = (lineNumber) => {
     setHighlightedLine(lineNumber);
     if (codeRef.current) {
@@ -485,9 +474,22 @@ export default function Home() {
     setHighlightedLine(null);
   };
 
-  const inputModeNote = isBackendConnected
-    ? "백엔드가 연결되어 있어요."
-    : "지금은 백엔드 없이 프론트 기본 점검만 표시해요.";
+  const codeLines = code.split("\n");
+  const lineVerdictMap = new Map();
+  if (result?.items) {
+    for (const it of result.items) {
+      const ln = Number(it.line);
+      if (ln > 0) lineVerdictMap.set(ln, it.verdict);
+    }
+  }
+
+  const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상없음: 0 };
+  const isBackendConnected = Boolean(BACKEND_URL);
+  const isUsingFile = Boolean(file);
+
+  const inputModeNote = isUsingFile
+    ? "파일이 선택돼 있어요. 파일이 있으면 파일 기준으로 검사하고, 코드가 비어 있으면 파일만 사용해요."
+    : "파일이 없으면 여기에 붙여넣은 코드 기준으로 검사해요. 파일과 코드가 둘 다 있으면 파일이 우선이에요.";
 
   const banner =
     result?.type === "ok"
@@ -501,7 +503,6 @@ export default function Home() {
       <div className={styles.heroBg} />
       <Onboarding onDismiss={handleOnboardingDismiss} forceShow={showOnboarding} />
       <main className={styles.main}>
-        {/* Hero 섹션 */}
         <div className={styles.hero}>
           <div className={styles.brand}>
             <img className={styles.brandLogo} src="/logo-leakage-check.png" alt="Leakage Check 로고" />
@@ -520,7 +521,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 가치 제안 카드 */}
         <div className={styles.valueProps}>
           {VALUE_PROPS.map((vp, i) => (
             <ValuePropCard key={i} {...vp} />
@@ -599,9 +599,7 @@ export default function Home() {
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 onScroll={(e) => setTextareaScrollTop(e.currentTarget.scrollTop)}
-                placeholder={`${LEAKAGE_EXAMPLE}
-
-pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
+                placeholder={`${LEAKAGE_EXAMPLE}\n\npandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
               />
               <div
                 className={styles.codeLineOverlay}
