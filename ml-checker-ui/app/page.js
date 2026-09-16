@@ -353,7 +353,10 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   const codeRef = useRef(null);
-  const lineRefs = useRef([]);
+  const codeAreaWrapRef = useRef(null);
+  const CODE_LINE_HEIGHT = 22;
+  const CODE_LINE_PADDING_TOP = 12;
+  const [textareaScrollTop, setTextareaScrollTop] = useState(0);
 
   const handleOnboardingDismiss = (payload) => {
     setShowOnboarding(false);
@@ -370,27 +373,33 @@ export default function Home() {
     setShowExamplePopup(false);
   };
 
+  const codeLines = code.split("\n");
+  const lineVerdictMap = new Map();
+  if (result?.items) {
+    for (const it of result.items) {
+      const ln = Number(it.line);
+      if (ln > 0) lineVerdictMap.set(ln, it.verdict);
+    }
+  }
+
+  const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상없음: 0 };
+
   const scrollToLine = (lineNumber) => {
     setHighlightedLine(lineNumber);
-    setTimeout(() => {
-      if (codeRef.current) {
-        codeRef.current.focus();
-        const lines = codeRef.current.value.split("\n");
-        const targetLine = lineNumber - 1;
-        if (targetLine >= 0 && targetLine < lines.length) {
-          let position = 0;
-          for (let i = 0; i < targetLine; i++) {
-            position += lines[i].length + 1;
-          }
-          const start = codeRef.current.selectionStart;
-          const end = codeRef.current.selectionEnd;
-          codeRef.current.setSelectionRange(position, position);
-          codeRef.current.scrollTop =
-            (targetLine / lines.length) * codeRef.current.scrollHeight -
-            codeRef.current.clientHeight / 2;
+    if (codeRef.current) {
+      codeRef.current.focus();
+      const lines = codeRef.current.value.split("\n");
+      const targetLine = lineNumber - 1;
+      if (targetLine >= 0 && targetLine < lines.length) {
+        let position = 0;
+        for (let i = 0; i < targetLine; i++) {
+          position += lines[i].length + 1;
         }
+        codeRef.current.setSelectionRange(position, position);
+        const targetTop = CODE_LINE_PADDING_TOP + targetLine * CODE_LINE_HEIGHT;
+        codeRef.current.scrollTop = Math.max(0, targetTop - codeRef.current.clientHeight / 2 + CODE_LINE_HEIGHT / 2);
       }
-    }, 50);
+    }
   };
 
   const handleLineClick = (lineNumber) => {
@@ -476,13 +485,9 @@ export default function Home() {
     setHighlightedLine(null);
   };
 
-  const summary = result?.summary ?? { 확정위반: 0, 의심: 0, 이상없음: 0 };
-  const isBackendConnected = Boolean(BACKEND_URL);
-  const isUsingFile = Boolean(file);
-
-  const inputModeNote = isUsingFile
-    ? "파일이 선택돼 있어요. 파일이 있으면 파일 기준으로 검사하고, 코드가 비어 있으면 파일만 사용해요."
-    : "파일이 없으면 여기에 붙여넣은 코드 기준으로 검사해요. 파일과 코드가 둘 다 있으면 파일이 우선이에요.";
+  const inputModeNote = isBackendConnected
+    ? "백엔드가 연결되어 있어요."
+    : "지금은 백엔드 없이 프론트 기본 점검만 표시해요.";
 
   const banner =
     result?.type === "ok"
@@ -587,16 +592,45 @@ export default function Home() {
               </button>
             </div>
           ) : (
-            <textarea
-              ref={codeRef}
-              className={`${styles.codeArea} ${highlightedLine !== null ? styles.codeAreaHighlighted : ""}`}
-              style={highlightedLine !== null ? { backgroundImage: `linear-gradient(to bottom, transparent ${Math.max(0, (highlightedLine - 1) * 22)}px, #fef08a ${Math.max(0, (highlightedLine - 1) * 22)}px, #fef08a ${(highlightedLine) * 22}px, transparent ${(highlightedLine) * 22}px)`, backgroundSize: "100% 22px" } : {}}
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder={`${LEAKAGE_EXAMPLE}
+            <div className={styles.codeAreaWrap} ref={codeAreaWrapRef}>
+              <textarea
+                ref={codeRef}
+                className={styles.codeArea}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                onScroll={(e) => setTextareaScrollTop(e.currentTarget.scrollTop)}
+                placeholder={`${LEAKAGE_EXAMPLE}
 
 pandas, sklearn 등을 쓰는 전처리 코드를 붙여넣으세요.`}
-            />
+              />
+              <div
+                className={styles.codeLineOverlay}
+                style={{ transform: `translateY(${-textareaScrollTop}px)` }}
+              >
+                {codeLines.map((_, i) => {
+                  const lineNumber = i + 1;
+                  const verdict = lineVerdictMap.get(lineNumber);
+                  const color = VERDICT_COLORS[verdict]?.badge ?? "transparent";
+                  const isHighlighted = lineNumber === highlightedLine;
+                  return (
+                    <div
+                      key={lineNumber}
+                      className={styles.codeLine}
+                      style={{
+                        top: CODE_LINE_PADDING_TOP + i * CODE_LINE_HEIGHT,
+                        height: CODE_LINE_HEIGHT,
+                        left: "12px",
+                        right: "12px",
+                        backgroundColor: isHighlighted ? color : "transparent",
+                        opacity: isHighlighted ? 0.28 : 0.05,
+                        borderLeftColor: color,
+                        borderLeftWidth: isHighlighted ? "2px" : "0",
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           )}
         </div>
 
