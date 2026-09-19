@@ -10,7 +10,8 @@
 
 🌐 링크
 
-- 프론트엔드(Vercel): https://2026-ml-checker.vercel.app/
+- 배포 종료(2026-09-20): 대회(MABC 2026 결선) 종료 후 프론트엔드(Vercel)·백엔드(Render) 배포를 내림. 아래 주소는 더 이상 접속되지 않음
+- ~~프론트엔드(Vercel): https://2026-ml-checker.vercel.app/~~
 
 📁 저장소 구조
 
@@ -19,7 +20,7 @@
 - 백엔드 `main` 브랜치 → Render 자동 배포
 - 프론트엔드 `ml-checker-ui` 브랜치 → Vercel 자동 배포
 
-🔁 배포 흐름
+🔁 배포 흐름 (대회 기간 기준, 현재 배포 종료)
 
 - 프론트엔드는 Vercel `ml-checker-ui` 브랜치를 보고 있음
 - 백엔드는 Render `main` 브랜치를 보고 있음
